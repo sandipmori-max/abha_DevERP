@@ -13,7 +13,7 @@ import {
     PanResponder,
     Modal,
 } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
 const { width, height } = Dimensions.get('window');
 
 const DATA = [
@@ -107,6 +107,7 @@ const Slide = ({ item, index, scrollX }: any) => {
 };
 
 export default function IntroScreen() {
+    const navigation = useNavigation();
     const scrollX = useRef(new Animated.Value(0)).current;
 
     const registerAnim = useRef(
@@ -385,7 +386,13 @@ export default function IntroScreen() {
                                         styles.selectedOption,
                                     ]}
                                     onPress={() =>
-                                        setSelectedLoginType(item)
+                                       {
+                                         setSelectedLoginType(item)
+                                        setTimeout(() => {
+                                            setShowLoginSheet(false)
+                                          navigation.navigate("Login")
+                                        })
+                                       }
                                     }
                                 >
                                     <View

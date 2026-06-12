@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
+import IntroScreen from '../screens/Intro/IntroScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,12 +12,13 @@ const RootNavigator = () => {
     <Stack.Navigator
       initialRouteName="Home"
       screenOptions={{
+        headerShown:false,
         headerTitleAlign: 'center',
       }}
     >
       <Stack.Screen
         name="Home"
-        component={HomeScreen}
+        component={IntroScreen}
         options={{
           title: 'Home Screen',
         }}

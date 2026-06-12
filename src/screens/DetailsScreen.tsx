@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-const DetailsScreen = ({ navigation, route }) => {
+const DetailsScreen = ({ navigation, route }: any) => {
   const { userId, name } = route.params || {};
 
   return (

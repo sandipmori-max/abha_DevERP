@@ -23,7 +23,7 @@ const LoginScreen = () => {
   const isFromCreate = route?.params?.isFromCreate || false
   const isFromMobileRegister = route?.params?.isFromMobileRegister || false
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
-  const isFromForgotAbhaNumberWithType =  route?.params?.isFromForgotAbhaNumberWithType || false
+  const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
   console.log("isFromRegister", isFromRegister)
   console.log("isFromCreate", isFromCreate)
 
@@ -363,7 +363,7 @@ const LoginScreen = () => {
               </Text>
             }
             {
-              isFromForgotAbhaNumber &&  !isFromForgotAbhaNumber && <Text style={styles.subtitle}>
+              isFromForgotAbhaNumber && !isFromForgotAbhaNumber && <Text style={styles.subtitle}>
                 You can recover your ABHA number using Aadhaar number or registered mobile number. Recovery using any of the following methods requires filling out your basic details and access to your linked mobile.
               </Text>
             }
@@ -395,7 +395,25 @@ const LoginScreen = () => {
               !isFromRegister && loginType === 'ABHA Number' &&
               <TouchableOpacity
                 onPress={() => {
-                   setValidationMethod('')
+                  const payload = {
+                    loginType,
+                    loginValue,
+                    password,
+                    validationMethod,
+                    otpMethod,
+                    isAgreed,
+                    isFromRegister,
+                    isFromCreate,
+                    isFromMobileRegister,
+                    isFromForgotAbhaNumber,
+                    isFromForgotAbhaNumberWithType,
+                  };
+
+                  console.log(
+                    "Form Data =>",
+                    JSON.stringify(payload, null, 2)
+                  );
+                  setValidationMethod('')
                   setTimeout(() => {
                     navigation.navigate("Login", {
                       loginType: 'Forgot ABHA Number',
@@ -416,7 +434,7 @@ const LoginScreen = () => {
 
           </View>
           {
-            !isFromForgotAbhaNumber  && <View style={styles.card}>
+            !isFromForgotAbhaNumber && <View style={styles.card}>
               <Text style={styles.cardTitle}>
                 Enter Details
               </Text>
@@ -453,7 +471,25 @@ const LoginScreen = () => {
               {
                 isFromRegister && loginType === 'ABHA Number' && <TouchableOpacity
                   onPress={() => {
-                     setValidationMethod('')
+                    const payload = {
+                      loginType,
+                      loginValue,
+                      password,
+                      validationMethod,
+                      otpMethod,
+                      isAgreed,
+                      isFromRegister,
+                      isFromCreate,
+                      isFromMobileRegister,
+                      isFromForgotAbhaNumber,
+                      isFromForgotAbhaNumberWithType,
+                    };
+
+                    console.log(
+                      "Form Data =>",
+                      JSON.stringify(payload, null, 2)
+                    );
+                    setValidationMethod('')
                     setTimeout(() => {
                       navigation.navigate("Login", {
                         loginType: 'Forgot ABHA Number',
@@ -477,8 +513,8 @@ const LoginScreen = () => {
             </View>
           }
 
- {
-            isFromForgotAbhaNumberWithType  && <View style={styles.card}>
+          {
+            isFromForgotAbhaNumberWithType && <View style={styles.card}>
               <Text style={styles.cardTitle}>
                 Enter Details
               </Text>
@@ -505,10 +541,10 @@ const LoginScreen = () => {
                   }
                   style={styles.input}
                 />
-                
+
 
               </View>
-              
+
             </View>
           }
 
@@ -594,7 +630,7 @@ const LoginScreen = () => {
               </View>
             )}
           {
-             isFromForgotAbhaNumberWithType && <View style={styles.termsContainer}>
+            isFromForgotAbhaNumberWithType && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
                 Terms & Conditions
               </Text>
@@ -641,7 +677,7 @@ const LoginScreen = () => {
             </View>
           }
           {
-           !isFromForgotAbhaNumberWithType && loginType === 'Aadhaar Number' && <View style={styles.termsContainer}>
+            !isFromForgotAbhaNumberWithType && loginType === 'Aadhaar Number' && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
                 Terms & Conditions
               </Text>
@@ -689,7 +725,7 @@ const LoginScreen = () => {
           }
 
           {
-          !isFromForgotAbhaNumberWithType &&  loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
+            !isFromForgotAbhaNumberWithType && loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
                 Terms & Conditions
               </Text>
@@ -761,6 +797,24 @@ const LoginScreen = () => {
               },
             ]}
             onPress={() => {
+              const payload = {
+                loginType,
+                loginValue,
+                password,
+                validationMethod,
+                otpMethod,
+                isAgreed,
+                isFromRegister,
+                isFromCreate,
+                isFromMobileRegister,
+                isFromForgotAbhaNumber,
+                isFromForgotAbhaNumberWithType,
+              };
+
+              console.log(
+                "Form Data =>",
+                JSON.stringify(payload, null, 2)
+              );
               setValidationMethod('')
               if (isFromForgotAbhaNumber) {
                 setTimeout(() => {
@@ -801,7 +855,25 @@ const LoginScreen = () => {
 
               <TouchableOpacity
                 onPress={() => {
-                   setValidationMethod('')
+                  const payload = {
+                    loginType,
+                    loginValue,
+                    password,
+                    validationMethod,
+                    otpMethod,
+                    isAgreed,
+                    isFromRegister,
+                    isFromCreate,
+                    isFromMobileRegister,
+                    isFromForgotAbhaNumber,
+                    isFromForgotAbhaNumberWithType,
+                  };
+
+                  console.log(
+                    "Form Data =>",
+                    JSON.stringify(payload, null, 2)
+                  );
+                  setValidationMethod('')
                   setTimeout(() => {
                     navigation.navigate("Login", {
                       loginType: isFromCreate ? 'Register with Mobile Number' : 'Create ABHA Number',
@@ -809,7 +881,6 @@ const LoginScreen = () => {
                       isFromCreate: isFromCreate ? false : true,
                       isFromMobileRegister: true
                     })
-
                   })
                 }}
               >

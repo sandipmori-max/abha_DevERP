@@ -13,9 +13,8 @@ import {
     PanResponder,
     Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 const { width, height } = Dimensions.get('window');
-
 const DATA = [
     {
         id: '1',
@@ -195,23 +194,32 @@ export default function IntroScreen() {
             },
         }),
     ).current;
-    useEffect(() => {
-        Animated.parallel([
-            Animated.spring(registerAnim, {
-                toValue: 0,
-                friction: 7,
-                tension: 60,
-                useNativeDriver: true,
-            }),
+    useFocusEffect(
+        React.useCallback(() => {
 
-            Animated.spring(loginAnim, {
-                toValue: 0,
-                friction: 7,
-                tension: 60,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, []);
+            registerAnim.setValue(250);
+            loginAnim.setValue(-250);
+
+            sheetProgress.setValue(0);
+
+            Animated.parallel([
+                Animated.spring(registerAnim, {
+                    toValue: 0,
+                    friction: 7,
+                    tension: 60,
+                    useNativeDriver: true,
+                }),
+
+                Animated.spring(loginAnim, {
+                    toValue: 0,
+                    friction: 7,
+                    tension: 60,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+
+        }, [])
+    );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -385,15 +393,15 @@ export default function IntroScreen() {
                                         selected &&
                                         styles.selectedOption,
                                     ]}
-                                    onPress={() =>
-                                       {
-                                         setSelectedLoginType(item)
+                                    onPress={() => {
+                                        setSelectedLoginType(item)
                                         setTimeout(() => {
                                             setShowLoginSheet(false)
-                                          navigation.navigate("Login")
+                                            navigation.navigate("Login", {
+                                                loginType: item,
+                                            })
                                         })
-                                       }
-                                    }
+                                    }}
                                 >
                                     <View
                                         style={[

@@ -5,6 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import IntroScreen from '../screens/Intro/IntroScreen';
 import LoginScreen from '../screens/Login/LoginScreen';
+import OtpVerificationScreen from '../screens/Login/OtpVerificationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,13 @@ const RootNavigator = () => {
         component={LoginScreen}
         options={{
           title: 'Login Screen',
+        }}
+      />
+        <Stack.Screen
+        name="OtpVerification"
+        component={OtpVerificationScreen}
+        options={{
+          title: 'Otp Verification',
         }}
       />
       <Stack.Screen

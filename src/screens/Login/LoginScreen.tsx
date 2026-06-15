@@ -19,6 +19,16 @@ const LoginScreen = () => {
   const loginType =
     route?.params?.loginType || 'Mobile Number';
 
+  const isFromRegister = route?.params?.isFromRegister || false
+  const isFromCreate = route?.params?.isFromCreate || false
+  const isFromMobileRegister = route?.params?.isFromMobileRegister || false
+
+
+  console.log("isFromRegister", isFromRegister)
+  console.log("isFromCreate", isFromCreate)
+
+  console.log("isFromMobileRegister", isFromMobileRegister)
+
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] =
@@ -34,16 +44,16 @@ const LoginScreen = () => {
     switch (loginType) {
       case 'Mobile Number':
         return 'Enter mobile number';
-
       case 'Aadhar Number':
         return 'Enter aadhaar number';
-
       case 'ABHA Address':
         return 'Enter ABHA address';
-
       case 'ABHA Number':
         return 'Enter ABHA number';
-
+      case 'Create ABHA Number':
+        return 'Enter ABHA number';
+      case 'Register with Mobile Number':
+        return 'Enter mobile number'
       default:
         return 'Enter value';
     }
@@ -249,19 +259,21 @@ const LoginScreen = () => {
               )
             }
           />
+          {
+            !isFromRegister && <RadioItem
+              title="Face Auth"
+              selected={
+                validationMethod ===
+                'Face Auth'
+              }
+              onPress={() =>
+                setValidationMethod(
+                  'Face Auth',
+                )
+              }
+            />
+          }
 
-          <RadioItem
-            title="Face Auth"
-            selected={
-              validationMethod ===
-              'Face Auth'
-            }
-            onPress={() =>
-              setValidationMethod(
-                'Face Auth',
-              )
-            }
-          />
         </View>
       );
     }
@@ -301,13 +313,15 @@ const LoginScreen = () => {
 
           <View style={styles.hero}>
             <Text style={styles.welcome}>
-              Welcome Back 👋
+              {isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}
             </Text>
+            {
+             !isFromMobileRegister && !isFromCreate && !isFromRegister && <Text style={styles.subtitle}>
+                Sign in securely to access
+                your ABHA health records
+              </Text>
+            }
 
-            <Text style={styles.subtitle}>
-              Sign in securely to access
-              your ABHA health records
-            </Text>
           </View>
 
           <View style={{
@@ -317,13 +331,22 @@ const LoginScreen = () => {
             flexDirection: 'row',
             justifyContent: 'space-between'
           }}>
-            <View style={styles.typeChip}>
-              <Text style={styles.typeText}>
-                {loginType}
-              </Text>
-            </View>
             {
-              loginType === 'ABHA Number' && <Text style={styles.forgotText}>
+              isFromRegister ? <View style={{ marginVertical: 1 }}></View> :
+                <>
+                  {
+                   !isFromMobileRegister && !isFromCreate && <View style={styles.typeChip}>
+                      <Text style={styles.typeText}>
+                        {loginType}
+                      </Text>
+                    </View>
+                  }
+                </>
+
+            }
+
+            {
+              !isFromRegister && loginType === 'ABHA Number' && <Text style={styles.forgotText}>
                 Forgot ABHA number?
               </Text>
             }
@@ -364,6 +387,15 @@ const LoginScreen = () => {
               }
 
             </View>
+            {
+              isFromRegister && loginType === 'ABHA Number' && <Text style={[styles.forgotText, {
+                alignSelf: 'flex-end',
+                marginTop: 10
+              }]}>
+                Forgot ABHA number?
+              </Text>
+            }
+
           </View>
 
           {renderValidationOptions()}
@@ -495,6 +527,54 @@ const LoginScreen = () => {
             </View>
           }
 
+           {
+            loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
+              <Text style={styles.termsTitle}>
+                Terms & Conditions
+              </Text>
+
+              <View style={styles.termsCard}>
+                <Text style={styles.termsText}>
+                  I hereby declare that I am voluntarily sharing my
+                  Aadhaar Number and demographic information issued
+                  by UIDAI with National Health Authority (NHA) for
+                  the sole purpose of authentication and healthcare
+                  services under ABDM.
+                </Text>
+
+                <View style={styles.termsFooter}>
+                  <TouchableOpacity
+                    style={styles.checkboxRow}
+                    onPress={() => setIsAgreed(!isAgreed)}
+                  >
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isAgreed && styles.checkboxActive,
+                      ]}
+                    >
+                      {isAgreed && (
+                        <Text style={styles.checkmark}>
+                          ✓
+                        </Text>
+                      )}
+                    </View>
+
+                    <Text style={styles.agreeText}>
+                      I agree
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity>
+                    <Text style={styles.speakerIcon}>
+                      🔊
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          }
+
         </ScrollView>
 
 
@@ -527,22 +607,42 @@ const LoginScreen = () => {
             }}
           >
             <Text style={styles.continueText}>
-              Continue
+              {isFromCreate ? "Next" : "Continue"}
             </Text>
           </TouchableOpacity>
 
-          {
-            <View style={styles.footer}>
+          { 
+          loginType !== 'Register with Mobile Number' &&
+          <View style={styles.footer}>
+
 
               <Text style={styles.footerText}>
-                Don't have an ABHA?
+                {
+                  isFromCreate ? `Don't have an Aadhar number?` : `Don't have an ABHA number?`
+                }
               </Text>
 
-              <TouchableOpacity>
-                <Text style={styles.createNow}>
-                  Create Now
-                </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setTimeout(() => {
+                    navigation.navigate("Login", {
+                      loginType: isFromCreate ? 'Register with Mobile Number' :  'Create ABHA Number',
+                      isFromRegister: false,
+                      isFromCreate: isFromCreate ? false : true,
+                      isFromMobileRegister:  true
+                    })
+                    
+                  })
+                }}
+              >
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={styles.createNow}>
+                    {isFromCreate ? 'Click here' : "Create Now"}
+                  </Text>
+                  {isFromCreate && <Text> to register via mobile</Text>}
+                </View>
               </TouchableOpacity>
+
             </View>
           }
 
@@ -672,7 +772,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 16,
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },

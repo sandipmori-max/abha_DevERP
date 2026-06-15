@@ -324,6 +324,15 @@ export default function IntroScreen() {
                 >
                     <TouchableOpacity
                         style={styles.registerBtn}
+                        onPress={() => {
+                            setTimeout(() => {
+                                setShowLoginSheet(false)
+                                navigation.navigate("Login", {
+                                    loginType: 'ABHA Number',
+                                    isFromRegister: true
+                                })
+                            })
+                        }}
                     >
                         <Text style={styles.registerText}>
                             Register
@@ -340,7 +349,6 @@ export default function IntroScreen() {
                 >
                     <TouchableOpacity
                         onPress={openSheet}
-
                         style={styles.loginBtn}
                     >
                         <Text style={styles.loginText}>
@@ -433,6 +441,15 @@ export default function IntroScreen() {
 
                             <TouchableOpacity
                                 style={styles.createBtn}
+                                onPress={() => {
+                                    setTimeout(() => {
+                                        setShowLoginSheet(false)
+                                        navigation.navigate("Login", {
+                                            loginType: 'ABHA Number',
+                                            isFromRegister: true
+                                        })
+                                    })
+                                }}
                             >
                                 <Text
                                     style={styles.createBtnText}

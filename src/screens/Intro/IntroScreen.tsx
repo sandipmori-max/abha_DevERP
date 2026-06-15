@@ -164,7 +164,7 @@ export default function IntroScreen() {
         });
     };
     const loginOptions = [
-        'Aadhar Number',
+        'Aadhaar Number',
         'Mobile Number',
         'ABHA Address',
         'ABHA Number',

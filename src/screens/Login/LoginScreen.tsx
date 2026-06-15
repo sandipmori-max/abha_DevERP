@@ -22,8 +22,8 @@ const LoginScreen = () => {
   const isFromRegister = route?.params?.isFromRegister || false
   const isFromCreate = route?.params?.isFromCreate || false
   const isFromMobileRegister = route?.params?.isFromMobileRegister || false
-
-
+  const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
+  const isFromForgotAbhaNumberWithType =  route?.params?.isFromForgotAbhaNumberWithType || false
   console.log("isFromRegister", isFromRegister)
   console.log("isFromCreate", isFromCreate)
 
@@ -41,10 +41,13 @@ const LoginScreen = () => {
   const [isAgreed, setIsAgreed] = useState(false);
 
   const placeholder = useMemo(() => {
+
     switch (loginType) {
       case 'Mobile Number':
         return 'Enter mobile number';
-      case 'Aadhar Number':
+      case 'Aadhaar Number':
+        return 'Enter aadhaar number';
+      case 'Aadhaar Number':
         return 'Enter aadhaar number';
       case 'ABHA Address':
         return 'Enter ABHA address';
@@ -53,7 +56,8 @@ const LoginScreen = () => {
       case 'Create ABHA Number':
         return 'Enter ABHA number';
       case 'Register with Mobile Number':
-        return 'Enter mobile number'
+        return 'Enter mobile number';
+
       default:
         return 'Enter value';
     }
@@ -64,7 +68,7 @@ const LoginScreen = () => {
       case 'Mobile Number':
         return 10;
 
-      case 'Aadhar Number':
+      case 'Aadhaar Number':
         return 12;
 
       default:
@@ -77,7 +81,7 @@ const LoginScreen = () => {
       case 'Mobile Number':
         return /^[6-9]\d{9}$/.test(loginValue);
 
-      case 'Aadhar Number':
+      case 'Aadhaar Number':
         return /^\d{12}$/.test(loginValue) && isAgreed;
 
       case 'ABHA Address':
@@ -96,7 +100,7 @@ const LoginScreen = () => {
       case 'Mobile Number':
         return /^[6-9]\d{9}$/.test(loginValue);
 
-      case 'Aadhar Number':
+      case 'Aadhaar Number':
         return /^\d{12}$/.test(loginValue);
 
       case 'ABHA Address':
@@ -143,7 +147,7 @@ const LoginScreen = () => {
       return null;
     }
 
-    if (loginType === 'Aadhar Number') {
+    if (loginType === 'Aadhaar Number' && !isFromForgotAbhaNumberWithType) {
       return (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>
@@ -278,6 +282,39 @@ const LoginScreen = () => {
       );
     }
 
+    if (loginType === 'Forgot ABHA Number' && !isFromForgotAbhaNumberWithType) {
+      return (
+        <View style={styles.card}>
+
+          <RadioItem
+            title="Aadhaar Number"
+            selected={
+              validationMethod ===
+              'Aadhaar Number'
+            }
+            onPress={() =>
+              setValidationMethod(
+                'Aadhaar Number',
+              )
+            }
+          />
+
+          <RadioItem
+            title="Mobile Number"
+            selected={
+              validationMethod ===
+              'Mobile Number'
+            }
+            onPress={() =>
+              setValidationMethod(
+                'Mobile Number',
+              )
+            }
+          />
+        </View>
+      );
+    }
+
     return null;
   };
 
@@ -313,12 +350,21 @@ const LoginScreen = () => {
 
           <View style={styles.hero}>
             <Text style={styles.welcome}>
-              {isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}
+
+              {
+                isFromForgotAbhaNumber ? 'Forgot ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
+              }
+
             </Text>
             {
-             !isFromMobileRegister && !isFromCreate && !isFromRegister && <Text style={styles.subtitle}>
+              !isFromForgotAbhaNumber && !isFromMobileRegister && !isFromCreate && !isFromRegister && <Text style={styles.subtitle}>
                 Sign in securely to access
                 your ABHA health records
+              </Text>
+            }
+            {
+              isFromForgotAbhaNumber &&  !isFromForgotAbhaNumber && <Text style={styles.subtitle}>
+                You can recover your ABHA number using Aadhaar number or registered mobile number. Recovery using any of the following methods requires filling out your basic details and access to your linked mobile.
               </Text>
             }
 
@@ -335,7 +381,7 @@ const LoginScreen = () => {
               isFromRegister ? <View style={{ marginVertical: 1 }}></View> :
                 <>
                   {
-                   !isFromMobileRegister && !isFromCreate && <View style={styles.typeChip}>
+                    !isFromForgotAbhaNumber && !isFromMobileRegister && !isFromCreate && <View style={styles.typeChip}>
                       <Text style={styles.typeText}>
                         {loginType}
                       </Text>
@@ -346,57 +392,125 @@ const LoginScreen = () => {
             }
 
             {
-              !isFromRegister && loginType === 'ABHA Number' && <Text style={styles.forgotText}>
-                Forgot ABHA number?
-              </Text>
+              !isFromRegister && loginType === 'ABHA Number' &&
+              <TouchableOpacity
+                onPress={() => {
+                   setValidationMethod('')
+                  setTimeout(() => {
+                    navigation.navigate("Login", {
+                      loginType: 'Forgot ABHA Number',
+                      isFromRegister: false,
+                      isFromCreate: false,
+                      isFromMobileRegister: false,
+                      isFromForgotAbhaNumber: true
+                    })
+
+                  })
+                }}>
+                <Text style={styles.forgotText}>
+                  Forgot ABHA number?
+                </Text>
+              </TouchableOpacity>
+
             }
 
           </View>
+          {
+            !isFromForgotAbhaNumber  && <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                Enter Details
+              </Text>
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              Enter Details
-            </Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  value={loginValue}
+                  onChangeText={text => {
+                    const value =
+                      loginType === 'Mobile Number' ||
+                        loginType === 'Aadhaar Number'
+                        ? text.replace(/[^0-9]/g, '')
+                        : text;
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                value={loginValue}
-                onChangeText={text => {
-                  const value =
+                    setLoginValue(value);
+                  }}
+                  placeholder={placeholder}
+                  maxLength={maxLength}
+                  keyboardType={
                     loginType === 'Mobile Number' ||
-                      loginType === 'Aadhar Number'
-                      ? text.replace(/[^0-9]/g, '')
-                      : text;
-
-                  setLoginValue(value);
-                }}
-                placeholder={placeholder}
-                maxLength={maxLength}
-                keyboardType={
-                  loginType === 'Mobile Number' ||
-                    loginType === 'Aadhar Number'
-                    ? 'number-pad'
-                    : 'default'
+                      loginType === 'Aadhaar Number'
+                      ? 'number-pad'
+                      : 'default'
+                  }
+                  style={styles.input}
+                />
+                {
+                  loginType === 'ABHA Address' && <Text style={styles.hintText}>
+                    @abdm
+                  </Text>
                 }
-                style={styles.input}
-              />
+
+              </View>
               {
-                loginType === 'ABHA Address' && <Text style={styles.hintText}>
-                  @abdm
-                </Text>
+                isFromRegister && loginType === 'ABHA Number' && <TouchableOpacity
+                  onPress={() => {
+                     setValidationMethod('')
+                    setTimeout(() => {
+                      navigation.navigate("Login", {
+                        loginType: 'Forgot ABHA Number',
+                        isFromRegister: false,
+                        isFromCreate: false,
+                        isFromMobileRegister: false,
+                        isFromForgotAbhaNumber: true
+                      })
+
+                    })
+                  }}>
+                  <Text style={[styles.forgotText, {
+                    alignSelf: 'flex-end',
+                    marginTop: 10
+                  }]}>
+                    Forgot ABHA number?
+                  </Text>
+                </TouchableOpacity>
               }
 
             </View>
-            {
-              isFromRegister && loginType === 'ABHA Number' && <Text style={[styles.forgotText, {
-                alignSelf: 'flex-end',
-                marginTop: 10
-              }]}>
-                Forgot ABHA number?
-              </Text>
-            }
+          }
 
-          </View>
+ {
+            isFromForgotAbhaNumberWithType  && <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                Enter Details
+              </Text>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  value={loginValue}
+                  onChangeText={text => {
+                    const value =
+                      loginType === 'Mobile Number' ||
+                        loginType === 'Aadhaar Number'
+                        ? text.replace(/[^0-9]/g, '')
+                        : text;
+
+                    setLoginValue(value);
+                  }}
+                  placeholder={placeholder}
+                  maxLength={maxLength}
+                  keyboardType={
+                    loginType === 'Mobile Number' ||
+                      loginType === 'Aadhaar Number'
+                      ? 'number-pad'
+                      : 'default'
+                  }
+                  style={styles.input}
+                />
+                
+
+              </View>
+              
+            </View>
+          }
 
           {renderValidationOptions()}
 
@@ -480,7 +594,54 @@ const LoginScreen = () => {
               </View>
             )}
           {
-            loginType === 'Aadhar Number' && <View style={styles.termsContainer}>
+             isFromForgotAbhaNumberWithType && <View style={styles.termsContainer}>
+              <Text style={styles.termsTitle}>
+                Terms & Conditions
+              </Text>
+
+              <View style={styles.termsCard}>
+                <Text style={styles.termsText}>
+                  I hereby declare that I am voluntarily sharing my
+                  Aadhaar Number and demographic information issued
+                  by UIDAI with National Health Authority (NHA) for
+                  the sole purpose of authentication and healthcare
+                  services under ABDM.
+                </Text>
+
+                <View style={styles.termsFooter}>
+                  <TouchableOpacity
+                    style={styles.checkboxRow}
+                    onPress={() => setIsAgreed(!isAgreed)}
+                  >
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isAgreed && styles.checkboxActive,
+                      ]}
+                    >
+                      {isAgreed && (
+                        <Text style={styles.checkmark}>
+                          ✓
+                        </Text>
+                      )}
+                    </View>
+
+                    <Text style={styles.agreeText}>
+                      I agree
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity>
+                    <Text style={styles.speakerIcon}>
+                      🔊
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          }
+          {
+           !isFromForgotAbhaNumberWithType && loginType === 'Aadhaar Number' && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
                 Terms & Conditions
               </Text>
@@ -527,8 +688,8 @@ const LoginScreen = () => {
             </View>
           }
 
-           {
-            loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
+          {
+          !isFromForgotAbhaNumberWithType &&  loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
                 Terms & Conditions
               </Text>
@@ -582,7 +743,7 @@ const LoginScreen = () => {
         <View style={styles.bottomBar}>
           <TouchableOpacity
             disabled={
-              loginType === 'Aadhar Number'
+              loginType === 'Aadhaar Number'
                 ? (!isAgreed || loginValue.length !== 12)
                 : loginType === 'Mobile Number'
                   ? loginValue.length !== 10
@@ -591,7 +752,7 @@ const LoginScreen = () => {
             style={[
               styles.continueBtn,
               (
-                (loginType === 'Aadhar Number' &&
+                (loginType === 'Aadhaar Number' &&
                   (!isAgreed || loginValue.length !== 12)) ||
                 (loginType === 'Mobile Number' &&
                   loginValue.length !== 10)
@@ -600,10 +761,26 @@ const LoginScreen = () => {
               },
             ]}
             onPress={() => {
-              navigation.navigate('OtpVerification', {
-                loginType,
-                mobileNumber: loginValue,
-              });
+              setValidationMethod('')
+              if (isFromForgotAbhaNumber) {
+                setTimeout(() => {
+                  navigation.navigate("Login", {
+                    loginType: validationMethod,
+                    isFromRegister: false,
+                    isFromCreate: false,
+                    isFromMobileRegister: false,
+                    isFromForgotAbhaNumber: true,
+                    isFromForgotAbhaNumberWithType: true
+                  })
+
+                })
+              } else {
+                navigation.navigate('OtpVerification', {
+                  loginType,
+                  mobileNumber: loginValue,
+                });
+              }
+
             }}
           >
             <Text style={styles.continueText}>
@@ -611,27 +788,28 @@ const LoginScreen = () => {
             </Text>
           </TouchableOpacity>
 
-          { 
-          loginType !== 'Register with Mobile Number' &&
-          <View style={styles.footer}>
+          {
+            !isFromForgotAbhaNumber && loginType !== 'Register with Mobile Number' &&
+            <View style={styles.footer}>
 
 
               <Text style={styles.footerText}>
                 {
-                  isFromCreate ? `Don't have an Aadhar number?` : `Don't have an ABHA number?`
+                  isFromCreate ? `Don't have an Aadhaar number?` : `Don't have an ABHA number?`
                 }
               </Text>
 
               <TouchableOpacity
                 onPress={() => {
+                   setValidationMethod('')
                   setTimeout(() => {
                     navigation.navigate("Login", {
-                      loginType: isFromCreate ? 'Register with Mobile Number' :  'Create ABHA Number',
+                      loginType: isFromCreate ? 'Register with Mobile Number' : 'Create ABHA Number',
                       isFromRegister: false,
                       isFromCreate: isFromCreate ? false : true,
-                      isFromMobileRegister:  true
+                      isFromMobileRegister: true
                     })
-                    
+
                   })
                 }}
               >

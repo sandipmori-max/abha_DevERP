@@ -76,44 +76,6 @@ const LoginScreen = () => {
     }
   }, [loginType]);
 
-  const canContinue = useMemo(() => {
-    switch (loginType) {
-      case 'Mobile Number':
-        return /^[6-9]\d{9}$/.test(loginValue);
-
-      case 'Aadhaar Number':
-        return /^\d{12}$/.test(loginValue) && isAgreed;
-
-      case 'ABHA Address':
-        return loginValue.trim().length > 0;
-
-      case 'ABHA Number':
-        return loginValue.trim().length > 0;
-
-      default:
-        return false;
-    }
-  }, [loginType, loginValue, isAgreed]);
-
-  const isValidInput = useMemo(() => {
-    switch (loginType) {
-      case 'Mobile Number':
-        return /^[6-9]\d{9}$/.test(loginValue);
-
-      case 'Aadhaar Number':
-        return /^\d{12}$/.test(loginValue);
-
-      case 'ABHA Address':
-        return loginValue.trim().length > 0;
-
-      case 'ABHA Number':
-        return loginValue.trim().length > 0;
-
-      default:
-        return false;
-    }
-  }, [loginType, loginValue]);
-
   const RadioItem = ({
     title,
     selected,
@@ -337,7 +299,13 @@ const LoginScreen = () => {
             <Text style={styles.back}>
               ←
             </Text>
+             
           </TouchableOpacity>
+          <Text style={styles.welcome}>
+              {
+                isFromForgotAbhaNumber ? 'Forgot ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
+              }
+            </Text>
         </View>
 
         <ScrollView
@@ -349,13 +317,7 @@ const LoginScreen = () => {
 
 
           <View style={styles.hero}>
-            <Text style={styles.welcome}>
-
-              {
-                isFromForgotAbhaNumber ? 'Forgot ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
-              }
-
-            </Text>
+           
             {
               !isFromForgotAbhaNumber && !isFromMobileRegister && !isFromCreate && !isFromRegister && <Text style={styles.subtitle}>
                 Sign in securely to access
@@ -388,9 +350,7 @@ const LoginScreen = () => {
                     </View>
                   }
                 </>
-
             }
-
             {
               !isFromRegister && loginType === 'ABHA Number' &&
               <TouchableOpacity
@@ -429,7 +389,6 @@ const LoginScreen = () => {
                   Forgot ABHA number?
                 </Text>
               </TouchableOpacity>
-
             }
 
           </View>
@@ -468,6 +427,7 @@ const LoginScreen = () => {
                 }
 
               </View>
+
               {
                 isFromRegister && loginType === 'ABHA Number' && <TouchableOpacity
                   onPress={() => {
@@ -509,7 +469,6 @@ const LoginScreen = () => {
                   </Text>
                 </TouchableOpacity>
               }
-
             </View>
           }
 

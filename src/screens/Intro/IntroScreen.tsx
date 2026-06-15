@@ -552,18 +552,18 @@ const styles = StyleSheet.create({
     },
 
     registerBtn: {
-        height: 55,
+        height: 48,
         borderWidth: 2,
         borderColor: '#D96A27',
-        borderRadius: 8,
+        borderRadius: 4,
         justifyContent: 'center',
         alignItems: 'center',
     },
 
     loginBtn: {
-        height: 55,
+        height: 48,
         backgroundColor: '#D96A27',
-        borderRadius: 8,
+        borderRadius: 4,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -666,9 +666,9 @@ const styles = StyleSheet.create({
     },
 
     createBtn: {
-        height: 50,
+        height: 48,
         backgroundColor: '#D96A27',
-        borderRadius: 12,
+        borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
     },

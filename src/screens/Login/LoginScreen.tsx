@@ -24,10 +24,6 @@ const LoginScreen = () => {
   const isFromMobileRegister = route?.params?.isFromMobileRegister || false
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
-  console.log("isFromRegister", isFromRegister)
-  console.log("isFromCreate", isFromCreate)
-
-  console.log("isFromMobileRegister", isFromMobileRegister)
 
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
@@ -63,18 +59,7 @@ const LoginScreen = () => {
     }
   }, [loginType]);
 
-  const maxLength = useMemo(() => {
-    switch (loginType) {
-      case 'Mobile Number':
-        return 10;
 
-      case 'Aadhaar Number':
-        return 12;
-
-      default:
-        return undefined;
-    }
-  }, [loginType]);
 
   const RadioItem = ({
     title,
@@ -280,6 +265,81 @@ const LoginScreen = () => {
     return null;
   };
 
+  const formatAadhaar = (value: string) => {
+    const cleaned = value.replace(/\D/g, '').slice(0, 12);
+
+    return cleaned
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .replace(/(\d{4})-(\d{4})(\d)/, '$1-$2-$3');
+  };
+
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 9) + 1;
+    const num2 = Math.floor(Math.random() * 9) + 1;
+
+    const operators = ['+', '-', '×'];
+    const operator =
+      operators[Math.floor(Math.random() * operators.length)];
+
+    let answer = 0;
+
+    switch (operator) {
+      case '+':
+        answer = num1 + num2;
+        break;
+      case '-':
+        answer = num1 - num2;
+        break;
+      case '×':
+        answer = num1 * num2;
+        break;
+    }
+
+    return {
+      question: `${num1}${operator}${num2}=?`,
+      answer,
+    };
+  };
+  const [captcha, setCaptcha] = useState(generateCaptcha());
+  const [captchaValue, setCaptchaValue] = useState('');
+
+  const refreshCaptcha = () => {
+    setCaptcha(generateCaptcha());
+    setCaptchaValue('');
+  };
+  const validateCaptcha = () => {
+    return Number(captchaValue) === captcha.answer;
+  };
+  const formatAbhaNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, '').slice(0, 14);
+
+    if (cleaned.length <= 2) return cleaned;
+
+    if (cleaned.length <= 6)
+      return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
+
+    if (cleaned.length <= 10)
+      return `${cleaned.slice(0, 2)}-${cleaned.slice(
+        2,
+        6,
+      )}-${cleaned.slice(6)}`;
+
+    return `${cleaned.slice(0, 2)}-${cleaned.slice(
+      2,
+      6,
+    )}-${cleaned.slice(6, 10)}-${cleaned.slice(10)}`;
+  };
+
+  const maxLength =
+    loginType === 'Aadhaar Number'
+      ? 14 // 1234-5678-9012
+      : loginType === 'ABHA Number' ||
+        loginType === 'Create ABHA Number'
+        ? 17 // 12-3456-7890-1234
+        : loginType === 'Mobile Number'
+          ? 10
+          : 100;
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -299,13 +359,13 @@ const LoginScreen = () => {
             <Text style={styles.back}>
               ←
             </Text>
-             
+
           </TouchableOpacity>
           <Text style={styles.welcome}>
-              {
-                isFromForgotAbhaNumber ? 'Forgot ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
-              }
-            </Text>
+            {
+              isFromForgotAbhaNumber ? 'Forgot ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
+            }
+          </Text>
         </View>
 
         <ScrollView
@@ -317,7 +377,7 @@ const LoginScreen = () => {
 
 
           <View style={styles.hero}>
-           
+
             {
               !isFromForgotAbhaNumber && !isFromMobileRegister && !isFromCreate && !isFromRegister && <Text style={styles.subtitle}>
                 Sign in securely to access
@@ -351,45 +411,7 @@ const LoginScreen = () => {
                   }
                 </>
             }
-            {
-              !isFromRegister && loginType === 'ABHA Number' &&
-              <TouchableOpacity
-                onPress={() => {
-                  const payload = {
-                    loginType,
-                    loginValue,
-                    password,
-                    validationMethod,
-                    otpMethod,
-                    isAgreed,
-                    isFromRegister,
-                    isFromCreate,
-                    isFromMobileRegister,
-                    isFromForgotAbhaNumber,
-                    isFromForgotAbhaNumberWithType,
-                  };
 
-                  console.log(
-                    "Form Data =>",
-                    JSON.stringify(payload, null, 2)
-                  );
-                  setValidationMethod('')
-                  setTimeout(() => {
-                    navigation.navigate("Login", {
-                      loginType: 'Forgot ABHA Number',
-                      isFromRegister: false,
-                      isFromCreate: false,
-                      isFromMobileRegister: false,
-                      isFromForgotAbhaNumber: true
-                    })
-
-                  })
-                }}>
-                <Text style={styles.forgotText}>
-                  Forgot ABHA number?
-                </Text>
-              </TouchableOpacity>
-            }
 
           </View>
           {
@@ -399,22 +421,46 @@ const LoginScreen = () => {
               </Text>
 
               <View style={styles.inputContainer}>
+                {(loginType === 'Mobile Number' ||
+                  loginType === 'Register with Mobile Number') && (
+                    <Text style={styles.prefix}>+91</Text>
+                  )}
                 <TextInput
                   value={loginValue}
                   onChangeText={text => {
-                    const value =
-                      loginType === 'Mobile Number' ||
-                        loginType === 'Aadhaar Number'
-                        ? text.replace(/[^0-9]/g, '')
-                        : text;
+                    let value = text;
+
+                    switch (loginType) {
+                      case 'Mobile Number':
+                      case 'Register with Mobile Number':
+                        value = text.replace(/\D/g, '').slice(0, 10);
+                        break;
+
+                      case 'Aadhaar Number':
+                        value = formatAadhaar(text);
+                        break;
+
+                      case 'ABHA Number':
+                      case 'Create ABHA Number':
+                        value = formatAbhaNumber(text);
+                        break;
+
+                      default:
+                        break;
+                    }
 
                     setLoginValue(value);
                   }}
                   placeholder={placeholder}
                   maxLength={maxLength}
                   keyboardType={
-                    loginType === 'Mobile Number' ||
-                      loginType === 'Aadhaar Number'
+                    [
+                      'Mobile Number',
+                      'Register with Mobile Number',
+                      'Aadhaar Number',
+                      'ABHA Number',
+                      'Create ABHA Number',
+                    ].includes(loginType)
                       ? 'number-pad'
                       : 'default'
                   }
@@ -429,7 +475,7 @@ const LoginScreen = () => {
               </View>
 
               {
-                isFromRegister && loginType === 'ABHA Number' && <TouchableOpacity
+                <TouchableOpacity
                   onPress={() => {
                     const payload = {
                       loginType,
@@ -507,7 +553,7 @@ const LoginScreen = () => {
             </View>
           }
 
-          {renderValidationOptions()}
+          {loginType === 'Forgot ABHA Number' && renderValidationOptions()}
 
           {validationMethod === 'Password' && (
             <View style={styles.card}>
@@ -731,6 +777,36 @@ const LoginScreen = () => {
             </View>
           }
 
+          <View style={{ marginHorizontal: 24, marginVertical: 12 }}>
+            <View>
+              <Text>Captcha</Text>
+            </View>
+            <View style={styles.captchaContainer}>
+
+              <Text style={styles.captchaText}>
+                {captcha.question}
+              </Text>
+
+              <TextInput
+                placeholder="Enter answer"
+                keyboardType="number-pad"
+                value={captchaValue}
+                onChangeText={setCaptchaValue}
+                style={styles.captchaInput}
+              />
+
+              <TouchableOpacity onPress={refreshCaptcha}>
+                {/* <MaterialIcons
+                name="refresh"
+                size={28}
+                color="#1E40AF"
+              /> */}
+                <View style={{ height: 40, width: 40, backgroundColor: 'red' }} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+
         </ScrollView>
 
 
@@ -829,7 +905,7 @@ const LoginScreen = () => {
                   };
 
                   console.log(
-                    "Form Data =>",
+                    "Form Data ====>- ......... ====>- ",
                     JSON.stringify(payload, null, 2)
                   );
                   setValidationMethod('')
@@ -866,6 +942,88 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F6F8FC',
+  },
+  captchaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+   },
+
+  captchaInput: {
+    flex: 1,
+    height: 46,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    backgroundColor: '#FFF',
+    marginHorizontal: 12,
+  },
+  captchaCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
+
+  captchaLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 12,
+  },
+
+  captchaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  captchaBox: {
+    width: 110,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  captchaText: {
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  answerInput: {
+    flex: 1,
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    marginHorizontal: 12,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+
+  iconButton: {
+    height: 42,
+    width: 42,
+    borderRadius: 21,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  prefix: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+    marginRight: 10,
   },
   header: {
     padding: 20,
@@ -986,13 +1144,13 @@ const styles = StyleSheet.create({
 
   footerText: {
     color: '#555',
-    fontSize: 15,
+    fontSize: 10,
   },
 
   createNow: {
     marginLeft: 6,
     color: '#D96A27',
-    fontSize: 15,
+    fontSize: 10,
     fontWeight: '700',
   },
   inputContainer: {

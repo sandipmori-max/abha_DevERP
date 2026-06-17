@@ -107,6 +107,7 @@ const Slide = ({ item, index, scrollX }: any) => {
 
 export default function IntroScreen() {
     const navigation = useNavigation();
+    const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
 
     const registerAnim = useRef(
@@ -166,11 +167,15 @@ export default function IntroScreen() {
     const loginOptions = [
         'Aadhaar Number',
         'Mobile Number',
-        'ABHA Address',
         'ABHA Number',
     ];
 
+ const registerOptions = [
+        'Aadhaar Number',
+        'Driving Licence', 
+    ];
 
+    const optionList = bottomSheetType === 'Login' ? loginOptions : registerOptions;
     const panResponder = useRef(
         PanResponder.create({
             onMoveShouldSetPanResponder: (_, gesture) =>
@@ -324,15 +329,9 @@ export default function IntroScreen() {
                 >
                     <TouchableOpacity
                         style={styles.registerBtn}
-                        onPress={() => {
-                            setTimeout(() => {
-                                setShowLoginSheet(false)
-                                navigation.navigate("Login", {
-                                    loginType: 'ABHA Number',
-                                    isFromRegister: true
-                                })
-                            })
-                        }}
+                        onPress={ () => {
+                            setBottomSheetType('Register')
+                            openSheet()}}
                     >
                         <Text style={styles.registerText}>
                             Register
@@ -348,7 +347,9 @@ export default function IntroScreen() {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={openSheet}
+                         onPress={ () => {
+                            setBottomSheetType('Login')
+                            openSheet()}}
                         style={styles.loginBtn}
                     >
                         <Text style={styles.loginText}>
@@ -386,10 +387,10 @@ export default function IntroScreen() {
                         <View style={styles.dragHandle} />
 
                         <Text style={styles.sheetTitle}>
-                            Login Using
+                           { bottomSheetType === 'Login' ? ' Login Using' : 'Create your ABHA number using'} 
                         </Text>
 
-                        {loginOptions.map(item => {
+                        {optionList.map(item => {
                             const selected =
                                 selectedLoginType === item;
 
@@ -436,7 +437,10 @@ export default function IntroScreen() {
 
                         <View style={styles.bottomInfo}>
                             <Text style={styles.infoText}>
-                                Don't have an ABHA number?
+                                {
+                                    bottomSheetType === 'Login' ? `Don't have an ABHA number? ` : `Already have ABHA number?`
+                                }
+                               
                             </Text>
 
                             <TouchableOpacity
@@ -454,7 +458,10 @@ export default function IntroScreen() {
                                 <Text
                                     style={styles.createBtnText}
                                 >
-                                    Create Now
+                                    {
+                                        bottomSheetType === 'Login' ? "Create Now " : "Login"
+                                    }
+                                    
                                 </Text>
                             </TouchableOpacity>
                         </View>

@@ -14,6 +14,7 @@ import {
     Modal,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useCreateSessionMutation } from '../../redux/api/sessionApi';
 const { width, height } = Dimensions.get('window');
 const DATA = [
     {
@@ -107,6 +108,7 @@ const Slide = ({ item, index, scrollX }: any) => {
 
 export default function IntroScreen() {
     const navigation = useNavigation();
+
     const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -226,6 +228,37 @@ export default function IntroScreen() {
         }, [])
     );
 
+     const [
+    createSession
+  ] = useCreateSessionMutation();
+
+    const handleSession = async()=>{
+
+    try {
+
+      const response =
+        await createSession()
+        .unwrap();
+
+
+      console.log(
+        "Session Response",
+        response
+      );
+
+
+    } catch(err){
+
+      console.log(
+        "Session Error",
+        err
+      );
+
+    }
+
+  };
+
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar
@@ -329,9 +362,12 @@ export default function IntroScreen() {
                 >
                     <TouchableOpacity
                         style={styles.registerBtn}
-                        onPress={ () => {
-                            setBottomSheetType('Register')
-                            openSheet()}}
+                        onPress={ async() => {
+                            // setBottomSheetType('Register')
+                            // openSheet()
+                                handleSession()    
+                        }
+                        }
                     >
                         <Text style={styles.registerText}>
                             Register

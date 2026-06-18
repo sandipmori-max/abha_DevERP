@@ -27,12 +27,15 @@ const LoginScreen = () => {
   const publicKey = useSelector(
     (state: any) => state.auth.publicKey
   );
+  const txnId = useSelector(
+    (state: any) => state.abha.txnId
+  );
   const isFromRegister = route?.params?.isFromRegister || false
   const isFromCreate = route?.params?.isFromCreate || false
   const isFromMobileRegister = route?.params?.isFromMobileRegister || false
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
-
+  const [errorMessage, setErrorMessage] = useState('');
 
   const generateCaptcha = () => {
     const num1 = Math.floor(Math.random() * 9) + 1;
@@ -176,7 +179,25 @@ const LoginScreen = () => {
 
     return true;
   };
+  const validateForm = () => {
+    if (!loginValue) {
+      return 'Please enter mobile number';
+    }
 
+    if (loginType === 'Mobile Number' && !/^[6-9]\d{9}$/.test(loginValue)) {
+      return 'Enter valid mobile number';
+    }
+
+    if (!captchaValue) {
+      return 'Please enter captcha';
+    }
+
+    if (Number(captchaValue) !== Number(captcha.answer)) {
+      return 'Invalid captcha';
+    }
+
+    return '';
+  };
 
   const [requestOtp, { isLoading }] =
     useRequestOtpMutation();
@@ -546,7 +567,7 @@ const LoginScreen = () => {
           {
             !isFromForgotAbhaNumber && <View style={styles.card}>
               <Text style={styles.cardTitle}>
-                Enter Details
+                Enter Details <Text style={{ color: 'red' }}>*</Text>
               </Text>
 
               <View style={styles.inputContainer}>
@@ -650,7 +671,7 @@ const LoginScreen = () => {
           {
             isFromForgotAbhaNumberWithType && <View style={styles.card}>
               <Text style={styles.cardTitle}>
-                Enter Details
+                Enter Details <Text style={{ color: 'red' }}>*</Text>
               </Text>
 
               <View style={styles.inputContainer}>
@@ -675,7 +696,11 @@ const LoginScreen = () => {
                   }
                   style={styles.input}
                 />
-
+                {!!errorMessage && (
+                  <Text style={styles.errorText}>
+                    {errorMessage}
+                  </Text>
+                )}
 
               </View>
 
@@ -766,7 +791,7 @@ const LoginScreen = () => {
           {
             isFromForgotAbhaNumberWithType && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
-                Terms & Conditions
+                Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
               </Text>
 
               <View style={styles.termsCard}>
@@ -813,7 +838,7 @@ const LoginScreen = () => {
           {
             !isFromForgotAbhaNumberWithType && loginType === 'Aadhaar Number' && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
-                Terms & Conditions
+                Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
               </Text>
 
               <View style={styles.termsCard}>
@@ -861,7 +886,7 @@ const LoginScreen = () => {
           {
             !isFromForgotAbhaNumberWithType && loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
               <Text style={styles.termsTitle}>
-                Terms & Conditions
+                Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
               </Text>
 
               <View style={styles.termsCard}>
@@ -906,9 +931,9 @@ const LoginScreen = () => {
             </View>
           }
 
-          <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor:'white', padding: 16, borderRadius: 8 }}>
+          <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
             <View>
-              <Text>Captcha</Text>
+              <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
             </View>
             <View style={styles.captchaContainer}>
 
@@ -930,7 +955,11 @@ const LoginScreen = () => {
                 size={28}
                 color="#1E40AF"
               /> */}
-                <View style={{ height: 40, width: 40, backgroundColor: 'red' }} />
+                <View style={{
+                  borderRadius: 8,
+                  height: 40, width: 40, borderWidth: 1,
+                  borderColor: 'gray'
+                }} />
               </TouchableOpacity>
             </View>
           </View>
@@ -951,7 +980,15 @@ const LoginScreen = () => {
             ]}
             onPress={async () => {
               try {
+                const error = validateForm();
+
+                if (error) {
+                  showToast('error', error);
+                  return;
+                }
+
                 if (!getIsFormValid()) {
+
                   showToast('error', 'Please fill all fields correctly');
                   return;
                 }
@@ -984,7 +1021,7 @@ const LoginScreen = () => {
                 const payloadPassed = getPayload(
                   loginType,
                   encryptedValue,
-                  "",
+                  txnId,
                 );
                 await requestOtp(payloadPassed).unwrap();
 
@@ -1103,7 +1140,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    
+
   },
 
   captchaLabel: {
@@ -1165,7 +1202,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 12,
   },
   welcome: {
     fontSize: 30,
@@ -1173,7 +1210,6 @@ const styles = StyleSheet.create({
     color: '#173D8F',
   },
   subtitle: {
-    marginTop: 8,
     color: '#666',
   },
   typeChip: {
@@ -1205,7 +1241,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
   },
-
   radioRow: {
     flexDirection: 'row',
     alignItems: 'center',

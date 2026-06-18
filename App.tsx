@@ -7,16 +7,14 @@ import GlobalLoader from './GlobalLoader';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './ToastConfig';
 
-
 const App = () => {
   return (
     <Provider store={store}>
       <NavigationContainer>
         <RootNavigator />
         <GlobalLoader />
-        <Toast config={toastConfig} 
-        position="bottom"
-  bottomOffset={40} />      
+        <Toast config={toastConfig}
+          topOffset={80} />
       </NavigationContainer>
     </Provider>
 
@@ -24,8 +22,6 @@ const App = () => {
 };
 
 export default App;
-
-// import React from "react";
 // import { NavigationContainer } from "@react-navigation/native";
 // import { Provider, useSelector, useDispatch } from "react-redux";
 // import { configureStore, createSlice } from "@reduxjs/toolkit";

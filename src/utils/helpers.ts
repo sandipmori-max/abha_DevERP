@@ -6,16 +6,13 @@ export const generateGUID = () => {
     });
 };
 
-export const getErrorMessage = (error: any) => {
-  const data = error?.error?.data || error?.data;
+export const getErrorMessage = (error: any) => { 
 
   return (
-    data?.message ||
-    data?.description ||
-    data?.error?.message ||
-    data?.loginId ||          // 👈 YOUR CASE (IMPORTANT)
-    data?.mobile ||
-    data?.aadhaar ||
+    error?.error?.message ||
+    error?.error?.data?.error?.message || 
+    error?.error?.data?.message ||
+    error?.error?.data?.loginId ||
     error?.error?.message ||
     error?.message ||
     'Something went wrong'

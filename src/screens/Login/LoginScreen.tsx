@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { encryptData } from '../../utils/encrypt';
@@ -1148,6 +1149,11 @@ const LoginScreen = () => {
                     JSON.stringify(payload, null, 2)
                   );
                   setValidationMethod('')
+                  setLoginValue('')
+                  setCaptchaValue("")
+                  refreshCaptcha()
+                  setIsAgreed(false)
+                  Keyboard.dismiss()
                   setTimeout(() => {
                     navigation.navigate("Login", {
                       loginType: isFromCreate ? 'Register with Mobile Number' : 'Create ABHA Number',

@@ -5,6 +5,23 @@ export const generateGUID = () => {
         return v.toString(16);
     });
 };
+
+export const getErrorMessage = (error: any) => {
+  const data = error?.error?.data || error?.data;
+
+  return (
+    data?.message ||
+    data?.description ||
+    data?.error?.message ||
+    data?.loginId ||          // 👈 YOUR CASE (IMPORTANT)
+    data?.mobile ||
+    data?.aadhaar ||
+    error?.error?.message ||
+    error?.message ||
+    'Something went wrong'
+  );
+};
+
 //X-CM-ID
 export const CLIENT_ID = 'SBXID_042942'
 export const X_CM_ID = 'sbx'

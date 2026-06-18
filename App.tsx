@@ -3,6 +3,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from './src/navigation/RootNavigator';
 import { Provider } from "react-redux";
 import { store } from './src/redux/store';
+import GlobalLoader from './GlobalLoader';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './ToastConfig';
 
 
 const App = () => {
@@ -10,6 +13,10 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer>
         <RootNavigator />
+        <GlobalLoader />
+        <Toast config={toastConfig} 
+        position="bottom"
+  bottomOffset={40} />      
       </NavigationContainer>
     </Provider>
 
@@ -17,11 +24,6 @@ const App = () => {
 };
 
 export default App;
-
-
-
-
-
 
 // import React from "react";
 // import { NavigationContainer } from "@react-navigation/native";

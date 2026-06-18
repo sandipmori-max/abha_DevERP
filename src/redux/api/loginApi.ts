@@ -1,4 +1,6 @@
- import { BASE_URL_API } from "../../utils/helpers";
+ import { toastConfig } from "../../../ToastConfig";
+import { BASE_URL_API, getErrorMessage } from "../../utils/helpers";
+import { showToast } from "../../utils/toast";
 import { setTxnId } from "../slices/abhaSlice";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
@@ -119,6 +121,8 @@ export const loginApi = baseApi.injectEndpoints({
             );
           }
         } catch (error: any) {
+                        showToast('error', 'Login Failed', JSON.stringify(error));   
+
           console.log(
             "========== API ERROR =========="
           );
@@ -149,7 +153,8 @@ export const loginApi = baseApi.injectEndpoints({
             error?.error?.error ||
               error?.message
           );
-        }
+
+     }
       },
     }),
   }),
@@ -177,7 +182,7 @@ export const getPayload = (
         otpSystem: 'abdm',
       };
 
-    case 'ABHA Number Aadhaar':
+    case 'Aadhaar Number':
       return {
         scope: ['abha-login', 'aadhaar-verify'],
         loginHint: 'abha-number',

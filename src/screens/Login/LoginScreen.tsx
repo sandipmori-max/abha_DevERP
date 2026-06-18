@@ -12,12 +12,15 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { encryptData } from '../../utils/encrypt';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getPayload, useRequestOtpMutation } from '../../redux/api/loginApi';
+import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
+import { showToast } from '../../utils/toast';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const dispatch = useDispatch()
 
   const loginType =
     route?.params?.loginType || 'Mobile Number';
@@ -821,76 +824,82 @@ const LoginScreen = () => {
 
         <View style={styles.bottomBar}>
           <TouchableOpacity
-            disabled={
-              loginType === 'Aadhaar Number'
-                ? (!isAgreed || loginValue.length !== 12)
-                : loginType === 'Mobile Number'
-                  ? loginValue.length !== 10
-                  : false
-            }
+            // disabled={
+            //   loginType === 'Aadhaar Number'
+            //     ? (!isAgreed || loginValue.length !== 12)
+            //     : loginType === 'Mobile Number'
+            //       ? loginValue.length !== 10
+            //       : false
+            // }
             style={[
               styles.continueBtn,
-              (
-                (loginType === 'Aadhaar Number' &&
-                  (!isAgreed || loginValue.length !== 12)) ||
-                (loginType === 'Mobile Number' &&
-                  loginValue.length !== 10)
-              ) && {
-                opacity: 0.5,
-              },
+              // (
+              //   (loginType === 'Aadhaar Number' &&
+              //     (!isAgreed || loginValue.length !== 12)) ||
+              //   (loginType === 'Mobile Number' &&
+              //     loginValue.length !== 10)
+              // ) && {
+              //   opacity: 0.5,
+              // },
             ]}
             onPress={async () => {
-              const payload = {
-                loginType,
-                loginValue,
-                password,
-                validationMethod,
-                otpMethod,
-                isAgreed,
-                isFromRegister,
-                isFromCreate,
-                isFromMobileRegister,
-                isFromForgotAbhaNumber,
-                isFromForgotAbhaNumberWithType,
-              };
+              try {
+                dispatch(showLoader());
 
-              console.log(
-                "Form Data =>",
-                JSON.stringify(payload, null, 2)
-              );
-              setValidationMethod('')
-              if (!isFromForgotAbhaNumber) {
+                const payload = {
+                  loginType,
+                  loginValue,
+                  password,
+                  validationMethod,
+                  otpMethod,
+                  isAgreed,
+                  isFromRegister,
+                  isFromCreate,
+                  isFromMobileRegister,
+                  isFromForgotAbhaNumber,
+                  isFromForgotAbhaNumberWithType,
+                };
+
+                console.log(
+                  "Form Data =>",
+                  JSON.stringify(payload, null, 2)
+                );
+                setValidationMethod('')
                 const encryptedValue =
                   encryptData(
                     loginValue,
                     publicKey,
                   );
-
                 const payloadPassed = getPayload(
                   loginType,
                   encryptedValue,
                   "",
                 );
                 await requestOtp(payloadPassed).unwrap();
+
+                if (isFromForgotAbhaNumber) {
+                  setTimeout(() => {
+                    navigation.navigate("Login", {
+                      loginType: validationMethod,
+                      isFromRegister: false,
+                      isFromCreate: false,
+                      isFromMobileRegister: false,
+                      isFromForgotAbhaNumber: true,
+                      isFromForgotAbhaNumberWithType: true
+                    })
+                  })
+                } else {
+                  navigation.navigate('OtpVerification', {
+                    loginType,
+                    mobileNumber: loginValue,
+                  });
+                }
+              } catch (error) {
+                dispatch(hideLoader());
+              } finally {
+                dispatch(hideLoader());
               }
 
-              if (isFromForgotAbhaNumber) {
-                setTimeout(() => {
-                  navigation.navigate("Login", {
-                    loginType: validationMethod,
-                    isFromRegister: false,
-                    isFromCreate: false,
-                    isFromMobileRegister: false,
-                    isFromForgotAbhaNumber: true,
-                    isFromForgotAbhaNumberWithType: true
-                  })
-                })
-              } else {
-                navigation.navigate('OtpVerification', {
-                  loginType,
-                  mobileNumber: loginValue,
-                });
-              }
             }}
           >
             <Text style={styles.continueText}>
@@ -924,7 +933,6 @@ const LoginScreen = () => {
                     isFromForgotAbhaNumber,
                     isFromForgotAbhaNumberWithType,
                   };
-
                   console.log(
                     "Form Data ====>- ......... ====>- ",
                     JSON.stringify(payload, null, 2)
@@ -947,10 +955,8 @@ const LoginScreen = () => {
                   {isFromCreate && <Text> to register via mobile</Text>}
                 </View>
               </TouchableOpacity>
-
             </View>
           }
-
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

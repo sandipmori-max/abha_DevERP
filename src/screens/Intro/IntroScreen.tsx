@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCreateSessionMutation } from '../../redux/api/sessionApi';
+import { useDispatch } from 'react-redux';
+import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 const { width, height } = Dimensions.get('window');
 const DATA = [
     {
@@ -108,6 +110,7 @@ const Slide = ({ item, index, scrollX }: any) => {
 
 export default function IntroScreen() {
     const navigation = useNavigation();
+    const dispatch = useDispatch()
    
     const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
@@ -169,7 +172,7 @@ export default function IntroScreen() {
     const loginOptions = [
         'Aadhaar Number',
         'Mobile Number',
-        'ABHA Number',
+        'ABHA Number'
     ];
 
     const registerOptions = [
@@ -250,9 +253,21 @@ export default function IntroScreen() {
         }
     };
 
-    useEffect(() => {
-         handleSession()    
-    }, [])
+  useEffect(() => {
+  const init = async () => {
+    try {
+      dispatch(showLoader());
+
+      await handleSession();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(hideLoader());
+    }
+  };
+
+  init();
+}, []);
 
     return (
         <SafeAreaView style={styles.container}>

@@ -7,6 +7,8 @@ import { certificateApi } from "./certificateApi";
 import { BASE_URL_PUBLIC_API, CLIENT_ID, CLIENT_SECERET, GRANT_TYPE, X_CM_ID } from "../../utils/helpers";
 import { END_POINTS } from "./end_points";
 
+
+
 export const sessionApi =
     baseApi.injectEndpoints({
         endpoints: (builder) => ({

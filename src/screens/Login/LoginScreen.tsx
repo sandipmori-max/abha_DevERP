@@ -408,7 +408,7 @@ const LoginScreen = () => {
       );
     }
 
-    if (loginType === 'Forgot ABHA Number' && !isFromForgotAbhaNumberWithType) {
+    if (loginType === 'Forgot ABHA Number' && isFromForgotAbhaNumber) {
       return (
         <View style={styles.card}>
 
@@ -418,10 +418,13 @@ const LoginScreen = () => {
               validationMethod ===
               'Aadhaar Number'
             }
-            onPress={() =>
+            onPress={() => {
+              setLoginValue("")
               setValidationMethod(
                 'Aadhaar Number',
               )
+            }
+
             }
           />
 
@@ -431,10 +434,13 @@ const LoginScreen = () => {
               validationMethod ===
               'Mobile Number'
             }
-            onPress={() =>
+            onPress={() => {
+              setLoginValue("")
               setValidationMethod(
                 'Mobile Number',
               )
+            }
+
             }
           />
         </View>
@@ -647,6 +653,8 @@ const LoginScreen = () => {
                     );
                     setValidationMethod('')
                     setTimeout(() => {
+                      setValidationMethod('Aadhaar Number')
+                      setLoginValue("")
                       navigation.navigate("Login", {
                         loginType: 'Forgot ABHA Number',
                         isFromRegister: false,
@@ -675,6 +683,7 @@ const LoginScreen = () => {
               </Text>
 
               <View style={styles.inputContainer}>
+
                 <TextInput
                   value={loginValue}
                   onChangeText={text => {
@@ -697,7 +706,9 @@ const LoginScreen = () => {
                   style={styles.input}
                 />
                 {!!errorMessage && (
-                  <Text style={styles.errorText}>
+                  <Text style={{
+                    color: 'red'
+                  }}>
                     {errorMessage}
                   </Text>
                 )}
@@ -708,6 +719,67 @@ const LoginScreen = () => {
           }
 
           {loginType === 'Forgot ABHA Number' && renderValidationOptions()}
+
+
+          {
+            isFromForgotAbhaNumber && <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                Enter Details <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+
+              <View style={styles.inputContainer}>
+                {(validationMethod === 'Mobile Number' ||
+                  validationMethod === 'Register with Mobile Number') && (
+                    <Text style={styles.prefix}>+91</Text>
+                  )}
+                <TextInput
+                  value={loginValue}
+                  onChangeText={text => {
+                    let value = text;
+
+                    switch (validationMethod) {
+                      case 'Mobile Number':
+                      case 'Register with Mobile Number':
+                        value = text.replace(/\D/g, '').slice(0, 10);
+                        break;
+
+                      case 'Aadhaar Number':
+                        value = formatAadhaar(text);
+                        break;
+
+                      case 'ABHA Number':
+                      case 'Create ABHA Number':
+                        value = formatAbhaNumber(text);
+                        break;
+
+                      default:
+                        break;
+                    }
+
+                    setLoginValue(value);
+                  }}
+                  placeholder={validationMethod === 'Mobile Number' ? 'Enter mobile number' : 'Enter aadhaar number'}
+                  maxLength={maxLength}
+                  keyboardType={
+                    validationMethod === 'Mobile Number' ||
+                      validationMethod === 'Aadhaar Number'
+                      ? 'number-pad'
+                      : 'default'
+                  }
+                  style={styles.input}
+                />
+                {!!errorMessage && (
+                  <Text style={{
+                    color: 'red'
+                  }}>
+                    {errorMessage}
+                  </Text>
+                )}
+
+              </View>
+
+            </View>
+          }
 
           {validationMethod === 'Password' && (
             <View style={styles.card}>

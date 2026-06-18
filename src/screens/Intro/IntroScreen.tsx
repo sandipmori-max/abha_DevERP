@@ -18,6 +18,7 @@ import { useCreateSessionMutation } from '../../redux/api/sessionApi';
 import { useDispatch } from 'react-redux';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 const { width, height } = Dimensions.get('window');
+
 const DATA = [
     {
         id: '1',
@@ -245,7 +246,6 @@ export default function IntroScreen() {
                 response
             );
         } catch (err) {
-
             console.log(
                 "Session Error",
                 err
@@ -745,3 +745,5 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
 });
+
+//https://www.youtube.com/watch?v=WU7hnaRjot4

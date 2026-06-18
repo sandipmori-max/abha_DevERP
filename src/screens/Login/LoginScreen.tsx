@@ -33,6 +33,151 @@ const LoginScreen = () => {
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
 
+
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 9) + 1;
+    const num2 = Math.floor(Math.random() * 9) + 1;
+
+    const operators = ['+', '-', '×'];
+    const operator =
+      operators[Math.floor(Math.random() * operators.length)];
+
+    let answer = 0;
+
+    switch (operator) {
+      case '+':
+        answer = num1 + num2;
+        break;
+      case '-':
+        answer = num1 - num2;
+        break;
+      case '×':
+        answer = num1 * num2;
+        break;
+    }
+
+    return {
+      question: `${num1}${operator}${num2}=?`,
+      answer,
+    };
+  };
+
+
+  const [captcha, setCaptcha] = useState(generateCaptcha());
+  const [captchaValue, setCaptchaValue] = useState('');
+
+  const getIsFormValid = () => {
+    console.log('--------------------');
+    console.log('loginType =>', loginType);
+    console.log('loginValue =>', loginValue);
+    console.log('isAgreed =>', isAgreed);
+    console.log('captchaValue =>', captchaValue);
+    console.log('captcha.answer =>', captcha);
+
+    if (!loginValue) {
+      console.log('❌ loginValue empty');
+      return false;
+    }
+
+    console.log('✅ loginValue valid');
+
+    if (loginType === 'Mobile Number' && loginValue.length !== 10) {
+      console.log(
+        '❌ Mobile validation failed',
+        'length =',
+        loginValue.length,
+      );
+      return false;
+    }
+
+    if (loginType === 'Mobile Number') {
+      console.log('✅ Mobile validation passed');
+    }
+
+    if (
+      loginType === 'Aadhaar Number' &&
+      loginValue.replace(/-/g, '').length !== 12
+    ) {
+      console.log(
+        '❌ Aadhaar validation failed',
+        loginValue.replace(/-/g, '').length,
+      );
+      return false;
+    }
+
+    if (loginType === 'Aadhaar Number') {
+      console.log('✅ Aadhaar validation passed');
+    }
+
+    if (
+      loginType === 'ABHA Number' ||
+      loginType === 'Create ABHA Number'
+    ) {
+      const abhaLength = loginValue.replace(/-/g, '').length;
+
+      console.log('ABHA Length =>', abhaLength);
+
+      if (abhaLength !== 14) {
+        console.log('❌ ABHA validation failed');
+        return false;
+      }
+
+      console.log('✅ ABHA validation passed');
+    }
+
+    if (loginType === 'ABHA Address') {
+      console.log(
+        'ABHA Address contains @ =>',
+        loginValue.includes('@'),
+      );
+
+      if (!loginValue.includes('@')) {
+        console.log('❌ ABHA Address validation failed');
+        return false;
+      }
+
+      console.log('✅ ABHA Address validation passed');
+    }
+
+    const termsRequired =
+      loginType === 'Aadhaar Number' ||
+      loginType === 'Create ABHA Number' ||
+      isFromForgotAbhaNumberWithType;
+
+    console.log('termsRequired =>', termsRequired);
+
+    if (termsRequired && !isAgreed) {
+      console.log('❌ Terms not accepted');
+      return false;
+    }
+
+    console.log('✅ Terms validation passed');
+
+    if (!captchaValue) {
+      console.log('❌ Captcha empty');
+      return false;
+    }
+
+    console.log('✅ Captcha value entered');
+
+    console.log(
+      'captcha compare =>',
+      Number(captchaValue),
+      captcha.answer,
+    );
+
+    if (Number(captchaValue) !== captcha.answer) {
+      console.log('❌ Captcha validation failed');
+      return false;
+    }
+
+    console.log('✅ Captcha validation passed');
+    console.log('🎉 FORM VALID');
+
+    return true;
+  };
+
+
   const [requestOtp, { isLoading }] =
     useRequestOtpMutation();
 
@@ -70,7 +215,9 @@ const LoginScreen = () => {
     }
   }, [loginType]);
 
+  const isFormValid = getIsFormValid();
 
+  console.log("isFormValid", isFormValid)
 
   const RadioItem = ({
     title,
@@ -284,35 +431,6 @@ const LoginScreen = () => {
       .replace(/(\d{4})-(\d{4})(\d)/, '$1-$2-$3');
   };
 
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 9) + 1;
-    const num2 = Math.floor(Math.random() * 9) + 1;
-
-    const operators = ['+', '-', '×'];
-    const operator =
-      operators[Math.floor(Math.random() * operators.length)];
-
-    let answer = 0;
-
-    switch (operator) {
-      case '+':
-        answer = num1 + num2;
-        break;
-      case '-':
-        answer = num1 - num2;
-        break;
-      case '×':
-        answer = num1 * num2;
-        break;
-    }
-
-    return {
-      question: `${num1}${operator}${num2}=?`,
-      answer,
-    };
-  };
-  const [captcha, setCaptcha] = useState(generateCaptcha());
-  const [captchaValue, setCaptchaValue] = useState('');
 
   const refreshCaptcha = () => {
     setCaptcha(generateCaptcha());
@@ -788,7 +906,7 @@ const LoginScreen = () => {
             </View>
           }
 
-          <View style={{ marginHorizontal: 24, marginVertical: 12 }}>
+          <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor:'white', padding: 16, borderRadius: 8 }}>
             <View>
               <Text>Captcha</Text>
             </View>
@@ -824,26 +942,19 @@ const LoginScreen = () => {
 
         <View style={styles.bottomBar}>
           <TouchableOpacity
-            // disabled={
-            //   loginType === 'Aadhaar Number'
-            //     ? (!isAgreed || loginValue.length !== 12)
-            //     : loginType === 'Mobile Number'
-            //       ? loginValue.length !== 10
-            //       : false
-            // }
+            disabled={!getIsFormValid()}
             style={[
               styles.continueBtn,
-              // (
-              //   (loginType === 'Aadhaar Number' &&
-              //     (!isAgreed || loginValue.length !== 12)) ||
-              //   (loginType === 'Mobile Number' &&
-              //     loginValue.length !== 10)
-              // ) && {
-              //   opacity: 0.5,
-              // },
+              !getIsFormValid() && {
+                opacity: 0.5
+              }
             ]}
             onPress={async () => {
               try {
+                if (!getIsFormValid()) {
+                  showToast('error', 'Please fill all fields correctly');
+                  return;
+                }
                 dispatch(showLoader());
 
                 const payload = {
@@ -992,14 +1103,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    
   },
 
   captchaLabel: {

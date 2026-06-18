@@ -660,7 +660,11 @@ const LoginScreen = () => {
                     setValidationMethod('')
                     setTimeout(() => {
                       setValidationMethod('Aadhaar Number')
-                      setLoginValue("")
+                      setLoginValue("")  
+                  setCaptchaValue("")
+                  refreshCaptcha()
+                  setIsAgreed(false)
+                  Keyboard.dismiss()
                       navigation.navigate("Login", {
                         loginType: 'Forgot ABHA Number',
                         isFromRegister: false,

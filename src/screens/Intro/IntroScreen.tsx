@@ -108,7 +108,7 @@ const Slide = ({ item, index, scrollX }: any) => {
 
 export default function IntroScreen() {
     const navigation = useNavigation();
-
+   
     const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -172,9 +172,9 @@ export default function IntroScreen() {
         'ABHA Number',
     ];
 
- const registerOptions = [
+    const registerOptions = [
         'Aadhaar Number',
-        'Driving Licence', 
+        'Driving Licence',
     ];
 
     const optionList = bottomSheetType === 'Login' ? loginOptions : registerOptions;
@@ -228,36 +228,31 @@ export default function IntroScreen() {
         }, [])
     );
 
-     const [
-    createSession
-  ] = useCreateSessionMutation();
+    const [
+        createSession
+    ] = useCreateSessionMutation();
 
-    const handleSession = async()=>{
+    const handleSession = async () => {
+        try {
+            const response =
+                await createSession()
+                    .unwrap();
+            console.log(
+                "Session Response",
+                response
+            );
+        } catch (err) {
 
-    try {
+            console.log(
+                "Session Error",
+                err
+            );
+        }
+    };
 
-      const response =
-        await createSession()
-        .unwrap();
-
-
-      console.log(
-        "Session Response",
-        response
-      );
-
-
-    } catch(err){
-
-      console.log(
-        "Session Error",
-        err
-      );
-
-    }
-
-  };
-
+    useEffect(() => {
+         handleSession()    
+    }, [])
 
     return (
         <SafeAreaView style={styles.container}>
@@ -362,10 +357,10 @@ export default function IntroScreen() {
                 >
                     <TouchableOpacity
                         style={styles.registerBtn}
-                        onPress={ async() => {
-                            // setBottomSheetType('Register')
-                            // openSheet()
-                                handleSession()    
+                        onPress={async () => {
+                            setBottomSheetType('Register')
+                            openSheet()
+
                         }
                         }
                     >
@@ -383,9 +378,22 @@ export default function IntroScreen() {
                     }}
                 >
                     <TouchableOpacity
-                         onPress={ () => {
+                        onPress={() => {
                             setBottomSheetType('Login')
-                            openSheet()}}
+                            openSheet()
+                            //  setTimeout(() => {
+                            //     const encryptedMobile =
+                            // encryptData(
+                            //     '9999999999',
+                            //     publicKey,
+                            // );
+
+                            //     console.log(
+                            //     'Encrypted Mobile:',
+                            //     encryptedMobile,
+                            //     );
+                            // }, 1000)
+                        }}
                         style={styles.loginBtn}
                     >
                         <Text style={styles.loginText}>
@@ -423,7 +431,7 @@ export default function IntroScreen() {
                         <View style={styles.dragHandle} />
 
                         <Text style={styles.sheetTitle}>
-                           { bottomSheetType === 'Login' ? ' Login Using' : 'Create your ABHA number using'} 
+                            {bottomSheetType === 'Login' ? ' Login Using' : 'Create your ABHA number using'}
                         </Text>
 
                         {optionList.map(item => {
@@ -476,7 +484,7 @@ export default function IntroScreen() {
                                 {
                                     bottomSheetType === 'Login' ? `Don't have an ABHA number? ` : `Already have ABHA number?`
                                 }
-                               
+
                             </Text>
 
                             <TouchableOpacity
@@ -497,7 +505,7 @@ export default function IntroScreen() {
                                     {
                                         bottomSheetType === 'Login' ? "Create Now " : "Login"
                                     }
-                                    
+
                                 </Text>
                             </TouchableOpacity>
                         </View>

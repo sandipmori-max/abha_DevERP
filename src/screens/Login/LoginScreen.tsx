@@ -11,6 +11,9 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { encryptData } from '../../utils/encrypt';
+import { useSelector } from 'react-redux';
+import { getPayload, useRequestOtpMutation } from '../../redux/api/loginApi';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -18,12 +21,17 @@ const LoginScreen = () => {
 
   const loginType =
     route?.params?.loginType || 'Mobile Number';
-
+  const publicKey = useSelector(
+    (state: any) => state.auth.publicKey
+  );
   const isFromRegister = route?.params?.isFromRegister || false
   const isFromCreate = route?.params?.isFromCreate || false
   const isFromMobileRegister = route?.params?.isFromMobileRegister || false
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
+
+  const [requestOtp, { isLoading }] =
+    useRequestOtpMutation();
 
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
@@ -831,7 +839,7 @@ const LoginScreen = () => {
                 opacity: 0.5,
               },
             ]}
-            onPress={() => {
+            onPress={async () => {
               const payload = {
                 loginType,
                 loginValue,
@@ -851,6 +859,21 @@ const LoginScreen = () => {
                 JSON.stringify(payload, null, 2)
               );
               setValidationMethod('')
+              if (!isFromForgotAbhaNumber) {
+                const encryptedValue =
+                  encryptData(
+                    loginValue,
+                    publicKey,
+                  );
+
+                const payloadPassed = getPayload(
+                  loginType,
+                  encryptedValue,
+                  "",
+                );
+                await requestOtp(payloadPassed).unwrap();
+              }
+
               if (isFromForgotAbhaNumber) {
                 setTimeout(() => {
                   navigation.navigate("Login", {
@@ -861,7 +884,6 @@ const LoginScreen = () => {
                     isFromForgotAbhaNumber: true,
                     isFromForgotAbhaNumberWithType: true
                   })
-
                 })
               } else {
                 navigation.navigate('OtpVerification', {
@@ -869,7 +891,6 @@ const LoginScreen = () => {
                   mobileNumber: loginValue,
                 });
               }
-
             }}
           >
             <Text style={styles.continueText}>
@@ -946,7 +967,7 @@ const styles = StyleSheet.create({
   captchaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-   },
+  },
 
   captchaInput: {
     flex: 1,

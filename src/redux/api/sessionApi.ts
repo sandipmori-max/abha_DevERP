@@ -7,12 +7,9 @@ import { certificateApi } from "./certificateApi";
 import { BASE_URL_PUBLIC_API, CLIENT_ID, CLIENT_SECERET, GRANT_TYPE, X_CM_ID } from "../../utils/helpers";
 import { END_POINTS } from "./end_points";
 
-
 export const sessionApi =
     baseApi.injectEndpoints({
-
         endpoints: (builder) => ({
-
             createSession:
                 builder.mutation<any, void>({
                     query: () => ({
@@ -42,8 +39,6 @@ export const sessionApi =
                                 data,
                             } =
                                 await queryFulfilled;
-
-
                             dispatch(
                                 setSession(data)
                             );
@@ -52,22 +47,14 @@ export const sessionApi =
                                     .getCertificate
                                     .initiate()
                             );
-
                         } catch (error) {
 
                             console.log(error);
-
                         }
-
                     },
-
                 }),
-
         }),
-
     });
-
-
 export const {
     useCreateSessionMutation,
 

@@ -4,8 +4,11 @@ const initialState = {
   accessToken: null,
   refreshToken: null,
   expiresIn: null,
-   publicKey: null,
+
+  publicKey: null,
   encryptionAlgorithm: null,
+
+
 };
 
 const authSlice = createSlice({
@@ -24,29 +27,35 @@ const authSlice = createSlice({
       state.expiresIn =
         action.payload.expiresIn;
     },
-    setCertificate:(state, action)=>{
 
-
+    setCertificate: (
+      state,
+      action
+    ) => {
       state.publicKey =
-      action.payload.publicKey;
-
+        action.payload.publicKey;
 
       state.encryptionAlgorithm =
-      action.payload.encryptionAlgorithm;
-
-
+        action.payload.encryptionAlgorithm;
     },
+
+   
+
     logout: (state) => {
       state.accessToken = null;
       state.refreshToken = null;
       state.expiresIn = null;
+
+      state.publicKey = null;
+      state.encryptionAlgorithm = null;
+ 
     },
   },
 });
 
 export const {
   setSession,
-  setCertificate,
+  setCertificate, 
   logout,
 } = authSlice.actions;
 

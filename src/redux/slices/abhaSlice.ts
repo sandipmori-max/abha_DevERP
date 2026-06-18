@@ -5,6 +5,7 @@ const initialState = {
   loginTxnId: null,
   abhaNumber: null,
   tToken: null,
+  txnId: null,
 };
 
 const abhaSlice = createSlice({
@@ -51,6 +52,18 @@ const abhaSlice = createSlice({
         initialState
       );
     },
+
+    setTxnId: (
+      state,
+      action
+    ) => {
+      state.txnId =
+        action.payload;
+    },
+
+    clearTxnId: (state) => {
+      state.txnId = null;
+    },
   },
 });
 
@@ -60,6 +73,8 @@ export const {
   setAbhaNumber,
   setTToken,
   clearFlow,
+  setTxnId,
+  clearTxnId
 } = abhaSlice.actions;
 
 export default abhaSlice.reducer;

@@ -7,7 +7,6 @@ export const generateGUID = () => {
 };
 
 export const getErrorMessage = (error: any) => { 
-
   return (
     error?.error?.message ||
     error?.error?.data?.error?.message || 

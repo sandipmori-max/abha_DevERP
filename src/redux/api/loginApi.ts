@@ -184,7 +184,7 @@ export const getPayload = (
         case 'Aadhaar Number':
             return {
                 scope: ['abha-login', 'aadhaar-verify'],
-                loginHint: 'abha-number',
+                loginHint: 'aadhaar',
                 loginId: encryptedValue,
                 otpSystem: 'aadhaar',
             };

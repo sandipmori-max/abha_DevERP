@@ -37,33 +37,38 @@ const LoginScreen = () => {
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
   const [errorMessage, setErrorMessage] = useState('');
 
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 9) + 1;
-    const num2 = Math.floor(Math.random() * 9) + 1;
+ const generateCaptcha = () => {
+  let num1 = Math.floor(Math.random() * 9) + 1;
+  let num2 = Math.floor(Math.random() * 9) + 1;
 
-    const operators = ['+', '-', '×'];
-    const operator =
-      operators[Math.floor(Math.random() * operators.length)];
+  const operators = ['+', '-', '×'];
+  const operator =
+    operators[Math.floor(Math.random() * operators.length)];
 
-    let answer = 0;
+  let answer = 0;
 
-    switch (operator) {
-      case '+':
-        answer = num1 + num2;
-        break;
-      case '-':
-        answer = num1 - num2;
-        break;
-      case '×':
-        answer = num1 * num2;
-        break;
-    }
+  switch (operator) {
+    case '+':
+      answer = num1 + num2;
+      break;
 
-    return {
-      question: `${num1}${operator}${num2}=?`,
-      answer,
-    };
+    case '-':
+      if (num1 < num2) {
+        [num1, num2] = [num2, num1];
+      }
+      answer = num1 - num2;
+      break;
+
+    case '×':
+      answer = num1 * num2;
+      break;
+  }
+
+  return {
+    question: `${num1}${operator}${num2}=?`,
+    answer,
   };
+};
 
 
   const [captcha, setCaptcha] = useState(generateCaptcha());
@@ -1084,36 +1089,21 @@ const LoginScreen = () => {
                   "Form Data =>",
                   JSON.stringify(payload, null, 2)
                 );
-                setValidationMethod('')
                 const encryptedValue =
                   encryptData(
                     loginValue,
                     publicKey,
                   );
                 const payloadPassed = getPayload(
-                  loginType,
+                   loginType === 'Forgot ABHA Number' ? validationMethod :loginType,
                   encryptedValue,
                   txnId,
                 );
                 await requestOtp(payloadPassed).unwrap();
-
-                if (isFromForgotAbhaNumber) {
-                  setTimeout(() => {
-                    navigation.navigate("Login", {
-                      loginType: validationMethod,
-                      isFromRegister: false,
-                      isFromCreate: false,
-                      isFromMobileRegister: false,
-                      isFromForgotAbhaNumber: true,
-                      isFromForgotAbhaNumberWithType: true
-                    })
-                  })
-                } else {
-                  navigation.navigate('OtpVerification', {
+                navigation.navigate('OtpVerification', {
                     loginType,
                     mobileNumber: loginValue,
-                  });
-                }
+                });
               } catch (error) {
                 dispatch(hideLoader());
               } finally {

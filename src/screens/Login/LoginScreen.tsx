@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getPayload, useRequestOtpMutation } from '../../redux/api/loginApi';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 import { showToast } from '../../utils/toast';
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -38,38 +39,38 @@ const LoginScreen = () => {
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
   const [errorMessage, setErrorMessage] = useState('');
 
- const generateCaptcha = () => {
-  let num1 = Math.floor(Math.random() * 9) + 1;
-  let num2 = Math.floor(Math.random() * 9) + 1;
+  const generateCaptcha = () => {
+    let num1 = Math.floor(Math.random() * 9) + 1;
+    let num2 = Math.floor(Math.random() * 9) + 1;
 
-  const operators = ['+', '-', '×'];
-  const operator =
-    operators[Math.floor(Math.random() * operators.length)];
+    const operators = ['+', '-', '×'];
+    const operator =
+      operators[Math.floor(Math.random() * operators.length)];
 
-  let answer = 0;
+    let answer = 0;
 
-  switch (operator) {
-    case '+':
-      answer = num1 + num2;
-      break;
+    switch (operator) {
+      case '+':
+        answer = num1 + num2;
+        break;
 
-    case '-':
-      if (num1 < num2) {
-        [num1, num2] = [num2, num1];
-      }
-      answer = num1 - num2;
-      break;
+      case '-':
+        if (num1 < num2) {
+          [num1, num2] = [num2, num1];
+        }
+        answer = num1 - num2;
+        break;
 
-    case '×':
-      answer = num1 * num2;
-      break;
-  }
+      case '×':
+        answer = num1 * num2;
+        break;
+    }
 
-  return {
-    question: `${num1}${operator}${num2}=?`,
-    answer,
+    return {
+      question: `${num1}${operator}${num2}=?`,
+      answer,
+    };
   };
-};
 
 
   const [captcha, setCaptcha] = useState(generateCaptcha());
@@ -151,7 +152,7 @@ const LoginScreen = () => {
     const termsRequired =
       loginType === 'Aadhaar Number' ||
       loginType === 'Create ABHA Number' ||
-      isFromForgotAbhaNumberWithType;
+      isFromForgotAbhaNumber;
 
     console.log('termsRequired =>', termsRequired);
 
@@ -416,9 +417,16 @@ const LoginScreen = () => {
 
     if (loginType === 'Forgot ABHA Number' && isFromForgotAbhaNumber) {
       return (
-        <View style={styles.card}>
-
-          <RadioItem
+        <View style={[styles.card, {flexDirection:'row', padding: 4 ,
+          marginHorizontal: 14,
+          alignContent:'center',
+          alignItems:'center', 
+          paddingHorizontal: 14
+        }]}>
+          <View style={{ 
+            width: '50%'
+          }}>
+            <RadioItem
             title="Aadhaar Number"
             selected={
               validationMethod ===
@@ -426,6 +434,9 @@ const LoginScreen = () => {
             }
             onPress={() => {
               setLoginValue("")
+              refreshCaptcha()
+              setCaptchaValue("")
+              Keyboard.dismiss()
               setValidationMethod(
                 'Aadhaar Number',
               )
@@ -433,8 +444,12 @@ const LoginScreen = () => {
 
             }
           />
+          </View>
+          <View style={{ 
+            width:'50%'
 
-          <RadioItem
+          }}>
+            <RadioItem
             title="Mobile Number"
             selected={
               validationMethod ===
@@ -442,6 +457,9 @@ const LoginScreen = () => {
             }
             onPress={() => {
               setLoginValue("")
+              refreshCaptcha()
+              setCaptchaValue("")
+              Keyboard.dismiss()
               setValidationMethod(
                 'Mobile Number',
               )
@@ -449,10 +467,10 @@ const LoginScreen = () => {
 
             }
           />
+          </View>
         </View>
       );
     }
-
     return null;
   };
 
@@ -525,7 +543,7 @@ const LoginScreen = () => {
           </TouchableOpacity>
           <Text style={styles.welcome}>
             {
-              isFromForgotAbhaNumber ? 'Forgot ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
+              isFromForgotAbhaNumber ? 'Recover ABHA Number' : `${isFromRegister ? 'Register with ABHA number' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
             }
           </Text>
         </View>
@@ -536,22 +554,18 @@ const LoginScreen = () => {
             paddingBottom: 140,
           }}
         >
-
-
           <View style={styles.hero}>
-
             {
               !isFromForgotAbhaNumber && !isFromMobileRegister && !isFromCreate && !isFromRegister && <Text style={styles.subtitle}>
                 Sign in securely to access
                 your ABHA health records
               </Text>
-            }
+            } 
             {
-              isFromForgotAbhaNumber && !isFromForgotAbhaNumber && <Text style={styles.subtitle}>
-                You can recover your ABHA number using Aadhaar number or registered mobile number. Recovery using any of the following methods requires filling out your basic details and access to your linked mobile.
+              isFromForgotAbhaNumber && <Text style={styles.subtitle}>
+              You can recover your ABHA number using Aadhaar number or registered mobile number. Recovery using any of the following methods requires filling out your basic details and access to your linked mobile.
               </Text>
             }
-
           </View>
 
           <View style={{
@@ -660,11 +674,11 @@ const LoginScreen = () => {
                     setValidationMethod('')
                     setTimeout(() => {
                       setValidationMethod('Aadhaar Number')
-                      setLoginValue("")  
-                  setCaptchaValue("")
-                  refreshCaptcha()
-                  setIsAgreed(false)
-                  Keyboard.dismiss()
+                      setLoginValue("")
+                      setCaptchaValue("")
+                      refreshCaptcha()
+                      setIsAgreed(false)
+                      Keyboard.dismiss()
                       navigation.navigate("Login", {
                         loginType: 'Forgot ABHA Number',
                         isFromRegister: false,
@@ -924,13 +938,69 @@ const LoginScreen = () => {
               </Text>
 
               <View style={styles.termsCard}>
-                <Text style={styles.termsText}>
-                  I hereby declare that I am voluntarily sharing my
-                  Aadhaar Number and demographic information issued
-                  by UIDAI with National Health Authority (NHA) for
-                  the sole purpose of authentication and healthcare
-                  services under ABDM.
-                </Text>
+                <View style={{ height: 140, marginVertical: 8 }}>
+                  <ScrollView>
+                    <Text style={styles.termsText}>
+                      I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under. I authorize NHA to use my Aadhaar number for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of “Yes” with NHA upon successful authentication. I have been duly informed about the option of using other IDs apart from Aadhaar; however, I consciously choose to use Aadhaar number for the purpose of availing benefits across the NDHE. I am aware that my personal identifiable information excluding Aadhaar number / VID number can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time as per provisions of Aadhaar Act and Regulations.
+                    </Text>
+                  </ScrollView>
+                </View>
+
+
+                <View style={styles.termsFooter}>
+                  <TouchableOpacity
+                    style={styles.checkboxRow}
+                    onPress={() => setIsAgreed(!isAgreed)}
+                  >
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isAgreed && styles.checkboxActive,
+                      ]}
+                    >
+                      {isAgreed && (
+                        <Text style={styles.checkmark}>
+                          ✓
+                        </Text>
+                      )}
+                    </View>
+
+                    <Text style={styles.agreeText}>
+                      I agree
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity>
+                    <Text style={styles.speakerIcon}>
+                      🔊
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          }
+
+
+          {
+            isFromForgotAbhaNumber  && <View style={styles.termsContainer}>
+              <Text style={styles.termsTitle}>
+                Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+
+              <View style={styles.termsCard}>
+                <View style={{ height: 140, marginVertical: 8 }}>
+                  <ScrollView>
+                    {
+                      validationMethod === 'Aadhaar Number' ? <Text style={styles.termsText}>
+                    I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under. I authorize NHA to use my Aadhaar number for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of “Yes” with NHA upon successful authentication. I have been duly informed about the option of using other IDs apart from Aadhaar; however, I consciously choose to use Aadhaar number for the purpose of availing benefits across the NDHE. I am aware that my personal identifiable information excluding Aadhaar number / VID number can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time as per provisions of Aadhaar Act and Regulations.                    </Text>
+                :   <Text style={styles.termsText}>
+                   I, hereby declare that I am voluntarily sharing my identity information with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM (Ayushman Bharat Digital Mission) from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under.
+I am aware that my personal identifiable information can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time.                   </Text>
+              
+                    }
+                      </ScrollView>
+                </View>
+
 
                 <View style={styles.termsFooter}>
                   <TouchableOpacity
@@ -1032,16 +1102,12 @@ const LoginScreen = () => {
               />
 
               <TouchableOpacity onPress={refreshCaptcha}>
-                {/* <MaterialIcons
-                name="refresh"
-                size={28}
-                color="#1E40AF"
-              /> */}
-                <View style={{
-                  borderRadius: 8,
-                  height: 40, width: 40, borderWidth: 1,
-                  borderColor: 'gray'
-                }} />
+                <MaterialIcons
+                  name="loop"
+                  size={28}
+                  color="#1E40AF"
+                />
+
               </TouchableOpacity>
             </View>
           </View>
@@ -1100,14 +1166,14 @@ const LoginScreen = () => {
                     publicKey,
                   );
                 const payloadPassed = getPayload(
-                   loginType === 'Forgot ABHA Number' ? validationMethod :loginType,
+                  loginType === 'Forgot ABHA Number' ? validationMethod : loginType,
                   encryptedValue,
                   txnId,
                 );
                 await requestOtp(payloadPassed).unwrap();
                 navigation.navigate('OtpVerification', {
-                    loginType,
-                    mobileNumber: loginValue,
+                  loginType,
+                  mobileNumber: loginValue,
                 });
               } catch (error) {
                 dispatch(hideLoader());
@@ -1266,7 +1332,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   header: {
-    padding: 20,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 8
   },
   back: {
     fontSize: 28,
@@ -1321,7 +1389,7 @@ const styles = StyleSheet.create({
   radioOuter: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: '#999',
     justifyContent: 'center',
@@ -1413,7 +1481,8 @@ const styles = StyleSheet.create({
   },
   termsContainer: {
     marginHorizontal: 20,
-    marginVertical: 12,
+    marginTop: 8,
+    marginBottom: 12
   },
 
   termsTitle: {
@@ -1500,4 +1569,4 @@ const styles = StyleSheet.create({
   eyeIcon: {
     fontSize: 20,
   },
-}); 
+});

@@ -17,6 +17,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCreateSessionMutation } from '../../redux/api/sessionApi';
 import { useDispatch } from 'react-redux';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
+import { ABHA_ICON } from '../../assets';
+
 const { width, height } = Dimensions.get('window');
 
 const DATA = [
@@ -112,7 +114,7 @@ const Slide = ({ item, index, scrollX }: any) => {
 export default function IntroScreen() {
     const navigation = useNavigation();
     const dispatch = useDispatch()
-   
+
     const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -171,8 +173,8 @@ export default function IntroScreen() {
         });
     };
     const loginOptions = [
-        'Aadhaar Number',
         'Mobile Number',
+        'Aadhaar Number',
         'ABHA Number'
     ];
 
@@ -253,21 +255,21 @@ export default function IntroScreen() {
         }
     };
 
-  useEffect(() => {
-  const init = async () => {
-    try {
-      dispatch(showLoader());
+    useEffect(() => {
+        const init = async () => {
+            try {
+                dispatch(showLoader());
 
-      await handleSession();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      dispatch(hideLoader());
-    }
-  };
+                await handleSession();
+            } catch (error) {
+                console.log(error);
+            } finally {
+                dispatch(hideLoader());
+            }
+        };
 
-  init();
-}, []);
+        init();
+    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -441,12 +443,31 @@ export default function IntroScreen() {
                                     },
                                 ],
                             },
+                            bottomSheetType !== 'Login' && {
+                                height: '40%'
+                            }
                         ]}
                     >
-                        <View style={styles.dragHandle} />
+
+                        <View  style={styles.logo}> 
+                            <Image
+                          source={ABHA_ICON.ABHA_LOGO}
+                         style={{height: 60, width: 80, alignSelf:'center'}}
+                          resizeMode="contain"
+                        /> 
+                        </View>
 
                         <Text style={styles.sheetTitle}>
-                            {bottomSheetType === 'Login' ? ' Login Using' : 'Create your ABHA number using'}
+                            {bottomSheetType === 'Login' ? 'Login To Your ABHA' : 'Create your ABHA number using'}
+                        </Text>
+
+                        <Text style={{
+                            color: 'gray',
+                            marginBottom: 12
+                        }}>
+                            {
+                                bottomSheetType === 'Login' ? 'Select a login method to access your ABHA account.' : 'Please choose one of the below option to start with the creation of your ABHA'
+                            }
                         </Text>
 
                         {optionList.map(item => {
@@ -502,27 +523,58 @@ export default function IntroScreen() {
 
                             </Text>
 
-                            <TouchableOpacity
-                                style={styles.createBtn}
-                                onPress={() => {
-                                    setTimeout(() => {
-                                        setShowLoginSheet(false)
-                                        navigation.navigate("Login", {
-                                            loginType: 'ABHA Number',
-                                            isFromRegister: true
-                                        })
-                                    })
-                                }}
-                            >
-                                <Text
-                                    style={styles.createBtnText}
-                                >
-                                    {
-                                        bottomSheetType === 'Login' ? "Create Now " : "Login"
-                                    }
+                            {
+                                bottomSheetType !== 'Login' ? <>
+                                    <TouchableOpacity
+                                        style={styles.loginBtnText}
+                                        onPress={() => {
+                                            setTimeout(() => {
+                                                setShowLoginSheet(false)
+                                                navigation.navigate("Login", {
+                                                    loginType: 'ABHA Number',
+                                                    isFromRegister: true
+                                                })
+                                            })
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: '#D96A27',
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: '#D96A27',
+                                                alignSelf: 'center',
+                                            }}
+                                        >
+                                            Login
+                                        </Text>
+                                    </TouchableOpacity>
+                                </> :
+                                    <TouchableOpacity
+                                        style={styles.loginBtnText}
+                                        onPress={() => {
+                                            setTimeout(() => {
+                                                setShowLoginSheet(false)
+                                                navigation.navigate("Login", {
+                                                    loginType: 'ABHA Number',
+                                                    isFromRegister: true
+                                                })
+                                            })
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: '#D96A27',
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: '#D96A27',
+                                                alignSelf: 'center',
+                                            }}
+                                        >
+                                            Create Now
+                                        </Text>
+                                    </TouchableOpacity>
+                            }
 
-                                </Text>
-                            </TouchableOpacity>
+
                         </View>
                     </Animated.View>
                 </Modal>
@@ -537,7 +589,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
-
+    logo:{
+        backgroundColor:'white',
+        top : -30,
+        position:'absolute',
+        height: 100, width: 100, alignSelf:'center', 
+        borderRadius: 12,
+    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -656,7 +714,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         width: '100%',
-        height: '55%',
+        height: '42%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
@@ -675,7 +733,7 @@ const styles = StyleSheet.create({
     sheetTitle: {
         fontSize: 22,
         fontWeight: '700',
-        marginBottom: 20,
+        marginBottom: 4,
     },
 
     optionRow: {
@@ -697,7 +755,7 @@ const styles = StyleSheet.create({
     radioOuter: {
         width: 22,
         height: 22,
-        borderRadius: 11,
+        borderRadius: 8,
         borderWidth: 2,
         borderColor: '#999',
         justifyContent: 'center',
@@ -727,11 +785,14 @@ const styles = StyleSheet.create({
 
     infoText: {
         textAlign: 'center',
-        marginBottom: 12,
         color: '#555',
     },
-
+    loginBtnText: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     createBtn: {
+        marginTop: 4,
         height: 48,
         backgroundColor: '#D96A27',
         borderRadius: 8,

@@ -488,6 +488,7 @@ export default function IntroScreen() {
                                             setShowLoginSheet(false)
                                             navigation.navigate("Login", {
                                                 loginType: item,
+                                                isFromRegister: bottomSheetType === 'Login' ? false : true
                                             })
                                         })
                                     }}

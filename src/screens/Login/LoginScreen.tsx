@@ -1244,7 +1244,15 @@ const LoginScreen = () => {
                         });
                         return;
                       }
-
+                      if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+                        showToast('error', "Please varify email")
+                        return;
+                      }
+                       if (stepThree.stepThreeEmailOTP.length === 6 && stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+                        // setCurrentStep(4)
+                        // 
+                        return;
+                      }
                       if (stepThree.stepThreeEmailVarifying) {
                         setCurrentStep(4)
                         return;

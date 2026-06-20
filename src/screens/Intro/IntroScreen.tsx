@@ -15,9 +15,10 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCreateSessionMutation } from '../../redux/api/sessionApi';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 import { ABHA_ICON } from '../../assets';
+import { encryptData } from '../../utils/encrypt';
 
 const { width, height } = Dimensions.get('window');
 
@@ -114,7 +115,9 @@ const Slide = ({ item, index, scrollX }: any) => {
 export default function IntroScreen() {
     const navigation = useNavigation();
     const dispatch = useDispatch()
-
+    const publicKey = useSelector(
+        (state: any) => state.auth.publicKey
+    );
     const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -375,6 +378,13 @@ export default function IntroScreen() {
                     <TouchableOpacity
                         style={styles.registerBtn}
                         onPress={async () => {
+                            //  const encryptedValue =
+                            //                       encryptData(
+                            //                         '8154877969',
+                            //                         publicKey,
+                            //                       );
+
+                            //                       console.log("encryptedValue", encryptedValue)
                             setBottomSheetType('Register')
                             openSheet()
 
@@ -449,14 +459,14 @@ export default function IntroScreen() {
                         ]}
                     >
 
-                        <View  style={styles.logo}> 
+                        <View style={styles.logo}>
                             <Image
-                          source={ABHA_ICON.ABHA_LOGO}
-                         style={{height: 60, width: 80, alignSelf:'center'}}
-                          resizeMode="contain"
-                        /> 
+                                source={ABHA_ICON.ABHA_LOGO}
+                                style={{ height: 60, width: 80, alignSelf: 'center' }}
+                                resizeMode="contain"
+                            />
                         </View>
-
+                        <View style={{ height: 14 }} />
                         <Text style={styles.sheetTitle}>
                             {bottomSheetType === 'Login' ? 'Login To Your ABHA' : 'Create your ABHA number using'}
                         </Text>
@@ -590,11 +600,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
-    logo:{
-        backgroundColor:'white',
-        top : -30,
-        position:'absolute',
-        height: 100, width: 100, alignSelf:'center', 
+    logo: {
+        backgroundColor: 'white',
+        top: -30,
+        position: 'absolute',
+        height: 100, width: 100, alignSelf: 'center',
         borderRadius: 12,
     },
     header: {

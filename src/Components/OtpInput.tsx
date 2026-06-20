@@ -20,7 +20,7 @@ import {
 } from '@react-navigation/native';
 
 
-const OtpInput = () => {
+const OtpInput = ({title, subTitle, setOpt}: any) => {
 
 
     const [otp, setOtp] = useState('');
@@ -91,22 +91,15 @@ const OtpInput = () => {
    
            <View style={{marginHorizontal: 24}}>
               <Text style={styles.title}>
-               Verify Your Identity
+              {title}
              </Text>
    
              <Text
                style={styles.subtitle}
              >
-               OTP sent to mobile number
+               {subTitle}
              </Text>
-   
-             <Text
-               style={styles.mobile}
-             >
-               {maskNumber(
-                 '8796543210',
-               )}
-             </Text>
+    
    
            </View>
              
@@ -127,6 +120,7 @@ const OtpInput = () => {
                    numeric.length <= 6
                  ) {
                    setOtp(numeric);
+                   setOpt(numeric)
                  }
                }}
                keyboardType="number-pad"

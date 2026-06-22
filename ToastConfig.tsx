@@ -1,56 +1,48 @@
 import React from 'react';
-import { BaseToast, ErrorToast } from 'react-native-toast-message';
+import CustomToast from './CustomToast';
 
 export const toastConfig = {
-  success: (props: any) => (
-    <BaseToast
-      {...props}
-      style={{
-        borderLeftColor: '#16a34a',
-        borderRadius: 10, 
-        paddingVertical: 8,
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-      }}
-      text1Style={{
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#111827',
-        flexWrap: 'wrap',
-      }}
-      text2Style={{
-        fontSize: 12,
-        color: '#6b7280',
-        flexWrap: 'wrap',
-      }}
+  success: ({ text1, text2, props }: any) => (
+    <CustomToast
+      toastId={props?.toastId}
+      text1={text1}
+      text2={text2}
+      icon="check-circle"
+      backgroundColor="#10B981"
+      progressColor="#FFFFFF"
     />
   ),
 
-  error: (props: any) => (
-    <ErrorToast
-      {...props}
-      style={{
-        borderLeftColor: '#dc2626',
-        borderRadius: 10, 
-        paddingVertical: 8,
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-      }}
-      text1Style={{
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#111827',
-        flexWrap: 'wrap',
-      }}
-      text2Style={{
-        fontSize: 12,
-        color: '#6b7280',
-        flexWrap: 'wrap',
-      }}
+  error: ({ text1, text2, props }: any) => (
+    <CustomToast
+      toastId={props?.toastId}
+      text1={text1}
+      text2={text2}
+      icon="error"
+      backgroundColor="#EF4444"
+      progressColor="#FFFFFF"
+    />
+  ),
+
+  warning: ({ text1, text2, props }: any) => (
+    <CustomToast
+      toastId={props?.toastId}
+      text1={text1}
+      text2={text2}
+      icon="warning"
+      backgroundColor="#F59E0B"
+      progressColor="#FFFFFF"
+    />
+  ),
+
+  info: ({ text1, text2, props }: any) => (
+    <CustomToast
+      toastId={props?.toastId}
+      text1={text1}
+      text2={text2}
+      icon="info"
+      backgroundColor="#3B82F6"
+      progressColor="#FFFFFF"
     />
   ),
 };

@@ -1202,9 +1202,12 @@ const LoginScreen = () => {
                     </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => {
-                    if (currentStep === 1) {
+                  onPress={async () => {
+                    try {
+                       dispatch(showLoader());
+                        if (currentStep === 1) {
                       //step 1
+
                       const validate = stepOneValidator();
                       console.log("validate +++++ ++ + + +++++ ", validate)
                       if (!validate) {
@@ -1215,7 +1218,28 @@ const LoginScreen = () => {
                         ...stepOne,
                         passedForVarification: !stepOne.passedForVarification,
                       });
-                      setCurrentStep(2)
+
+                      console.log("step ------ one ------- value. ", stepOne);
+
+
+                       const encryptedValue =
+                      encryptData(
+                        stepOne.aadhaarNumber,
+                        publicKey,
+                      );
+                    const payloadPassed = getPayload(
+                      'Aadhaar Number',
+                      encryptedValue,
+                      txnId,
+                    );
+                    await requestOtp(payloadPassed).unwrap();
+
+
+                    // navigation.navigate('OtpVerification', {
+                    //   loginType,
+                    //   mobileNumber: loginValue,
+                    // });
+                      // setCurrentStep(2)
 
                     } else if (currentStep === 2) {
                       //step 2
@@ -1262,6 +1286,13 @@ const LoginScreen = () => {
                     } else if (currentStep === 4) {
                       //step 4
                     }
+                    } catch (error) {
+                        console.log("--------------------", error)
+                       dispatch(hideLoader());
+                    } finally {
+                       dispatch(hideLoader());
+                    }
+                   
                     // nextStep()
                   }}
                   style={styles.nextButton}
@@ -1921,11 +1952,11 @@ const LoginScreen = () => {
                 <View style={styles.footer}>
 
 
-                  <Text style={styles.footerText}>
+                  {/* <Text style={styles.footerText}>
                     {
                       isFromCreate ? `Don't have an Aadhaar number?` : `Don't have an ABHA number?`
                     }
-                  </Text>
+                  </Text> */}
 
                   <TouchableOpacity
                     onPress={() => {
@@ -1964,9 +1995,8 @@ const LoginScreen = () => {
                   >
                     <View style={{ flexDirection: 'row' }}>
                       <Text style={styles.createNow}>
-                        {isFromCreate ? 'Click here' : "Create Now"}
-                      </Text>
-                      {isFromCreate && <Text> to register via mobile</Text>}
+                        Retrieve your Enrolment number
+                      </Text> 
                     </View>
                   </TouchableOpacity>
                 </View>

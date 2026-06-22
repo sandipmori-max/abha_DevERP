@@ -408,18 +408,6 @@ export default function IntroScreen() {
                         onPress={() => {
                             setBottomSheetType('Login')
                             openSheet()
-                            //  setTimeout(() => {
-                            //     const encryptedMobile =
-                            // encryptData(
-                            //     '9999999999',
-                            //     publicKey,
-                            // );
-
-                            //     console.log(
-                            //     'Encrypted Mobile:',
-                            //     encryptedMobile,
-                            //     );
-                            // }, 1000)
                         }}
                         style={styles.loginBtn}
                     >
@@ -539,13 +527,7 @@ export default function IntroScreen() {
                                     <TouchableOpacity
                                         style={styles.loginBtnText}
                                         onPress={() => {
-                                            setTimeout(() => {
-                                                setShowLoginSheet(false)
-                                                navigation.navigate("Login", {
-                                                    loginType: 'ABHA Number',
-                                                    isFromRegister: true
-                                                })
-                                            })
+                                            setBottomSheetType('Login')
                                         }}
                                     >
                                         <Text
@@ -563,13 +545,7 @@ export default function IntroScreen() {
                                     <TouchableOpacity
                                         style={styles.loginBtnText}
                                         onPress={() => {
-                                            setTimeout(() => {
-                                                setShowLoginSheet(false)
-                                                navigation.navigate("Login", {
-                                                    loginType: 'ABHA Number',
-                                                    isFromRegister: true
-                                                })
-                                            })
+                                             setBottomSheetType('Register')
                                         }}
                                     >
                                         <Text

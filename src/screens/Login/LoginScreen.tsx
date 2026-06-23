@@ -20,6 +20,9 @@ import { showToast } from '../../utils/toast';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import OtpInput from '../../Components/OtpInput';
 import { getEnrollmentPayload, useEnrollmentRequestOtpMutation } from '../../redux/api/enrollmentApi';
+import { getEnrolByAadhaarPayload, useEnrolByAadhaarMutation } from '../../redux/api/enrolByAadhaarApi';
+import { getAuthByAbdmPayload, useAuthByAbdmMutation } from '../../redux/api/authByAbdmApi';
+import { getEmailVerificationLinkPayload, useRequestEmailVerificationLinkMutation } from '../../redux/api/emailVerificationLinkApi';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -53,7 +56,7 @@ const LoginScreen = () => {
 
   const [stepTwo, setStepTwo] = useState<any>({
     stepTwoTitle: "",
-    setpTwoOTP: '123456',
+    stepTwoOTP: '123456',
     stepTwoMobileNumber: "",
     setTwoDone: false,
   })
@@ -205,6 +208,26 @@ const LoginScreen = () => {
       error: enrollmentError,
     },
   ] = useEnrollmentRequestOtpMutation();
+
+  const [
+    enrolByAadhaar,
+    { isLoading: enrollmentByAadhaarLoading, },
+  ] =
+    useEnrolByAadhaarMutation();
+
+
+  const [
+    authByAbdm,
+    { isLoading: enrollmentByAbdmLoading, },
+  ] =
+    useAuthByAbdmMutation();
+
+
+    const [
+  requestEmailVerificationLink,
+   { isLoading: emailVerifyLoading, },
+] =
+  useRequestEmailVerificationLinkMutation();
 
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
@@ -540,7 +563,7 @@ const LoginScreen = () => {
 
                 <TextInput
                   value={stepOne.aadhaarNumber}
-                  
+
                   onChangeText={text => {
                     let value = formatAadhaar(text);
 
@@ -730,7 +753,7 @@ const LoginScreen = () => {
             setOpt={(e) => {
               setStepTwo({
                 ...stepTwo,
-                setpTwoOTP: e,
+                stepTwoOTP: e,
               });
             }}
             title='Confirm OTP'
@@ -823,14 +846,39 @@ const LoginScreen = () => {
                 alignItems: 'flex-end',
                 marginBottom: 18, marginHorizontal: 24
               }}>
-                <TouchableOpacity onPress={() => {
-                  if (stepThree.stepThreeMobile.length < 10) {
+                <TouchableOpacity onPress={async () => {
+                  if (!stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobile.length < 10) {
                     showToast('error', 'Please fill mobile correctly');
                     return;
                   }
+
+                  const encryptedValue =
+                    encryptData(
+                      stepThree.stepThreeMobile,
+                      publicKey
+                    );
+
+                  const payload =
+                    getEnrollmentPayload(
+                      "Mobile Number",
+                      encryptedValue,
+                      txnId
+                    );
+
+                  const result =
+                    await enrollmentRequestOtp(
+                      payload
+                    ).unwrap();
+
+                  console.log(
+                    "Mobile OTP Response =>",
+                    result
+                  );
+
                   setStepThree({
                     ...stepThree,
                     stepThreeMobileVerifyed: true,
+                    mobileTitle: result?.message
                   });
                 }}>
                   <Text style={{
@@ -852,7 +900,7 @@ const LoginScreen = () => {
                       });
                     }}
                     title='Confirm OTP'
-                    subTitle='OTP sent to Aadhaar mobile number ending with ******8836' />
+                    subTitle={stepThree.mobileTitle} />
                 </> : <>
 
                   {
@@ -903,16 +951,37 @@ const LoginScreen = () => {
                         marginVertical: 8, marginHorizontal: 24
                       }}>
                         <TouchableOpacity
-                          onPress={() => {
+                          onPress={ async() => {
                             if (stepThree.stepThreeEmail.length < 1) {
                               showToast('error', 'Please fill email correctly');
                               return;
                             }
-                            setStepThree({
-                              ...stepThree,
-                              stepThreeEmailVarifying: true,
-                              stepThreeEmailOPTVerify: true
-                            });
+                            const encryptedEmail =
+                                        encryptData(
+                                          stepThree.stepThreeEmail,
+                                          publicKey
+                                        );
+
+                                      const payload =
+                                        getEmailVerificationLinkPayload(
+                                          encryptedEmail
+                                        );
+
+                                      const result =
+                                        await requestEmailVerificationLink(
+                                          payload
+                                        ).unwrap();
+
+                                      console.log(
+                                        "EMAIL LINK RESULT =>",
+                                        result
+                                      );
+                                      setCurrentStep(4)
+                                      // setStepThree({
+                                      //   ...stepThree,
+                                      //   stepThreeEmailVarifying: true,
+                                      //   stepThreeEmailOPTVerify: true
+                                      // });
                           }}
                         >
                           <Text style={{
@@ -1029,7 +1098,7 @@ const LoginScreen = () => {
 
   const stepTwoValidator = () => {
     if (
-      stepTwo.setpTwoOTP !== '123456'
+      stepTwo.stepTwoOTP !== '123456'
     ) {
       return false;
     }
@@ -1175,22 +1244,22 @@ const LoginScreen = () => {
 
 
                         const encryptedValue =
-                            encryptData(
-                              loginValue,
-                              publicKey,
-                            );
-                          const payloadPassed = getEnrollmentPayload(
-                            loginType,
-                            encryptedValue,
-                            txnId,
+                          encryptData(
+                            loginValue,
+                            publicKey,
                           );
-                          const result = await enrollmentRequestOtp(payloadPassed).unwrap();
-                          console.log("result ------+++++++++++++-------- ", result)
-                          setStepTwo({
-                              ...stepTwo,
-                              stepTwoTitle: result?.message,
-                          });
-                          setCurrentStep(2)
+                        const payloadPassed = getEnrollmentPayload(
+                          loginType,
+                          encryptedValue,
+                          txnId,
+                        );
+                        const result = await enrollmentRequestOtp(payloadPassed).unwrap();
+                        console.log("result ------+++++++++++++-------- ", result)
+                        setStepTwo({
+                          ...stepTwo,
+                          stepTwoTitle: result?.message,
+                        });
+                        setCurrentStep(2)
                         // navigation.navigate('OtpVerification', {
                         //   loginType,
                         //   mobileNumber: loginValue,
@@ -1205,22 +1274,69 @@ const LoginScreen = () => {
                           showToast('error', "Please fill all fields correctly")
                           return;
                         }
-                        setCurrentStep(3)
+
+                        const encryptedValue =
+                          encryptData(
+                            stepTwo.stepTwoOTP,
+                            publicKey,
+                          );
+                        console.log(
+                          "txnId =>",
+                          txnId
+                        );
+                        const payloadPassed = getEnrolByAadhaarPayload(
+                          txnId,
+                          encryptedValue,
+                          stepTwo.stepTwoMobileNumber,
+
+                        );
+                        const result = await enrolByAadhaar(payloadPassed).unwrap();
+                        console.log("result ------+++++++++++++-------- ", result)
+
+                        if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
+                          setCurrentStep(4)
+                        } else {
+                          setCurrentStep(3)
+                        }
+
+                        // setCurrentStep(3)
                       } else if (currentStep === 3) {
                         //step 3
                         if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobileOTP === '123456') {
-                          setStepThree({
-                            ...stepThree,
-                            stepThreeMobileAuthDone: true,
+                          const encryptedOtp =
+                            encryptData(
+                              stepThree.stepThreeMobileOTP,
+                              publicKey
+                            );
 
-                          });
+                          const payload =
+                            getAuthByAbdmPayload(
+                              txnId,
+                              encryptedOtp
+                            );
+
+                          const result =
+                            await authByAbdm(
+                              payload
+                            ).unwrap();
+
+                          console.log(
+                            "AUTH BY ABDM RESULT =>",
+                            result
+                          );
+                          if (result?.authResult === 'success') {
+                            setStepThree({
+                              ...stepThree,
+                              stepThreeMobileAuthDone: true,
+                            });
+                          }
+
                           return;
                         }
                         if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
                           setStepThree({
                             ...stepThree,
                             stepThreeEmailVarifying: true,
-
                           });
                           return;
                         }
@@ -1234,10 +1350,10 @@ const LoginScreen = () => {
                           return;
                         }
                         if (stepThree.stepThreeEmailVarifying) {
-                          setCurrentStep(4)
+                          // setCurrentStep(4)
                           return;
                         }
-                        showToast('error', "Please varify mobile number")
+                        showToast('error', "Please verify mobile")
                         // setCurrentStep(4)
                       } else if (currentStep === 4) {
                         //step 4

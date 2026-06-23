@@ -8,6 +8,10 @@ export const generateGUID = () => {
 
 export const getErrorMessage = (error: any) => {
   return (
+    error?.error?.authMethods ||
+    error?.error?.mobile ||
+
+    error?.error?.txnId ||
     error?.error?.description ||
     error?.error?.scope ||
     error?.error?.loginHint ||
@@ -15,31 +19,44 @@ export const getErrorMessage = (error: any) => {
     error?.error?.loginId ||
     error?.error?.message ||
 
+    error?.error?.data?.error?.authMethods ||
+    error?.error?.data?.error?.mobile ||
+
+    error?.error?.data?.error?.txnId ||
     error?.error?.data?.error?.description ||
     error?.error?.data?.error?.scope ||
     error?.error?.data?.error?.loginHint ||
     error?.error?.data?.error?.otpSystem ||
     error?.error?.data?.error?.loginId ||
-
     error?.error?.data?.error?.message ||
 
+    error?.error?.data?.authMethods ||
+    error?.error?.data?.mobile ||
+
+    error?.error?.data?.txnId ||
     error?.error?.data?.description ||
     error?.error?.data?.scope ||
     error?.error?.data?.loginHint ||
     error?.error?.data?.otpSystem ||
     error?.error?.data?.loginId ||
-
     error?.error?.data?.message ||
 
 
+    error?.error?.authMethods ||
+    error?.error?.mobile ||
+
+    error?.error?.txnId ||
     error?.error?.description ||
     error?.error?.scope ||
     error?.error?.loginHint ||
     error?.error?.otpSystem ||
     error?.error?.loginId ||
-
-
     error?.error?.message ||
+
+    error?.authMethods ||
+    error?.mobile ||
+
+    error?.txnId ||
     error?.description ||
     error?.scope ||
     error?.loginHint ||

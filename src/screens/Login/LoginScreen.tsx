@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  FlatList,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { encryptData } from '../../utils/encrypt';
@@ -23,6 +24,9 @@ import { getEnrollmentPayload, useEnrollmentRequestOtpMutation } from '../../red
 import { getEnrolByAadhaarPayload, useEnrolByAadhaarMutation } from '../../redux/api/enrolByAadhaarApi';
 import { getAuthByAbdmPayload, useAuthByAbdmMutation } from '../../redux/api/authByAbdmApi';
 import { getEmailVerificationLinkPayload, useRequestEmailVerificationLinkMutation } from '../../redux/api/emailVerificationLinkApi';
+import { useEnrolSuggestionMutation } from '../../redux/api/enrolSuggestionApi';
+import { getEnrolAbhaAddressPayload, useEnrolAbhaAddressMutation } from '../../redux/api/enrolAbhaAddressApi';
+import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -72,6 +76,10 @@ const LoginScreen = () => {
     stepThreeEmailVarifying: false,
     stepThreeEmailOPTVerify: false,
     stepThreeEmailVarifyDone: false
+  })
+
+  const [stepFour, setStepFour] = useState<any>({
+    userName: ""
   })
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -223,11 +231,36 @@ const LoginScreen = () => {
     useAuthByAbdmMutation();
 
 
+  const [
+    requestEmailVerificationLink,
+    { isLoading: emailVerifyLoading, },
+  ] =
+    useRequestEmailVerificationLinkMutation();
+
+
+  const [
+    enrolSuggestion,
+    { isLoading: enrolSuggestionLoading, },
+  ] =
+    useEnrolSuggestionMutation();
+
+
+  const [
+    enrolAbhaAddress,
+    { isLoading: enrolAbhaAddressLoading, },
+  ] =
+    useEnrolAbhaAddressMutation();
+
     const [
-  requestEmailVerificationLink,
-   { isLoading: emailVerifyLoading, },
-] =
-  useRequestEmailVerificationLinkMutation();
+  getProfileAccount,
+  {
+    data,
+    isLoading : profileLoading,
+    error,
+  },
+] = useLazyProfileAccountQuery();
+
+  const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
 
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
@@ -547,6 +580,22 @@ const LoginScreen = () => {
     "Communication Details",
     "ABHA Address Creation"
   ]
+
+  const [selectedItem, setSelectedItem] =
+    useState<string | null>(null);
+
+  const handleSelect = (
+    item: string
+  ) => {
+    setSelectedItem((prev) =>
+      prev === item ? null : item
+    );
+    setStepFour({
+      ...stepFour,
+      userName: item,
+    });
+  };
+
 
   const renderStep = () => {
     switch (currentStep) {
@@ -951,37 +1000,48 @@ const LoginScreen = () => {
                         marginVertical: 8, marginHorizontal: 24
                       }}>
                         <TouchableOpacity
-                          onPress={ async() => {
+                          onPress={async () => {
                             if (stepThree.stepThreeEmail.length < 1) {
                               showToast('error', 'Please fill email correctly');
                               return;
                             }
                             const encryptedEmail =
-                                        encryptData(
-                                          stepThree.stepThreeEmail,
-                                          publicKey
-                                        );
+                              encryptData(
+                                stepThree.stepThreeEmail,
+                                publicKey
+                              );
 
-                                      const payload =
-                                        getEmailVerificationLinkPayload(
-                                          encryptedEmail
-                                        );
+                            const payload =
+                              getEmailVerificationLinkPayload(
+                                encryptedEmail
+                              );
 
-                                      const result =
-                                        await requestEmailVerificationLink(
-                                          payload
-                                        ).unwrap();
+                            const result =
+                              await requestEmailVerificationLink(
+                                payload
+                              ).unwrap();
 
-                                      console.log(
-                                        "EMAIL LINK RESULT =>",
-                                        result
-                                      );
-                                      setCurrentStep(4)
-                                      // setStepThree({
-                                      //   ...stepThree,
-                                      //   stepThreeEmailVarifying: true,
-                                      //   stepThreeEmailOPTVerify: true
-                                      // });
+                            console.log(
+                              "EMAIL LINK RESULT =>",
+                              result
+                            );
+
+                            const response =
+                              await enrolSuggestion({
+                                txnId,
+                              }).unwrap();
+
+                            console.log(
+                              response.abhaAddressList
+                            );
+
+                            setAbhaSuggestionList(response.abhaAddressList)
+                            setCurrentStep(4)
+                            // setStepThree({
+                            //   ...stepThree,
+                            //   stepThreeEmailVarifying: true,
+                            //   stepThreeEmailOPTVerify: true
+                            // });
                           }}
                         >
                           <Text style={{
@@ -1025,10 +1085,13 @@ const LoginScreen = () => {
             <View style={styles.inputContainer}>
 
               <TextInput
-                value={loginValue}
+                value={stepFour.userName}
                 onChangeText={text => {
                   let value = text;
-                  setLoginValue(value);
+                   stepFour({
+                    ...stepFour,
+                    userName: value
+                   })
                 }}
                 placeholder={'Enter abha address'}
                 maxLength={14}
@@ -1053,6 +1116,37 @@ const LoginScreen = () => {
 
             </View>
 
+            <FlatList
+              data={abhaSuggestionList}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => {
+                const isSelected =
+                  selectedItem === item;
+
+                return (
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleSelect(item)
+                    }
+                    style={{
+                      padding: 12,
+                      marginVertical: 5,
+                      borderWidth: 1,
+                      borderColor: isSelected
+                        ? "green"
+                        : "#ccc",
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Text>{item}</Text>
+
+                    {isSelected && (
+                      <Text>✓ Selected</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+            />
           </View>
 
         </>;
@@ -1357,6 +1451,26 @@ const LoginScreen = () => {
                         // setCurrentStep(4)
                       } else if (currentStep === 4) {
                         //step 4
+
+                        if(!stepFour.userName &&  stepFour.userName === ''){
+                            showToast('error', "Please fill abha address")
+                            return;
+                        }
+                        const response =
+                          await enrolAbhaAddress(
+                            getEnrolAbhaAddressPayload(
+                              txnId,
+                              stepFour.userName,
+                              1
+                            )
+                          ).unwrap();
+
+                           const responseProfile =
+                            await getProfileAccount();
+                            console.log(responseProfile);
+                            navigation.navigate("Profile", {
+                            profile: responseProfile.data,
+                          });
                       }
                     } catch (error) {
                       console.log("--------------------", error)

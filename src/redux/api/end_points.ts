@@ -13,4 +13,9 @@ export const END_POINTS = {
   "enrollment/auth/byAbdm",
   requestEmailVerificationLink:
   "profile/account/request/emailVerificationLink",
+  enrolSuggestion:
+  "enrollment/enrol/suggestion",
+  enrolAbhaAddress:
+  "enrollment/enrol/abha-address",
+  profileAccount: "profile/account",
 }

@@ -5,4 +5,6 @@ export const END_POINTS = {
     "profile/login/request/otp",
      verifyOtp:
     "profile/login/verify",
+      enrollmentRequestOtp:
+    "enrollment/request/otp",
 }

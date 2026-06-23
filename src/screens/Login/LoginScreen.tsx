@@ -19,6 +19,7 @@ import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 import { showToast } from '../../utils/toast';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import OtpInput from '../../Components/OtpInput';
+import { getEnrollmentPayload, useEnrollmentRequestOtpMutation } from '../../redux/api/enrollmentApi';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -34,6 +35,7 @@ const LoginScreen = () => {
     (state: any) => state.abha.txnId
   );
   const isFromRegister = route?.params?.isFromRegister || false
+  console.log("isFromRegister+++++++++++", isFromRegister)
   const isFromCreate = route?.params?.isFromCreate || false
   const isFromMobileRegister = route?.params?.isFromMobileRegister || false
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
@@ -120,7 +122,7 @@ const LoginScreen = () => {
   const [captchaValue, setCaptchaValue] = useState('');
 
   const getIsFormValid = () => {
-  
+
     if (!loginValue) {
       return false;
     }
@@ -194,6 +196,14 @@ const LoginScreen = () => {
 
   const [requestOtp, { isLoading }] =
     useRequestOtpMutation();
+
+  const [
+    enrollmentRequestOtp,
+    {
+      isLoading: enrollmentLoading,
+      error: enrollmentError,
+    },
+  ] = useEnrollmentRequestOtpMutation();
 
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
@@ -1132,108 +1142,122 @@ const LoginScreen = () => {
                   {
                     backgroundColor: '#173D8F',
                     borderRadius: 4,
-                    alignContent:'center',
-                    alignItems:'center',
-                    alignSelf:'center',
+                    alignContent: 'center',
+                    alignItems: 'center',
+                    alignSelf: 'center',
                     padding: 10
                   }
                 ]}>
-                 <Text style={styles.typeText}>
-                      {steps[currentStep - 1]}
-                    </Text>
+                  <Text style={styles.typeText}>
+                    {steps[currentStep - 1]}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   onPress={async () => {
                     try {
-                       dispatch(showLoader());
-                        if (currentStep === 1) {
-                      //step 1
-
-                      const validate = stepOneValidator();
-                      console.log("validate +++++ ++ + + +++++ ", validate)
-                      if (!validate) {
-                        showToast('error', "Please fill all fields correctly")
-                        return;
-                      }
-                      setStepOne({
-                        ...stepOne,
-                        passedForVarification: !stepOne.passedForVarification,
-                      });
-
-                      console.log("step ------ one ------- value. ", stepOne);
+                      dispatch(showLoader());
+                      if (currentStep === 1) {
+                        //step 1
 
 
-                       const encryptedValue =
-                      encryptData(
-                        stepOne.aadhaarNumber,
-                        publicKey,
-                      );
-                    const payloadPassed = getPayload(
-                      'Aadhaar Number',
-                      encryptedValue,
-                      txnId,
-                    );
-                    await requestOtp(payloadPassed).unwrap();
-
-
-                    // navigation.navigate('OtpVerification', {
-                    //   loginType,
-                    //   mobileNumber: loginValue,
-                    // });
-                      // setCurrentStep(2)
-
-                    } else if (currentStep === 2) {
-                      //step 2
-                      const validate = stepTwoValidator();
-                      console.log("validate222222222 +++++ ++ + + +++++ ", validate)
-                      if (!validate) {
-                        showToast('error', "Please fill all fields correctly")
-                        return;
-                      }
-                      setCurrentStep(3)
-                    } else if (currentStep === 3) {
-                      //step 3
-                      if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobileOTP === '123456') {
-                        setStepThree({
-                          ...stepThree,
-                          stepThreeMobileAuthDone: true,
-
+                        const validate = stepOneValidator();
+                        console.log("validate +++++ ++ + + +++++ ", validate)
+                        if (!validate) {
+                          showToast('error', "Please fill all fields correctly")
+                          return;
+                        }
+                        setStepOne({
+                          ...stepOne,
+                          passedForVarification: !stepOne.passedForVarification,
                         });
-                        return;
-                      }
-                      if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
-                        setStepThree({
-                          ...stepThree,
-                          stepThreeEmailVarifying: true,
 
-                        });
-                        return;
-                      }
-                      if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                        showToast('error', "Please varify email")
-                        return;
-                      }
-                       if (stepThree.stepThreeEmailOTP.length === 6 && stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+
+                        if (isFromRegister) {
+                          const encryptedValue =
+                            encryptData(
+                              loginValue,
+                              publicKey,
+                            );
+                          const payloadPassed = getEnrollmentPayload(
+                            loginType,
+                            encryptedValue,
+                            txnId,
+                          );
+                          const result = await enrollmentRequestOtp(payloadPassed).unwrap();
+                          console.log("result ------+++++++++++++-------- ", result)
+                        } else {
+                          console.log("step ------ one ------- value. ", stepOne);
+                          const encryptedValue =
+                            encryptData(
+                              stepOne.aadhaarNumber,
+                              publicKey,
+                            );
+                          const payloadPassed = getPayload(
+                            'Aadhaar Number',
+                            encryptedValue,
+                            txnId,
+                          );
+                          await requestOtp(payloadPassed).unwrap();
+                        }
+
+                        // navigation.navigate('OtpVerification', {
+                        //   loginType,
+                        //   mobileNumber: loginValue,
+                        // });
+                        // setCurrentStep(2)
+
+                      } else if (currentStep === 2) {
+                        //step 2
+                        const validate = stepTwoValidator();
+                        console.log("validate222222222 +++++ ++ + + +++++ ", validate)
+                        if (!validate) {
+                          showToast('error', "Please fill all fields correctly")
+                          return;
+                        }
+                        setCurrentStep(3)
+                      } else if (currentStep === 3) {
+                        //step 3
+                        if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobileOTP === '123456') {
+                          setStepThree({
+                            ...stepThree,
+                            stepThreeMobileAuthDone: true,
+
+                          });
+                          return;
+                        }
+                        if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
+                          setStepThree({
+                            ...stepThree,
+                            stepThreeEmailVarifying: true,
+
+                          });
+                          return;
+                        }
+                        if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+                          showToast('error', "Please varify email")
+                          return;
+                        }
+                        if (stepThree.stepThreeEmailOTP.length === 6 && stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+                          // setCurrentStep(4)
+                          // 
+                          return;
+                        }
+                        if (stepThree.stepThreeEmailVarifying) {
+                          setCurrentStep(4)
+                          return;
+                        }
+                        showToast('error', "Please varify mobile number")
                         // setCurrentStep(4)
-                        // 
-                        return;
+                      } else if (currentStep === 4) {
+                        //step 4
                       }
-                      if (stepThree.stepThreeEmailVarifying) {
-                        setCurrentStep(4)
-                        return;
-                      }
-                      showToast('error', "Please varify mobile number")
-                      // setCurrentStep(4)
-                    } else if (currentStep === 4) {
-                      //step 4
-                    }
                     } catch (error) {
-                        console.log("--------------------", error)
-                       dispatch(hideLoader());
+                      console.log("--------------------", error)
+                      dispatch(hideLoader());
                     } finally {
-                       dispatch(hideLoader());
+                      dispatch(hideLoader());
                     }
-                   
+
                     // nextStep()
                   }}
                   style={styles.nextButton}
@@ -1856,26 +1880,49 @@ const LoginScreen = () => {
                       isFromForgotAbhaNumberWithType,
                     };
 
-                    console.log(
-                      "Form Data =>",
-                      JSON.stringify(payload, null, 2)
-                    );
-                    const encryptedValue =
-                      encryptData(
-                        loginValue,
-                        publicKey,
+                    console.log("isFromRegisterisFromRegisterisFromRegisterisFromRegisterisFromRegister", isFromRegister)
+                    if (isFromRegister) {
+                      const encryptedValue =
+                        encryptData(
+                          loginValue,
+                          publicKey,
+                        );
+                      const payloadPassed = getEnrollmentPayload(
+                        loginType,
+                        encryptedValue,
+                        txnId,
                       );
-                    const payloadPassed = getPayload(
-                      loginType === 'Forgot ABHA Number' ? validationMethod : loginType,
-                      encryptedValue,
-                      txnId,
-                    );
-                    await requestOtp(payloadPassed).unwrap();
-                    navigation.navigate('OtpVerification', {
-                      loginType,
-                      mobileNumber: loginValue,
-                    });
+                      const result = await enrollmentRequestOtp(payloadPassed).unwrap();
+                      console.log("result ------+++++++++++++-------- ", result)
+                      navigation.navigate('OtpVerification', {
+                        loginType,
+                        mobileNumber: loginValue,
+                      });
+                    } else {
+                      console.log(
+                        "Form Data =>",
+                        JSON.stringify(payload, null, 2)
+                      );
+                      const encryptedValue =
+                        encryptData(
+                          loginValue,
+                          publicKey,
+                        );
+                      const payloadPassed = getPayload(
+                        loginType === 'Forgot ABHA Number' ? validationMethod : loginType,
+                        encryptedValue,
+                        txnId,
+                      );
+                      const result = await requestOtp(payloadPassed).unwrap();
+                      console.log("result -------------- ", result)
+                      navigation.navigate('OtpVerification', {
+                        loginType,
+                        mobileNumber: loginValue,
+                      });
+                    }
+
                   } catch (error) {
+                    console.log("error -------------- ", error)
                     dispatch(hideLoader());
                   } finally {
                     dispatch(hideLoader());
@@ -1937,7 +1984,7 @@ const LoginScreen = () => {
                     <View style={{ flexDirection: 'row' }}>
                       <Text style={styles.createNow}>
                         Retrieve your Enrolment number
-                      </Text> 
+                      </Text>
                     </View>
                   </TouchableOpacity>
                 </View>

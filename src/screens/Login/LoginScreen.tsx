@@ -120,46 +120,20 @@ const LoginScreen = () => {
   const [captchaValue, setCaptchaValue] = useState('');
 
   const getIsFormValid = () => {
-    console.log('--------------------');
-    console.log('loginType =>', loginType);
-    console.log('loginValue =>', loginValue);
-    console.log('isAgreed =>', isAgreed);
-    console.log('captchaValue =>', captchaValue);
-    console.log('captcha.answer =>', captcha);
-
+  
     if (!loginValue) {
-      console.log('❌ loginValue empty');
       return false;
     }
-
-    console.log('✅ loginValue valid');
 
     if (loginType === 'Mobile Number' && loginValue.length !== 10) {
-      console.log(
-        '❌ Mobile validation failed',
-        'length =',
-        loginValue.length,
-      );
       return false;
-    }
-
-    if (loginType === 'Mobile Number') {
-      console.log('✅ Mobile validation passed');
     }
 
     if (
       loginType === 'Aadhaar Number' &&
       loginValue.replace(/-/g, '').length !== 12
     ) {
-      console.log(
-        '❌ Aadhaar validation failed',
-        loginValue.replace(/-/g, '').length,
-      );
       return false;
-    }
-
-    if (loginType === 'Aadhaar Number') {
-      console.log('✅ Aadhaar validation passed');
     }
 
     if (
@@ -168,67 +142,36 @@ const LoginScreen = () => {
     ) {
       const abhaLength = loginValue.replace(/-/g, '').length;
 
-      console.log('ABHA Length =>', abhaLength);
-
       if (abhaLength !== 14) {
-        console.log('❌ ABHA validation failed');
         return false;
       }
-
-      console.log('✅ ABHA validation passed');
     }
 
     if (loginType === 'ABHA Address') {
-      console.log(
-        'ABHA Address contains @ =>',
-        loginValue.includes('@'),
-      );
-
       if (!loginValue.includes('@')) {
-        console.log('❌ ABHA Address validation failed');
         return false;
       }
-
-      console.log('✅ ABHA Address validation passed');
     }
 
     const termsRequired =
       loginType === 'Aadhaar Number' ||
       loginType === 'Create ABHA Number' ||
       isFromForgotAbhaNumber;
-
-    console.log('termsRequired =>', termsRequired);
-
     if (termsRequired && !isAgreed) {
-      console.log('❌ Terms not accepted');
       return false;
     }
-
-    console.log('✅ Terms validation passed');
 
     if (!captchaValue) {
-      console.log('❌ Captcha empty');
       return false;
     }
-
-    console.log('✅ Captcha value entered');
-
-    console.log(
-      'captcha compare =>',
-      Number(captchaValue),
-      captcha.answer,
-    );
 
     if (Number(captchaValue) !== captcha.answer) {
-      console.log('❌ Captcha validation failed');
       return false;
     }
-
-    console.log('✅ Captcha validation passed');
-    console.log('🎉 FORM VALID');
 
     return true;
   };
+
   const validateForm = () => {
     if (!loginValue) {
       return 'Please enter mobile number';
@@ -286,8 +229,6 @@ const LoginScreen = () => {
   }, [loginType]);
 
   const isFormValid = getIsFormValid();
-
-  console.log("isFormValid", isFormValid)
 
   const RadioItem = ({
     title,

@@ -43,7 +43,7 @@ const LoginScreen = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [stepOne, setStepOne] = useState<any>({
-    aadhaarNumber: '',
+    aadhaarNumber: '761987140371',
     termsAgree: false,
     authType: "",
     captchaValid: false,
@@ -52,6 +52,7 @@ const LoginScreen = () => {
   })
 
   const [stepTwo, setStepTwo] = useState<any>({
+    stepTwoTitle: "",
     setpTwoOTP: '123456',
     stepTwoMobileNumber: "",
     setTwoDone: false,
@@ -539,6 +540,7 @@ const LoginScreen = () => {
 
                 <TextInput
                   value={stepOne.aadhaarNumber}
+                  
                   onChangeText={text => {
                     let value = formatAadhaar(text);
 
@@ -732,7 +734,7 @@ const LoginScreen = () => {
               });
             }}
             title='Confirm OTP'
-            subTitle='OTP sent to Aadhaar mobile number ending with ******8836' />
+            subTitle={stepTwo.stepTwoTitle} />
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>
@@ -1172,8 +1174,7 @@ const LoginScreen = () => {
                         });
 
 
-                        if (isFromRegister) {
-                          const encryptedValue =
+                        const encryptedValue =
                             encryptData(
                               loginValue,
                               publicKey,
@@ -1185,21 +1186,11 @@ const LoginScreen = () => {
                           );
                           const result = await enrollmentRequestOtp(payloadPassed).unwrap();
                           console.log("result ------+++++++++++++-------- ", result)
-                        } else {
-                          console.log("step ------ one ------- value. ", stepOne);
-                          const encryptedValue =
-                            encryptData(
-                              stepOne.aadhaarNumber,
-                              publicKey,
-                            );
-                          const payloadPassed = getPayload(
-                            'Aadhaar Number',
-                            encryptedValue,
-                            txnId,
-                          );
-                          await requestOtp(payloadPassed).unwrap();
-                        }
-
+                          setStepTwo({
+                              ...stepTwo,
+                              stepTwoTitle: result?.message,
+                          });
+                          setCurrentStep(2)
                         // navigation.navigate('OtpVerification', {
                         //   loginType,
                         //   mobileNumber: loginValue,

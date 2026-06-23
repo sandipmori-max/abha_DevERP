@@ -126,7 +126,7 @@ export const enrolByAadhaarApi =
                       "ACTIVE",
                   },
 
-                  isNew: false,
+                  isNew: true,
                 },
               };
             }

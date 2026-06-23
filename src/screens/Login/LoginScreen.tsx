@@ -50,7 +50,7 @@ const LoginScreen = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [stepOne, setStepOne] = useState<any>({
-    aadhaarNumber: '761987140371',
+    aadhaarNumber: '',
     termsAgree: false,
     authType: "",
     captchaValid: false,
@@ -60,7 +60,7 @@ const LoginScreen = () => {
 
   const [stepTwo, setStepTwo] = useState<any>({
     stepTwoTitle: "",
-    stepTwoOTP: '123456',
+    stepTwoOTP: '',
     stepTwoMobileNumber: "",
     setTwoDone: false,
   })
@@ -206,59 +206,41 @@ const LoginScreen = () => {
     return '';
   };
 
-  const [requestOtp, { isLoading }] =
+  const [requestOtp] =
     useRequestOtpMutation();
 
   const [
     enrollmentRequestOtp,
-    {
-      isLoading: enrollmentLoading,
-      error: enrollmentError,
-    },
   ] = useEnrollmentRequestOtpMutation();
 
   const [
     enrolByAadhaar,
-    { isLoading: enrollmentByAadhaarLoading, },
   ] =
     useEnrolByAadhaarMutation();
 
-
   const [
     authByAbdm,
-    { isLoading: enrollmentByAbdmLoading, },
   ] =
     useAuthByAbdmMutation();
 
-
   const [
     requestEmailVerificationLink,
-    { isLoading: emailVerifyLoading, },
   ] =
     useRequestEmailVerificationLinkMutation();
 
-
   const [
     enrolSuggestion,
-    { isLoading: enrolSuggestionLoading, },
   ] =
     useEnrolSuggestionMutation();
 
-
   const [
     enrolAbhaAddress,
-    { isLoading: enrolAbhaAddressLoading, },
   ] =
     useEnrolAbhaAddressMutation();
 
-    const [
-  getProfileAccount,
-  {
-    data,
-    isLoading : profileLoading,
-    error,
-  },
-] = useLazyProfileAccountQuery();
+  const [
+    getProfileAccount,
+  ] = useLazyProfileAccountQuery();
 
   const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
 
@@ -1088,10 +1070,10 @@ const LoginScreen = () => {
                 value={stepFour.userName}
                 onChangeText={text => {
                   let value = text;
-                   stepFour({
+                  stepFour({
                     ...stepFour,
                     userName: value
-                   })
+                  })
                 }}
                 placeholder={'Enter abha address'}
                 maxLength={14}
@@ -1192,7 +1174,7 @@ const LoginScreen = () => {
 
   const stepTwoValidator = () => {
     if (
-      stepTwo.stepTwoOTP !== '123456'
+      stepTwo.stepTwoOTP !== ''
     ) {
       return false;
     }
@@ -1388,7 +1370,13 @@ const LoginScreen = () => {
                         console.log("result ------+++++++++++++-------- ", result)
 
                         if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
-                          setCurrentStep(4)
+                          // setCurrentStep(4)
+                          const responseProfile =
+                            await getProfileAccount();
+                          console.log(responseProfile);
+                          navigation.navigate("Profile", {
+                            profile: responseProfile.data,
+                          });
                         } else {
                           setCurrentStep(3)
                         }
@@ -1396,7 +1384,7 @@ const LoginScreen = () => {
                         // setCurrentStep(3)
                       } else if (currentStep === 3) {
                         //step 3
-                        if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobileOTP === '123456') {
+                        if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
                           const encryptedOtp =
                             encryptData(
                               stepThree.stepThreeMobileOTP,
@@ -1452,9 +1440,9 @@ const LoginScreen = () => {
                       } else if (currentStep === 4) {
                         //step 4
 
-                        if(!stepFour.userName &&  stepFour.userName === ''){
-                            showToast('error', "Please fill abha address")
-                            return;
+                        if (!stepFour.userName && stepFour.userName === '') {
+                          showToast('error', "Please fill abha address")
+                          return;
                         }
                         const response =
                           await enrolAbhaAddress(
@@ -1465,12 +1453,12 @@ const LoginScreen = () => {
                             )
                           ).unwrap();
 
-                           const responseProfile =
-                            await getProfileAccount();
-                            console.log(responseProfile);
-                            navigation.navigate("Profile", {
-                            profile: responseProfile.data,
-                          });
+                        const responseProfile =
+                          await getProfileAccount();
+                        console.log(responseProfile);
+                        navigation.navigate("Profile", {
+                          profile: responseProfile.data,
+                        });
                       }
                     } catch (error) {
                       console.log("--------------------", error)

@@ -1,0 +1,202 @@
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React from 'react'
+import { styles } from './style';
+import { formatAadhaar } from '../../utils/helpers';
+import RadioItem from './RadioItem';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
+
+const StepOne = ({
+    captcha,
+    captchaValue,
+    stepOne,
+    setStepOne,
+    loginType,
+    validationMethod,
+    setLoginValue,
+    refreshCaptcha,
+    setCaptchaValue,
+    setValidationMethod }: any) => {
+    return (
+        <>
+            <View style={styles.card}>
+                <Text style={styles.cardTitle}>
+                    Enter Details <Text style={{ color: 'red' }}>*</Text>
+                </Text>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        value={stepOne.aadhaarNumber}
+
+                        onChangeText={text => {
+                            let value = formatAadhaar(text);
+
+                            setStepOne({
+                                ...stepOne,
+                                aadhaarNumber: value,
+                            });
+                        }}
+                        placeholder={'Enter Aadhaar Number'}
+                        maxLength={17}
+                        keyboardType={
+                            [
+                                'Mobile Number',
+                                'Register with Mobile Number',
+                                'Aadhaar Number',
+                                'ABHA Number',
+                                'Create ABHA Number',
+                            ].includes(loginType)
+                                ? 'number-pad'
+                                : 'default'
+                        }
+                        style={styles.input}
+                    />
+                </View>
+            </View>
+            <View style={[styles.termsContainer, { marginTop: 0 }]}>
+                <Text style={styles.termsTitle}>
+                    Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
+                </Text>
+
+                <View style={styles.termsCard}>
+                    <View style={{ height: 100, marginVertical: 8 }}>
+                        <ScrollView>
+                            <Text style={styles.termsText}>
+                                I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under. I authorize NHA to use my Aadhaar number for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of “Yes” with NHA upon successful authentication. I have been duly informed about the option of using other IDs apart from Aadhaar; however, I consciously choose to use Aadhaar number for the purpose of availing benefits across the NDHE. I am aware that my personal identifiable information excluding Aadhaar number / VID number can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time as per provisions of Aadhaar Act and Regulations.
+                            </Text>
+                        </ScrollView>
+                    </View>
+
+
+                    <View style={styles.termsFooter}>
+                        <TouchableOpacity
+                            style={styles.checkboxRow}
+                            onPress={() => {
+                                setStepOne({
+                                    ...stepOne,
+                                    termsAgree: !stepOne.termsAgree,
+                                });
+                            }}
+                        >
+                            <View
+                                style={[
+                                    styles.checkbox,
+                                    stepOne.termsAgree && styles.checkboxActive,
+                                ]}
+                            >
+                                {stepOne.termsAgree && (
+                                    <Text style={styles.checkmark}>
+                                        ✓
+                                    </Text>
+                                )}
+                            </View>
+
+                            <Text style={styles.agreeText}>
+                                I agree
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity>
+                            <Text style={styles.speakerIcon}>
+                                🔊
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+            <Text style={[styles.cardTitle, { marginHorizontal: 20 }]}>
+                Authentication type <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+            <View style={[styles.card, {
+                flexDirection: 'row', padding: 4,
+                marginHorizontal: 14,
+                alignContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: 14
+            }]}>
+                <View style={{
+                    width: '50%'
+                }}>
+                    <RadioItem
+                        title="Aadhaar OTP"
+                        selected={
+                            validationMethod ===
+                            'Aadhaar OTP'
+                        }
+                        onPress={() => {
+                            setStepOne({
+                                ...stepOne,
+                                authType: 'Aadhaar OTP',
+                            });
+                            setLoginValue("")
+                            refreshCaptcha()
+                            setCaptchaValue("")
+                            Keyboard.dismiss()
+                            setValidationMethod(
+                                'Aadhaar OTP',
+                            )
+                        }
+
+                        }
+                    />
+                </View>
+                <View style={{
+                    width: '50%'
+
+                }}>
+                    <RadioItem
+                        title="Face Auth"
+                        selected={
+                            validationMethod ===
+                            'Face Auth'
+                        }
+                        onPress={() => {
+                            setStepOne({
+                                ...stepOne,
+                                authType: 'Face Auth',
+                            });
+                            setLoginValue("")
+                            refreshCaptcha()
+                            setCaptchaValue("")
+                            Keyboard.dismiss()
+                            setValidationMethod(
+                                'Face Auth',
+                            )
+                        }
+
+                        }
+                    />
+                </View>
+            </View>
+            <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
+                <View>
+                    <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
+                </View>
+                <View style={styles.captchaContainer}>
+
+                    <Text style={styles.captchaText}>
+                        {captcha.question}
+                    </Text>
+
+                    <TextInput
+                        placeholder="Enter answer"
+                        keyboardType="number-pad"
+                        value={captchaValue}
+                        onChangeText={setCaptchaValue}
+                        style={styles.captchaInput}
+                    />
+
+                    <TouchableOpacity onPress={refreshCaptcha}>
+                        <MaterialIcons
+                            name="loop"
+                            size={28}
+                            color="#1E40AF"
+                        />
+
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </>
+    )
+}
+
+export default StepOne
+

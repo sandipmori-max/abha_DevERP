@@ -29,6 +29,8 @@ import { getEnrolAbhaAddressPayload, useEnrolAbhaAddressMutation } from '../../r
 import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
 import DLStepTwo from './DLStepTwo';
 import { styles } from './style';
+import RadioItem from './RadioItem';
+import { formatAadhaar, formatAbhaNumber, generateCaptcha, getIsFormValid, stepOneValidator, steps, stepsDL, stepTwoValidator, TERMS_FIVE, TERMS_FOUR, TERMS_ONE, TERMS_SIX, TERMS_TWO, validateForm } from '../../utils/helpers';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -85,7 +87,6 @@ const LoginScreen = () => {
     userName: ""
   })
 
-
   const [stepOneDL, setStepOneDL] = useState<any>({
     stepOneDLTitle: "",
     stepOneDLOTP: '',
@@ -96,181 +97,27 @@ const LoginScreen = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [currentStepDL, setCurrentStepDL] = useState(1);
-
-
-  const nextStep = () => {
-    if (currentStep < 4) {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  const generateCaptcha = () => {
-    let num1 = Math.floor(Math.random() * 9) + 1;
-    let num2 = Math.floor(Math.random() * 9) + 1;
-
-    const operators = ['+', '-', '×'];
-    const operator =
-      operators[Math.floor(Math.random() * operators.length)];
-
-    let answer = 0;
-
-    switch (operator) {
-      case '+':
-        answer = num1 + num2;
-        break;
-
-      case '-':
-        if (num1 < num2) {
-          [num1, num2] = [num2, num1];
-        }
-        answer = num1 - num2;
-        break;
-
-      case '×':
-        answer = num1 * num2;
-        break;
-    }
-
-    return {
-      question: `${num1}${operator}${num2}=?`,
-      answer,
-    };
-  };
-
-
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [captchaValue, setCaptchaValue] = useState('');
 
-  const getIsFormValid = () => {
-
-    if (!loginValue) {
-      return false;
-    }
-
-    if (loginType === 'Mobile Number' && loginValue.length !== 10) {
-      return false;
-    }
-
-    if (
-      loginType === 'Aadhaar Number' &&
-      loginValue.replace(/-/g, '').length !== 12
-    ) {
-      return false;
-    }
-
-    if (
-      loginType === 'ABHA Number' ||
-      loginType === 'Create ABHA Number'
-    ) {
-      const abhaLength = loginValue.replace(/-/g, '').length;
-
-      if (abhaLength !== 14) {
-        return false;
-      }
-    }
-
-    if (loginType === 'ABHA Address') {
-      if (!loginValue.includes('@')) {
-        return false;
-      }
-    }
-
-    const termsRequired =
-      loginType === 'Aadhaar Number' ||
-      loginType === 'Create ABHA Number' ||
-      isFromForgotAbhaNumber;
-    if (termsRequired && !isAgreed) {
-      return false;
-    }
-
-    if (!captchaValue) {
-      return false;
-    }
-
-    if (Number(captchaValue) !== captcha.answer) {
-      return false;
-    }
-
-    return true;
-  };
-
-  const validateForm = () => {
-    if (!loginValue) {
-      return 'Please enter mobile number';
-    }
-
-    if (loginType === 'Mobile Number' && !/^[6-9]\d{9}$/.test(loginValue)) {
-      return 'Enter valid mobile number';
-    }
-
-    if (!captchaValue) {
-      return 'Please enter captcha';
-    }
-
-    if (Number(captchaValue) !== Number(captcha.answer)) {
-      return 'Invalid captcha';
-    }
-
-    return '';
-  };
-
-  const [requestOtp] =
-    useRequestOtpMutation();
-
-  const [
-    enrollmentRequestOtp,
-  ] = useEnrollmentRequestOtpMutation();
-
-  const [
-    enrolByAadhaar,
-  ] =
-    useEnrolByAadhaarMutation();
-
-  const [
-    authByAbdm,
-  ] =
-    useAuthByAbdmMutation();
-
-  const [
-    requestEmailVerificationLink,
-  ] =
-    useRequestEmailVerificationLinkMutation();
-
-  const [
-    enrolSuggestion,
-  ] =
-    useEnrolSuggestionMutation();
-
-  const [
-    enrolAbhaAddress,
-  ] =
-    useEnrolAbhaAddressMutation();
-
-  const [
-    getProfileAccount,
-  ] = useLazyProfileAccountQuery();
+  const [requestOtp] = useRequestOtpMutation();
+  const [enrollmentRequestOtp,] = useEnrollmentRequestOtpMutation();
+  const [enrolByAadhaar,] = useEnrolByAadhaarMutation();
+  const [authByAbdm,] = useAuthByAbdmMutation();
+  const [requestEmailVerificationLink,] = useRequestEmailVerificationLinkMutation();
+  const [enrolSuggestion,] = useEnrolSuggestionMutation();
+  const [enrolAbhaAddress,] = useEnrolAbhaAddressMutation();
+  const [getProfileAccount,] = useLazyProfileAccountQuery();
 
   const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
-
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] =
-    useState(false);
-  const [validationMethod, setValidationMethod] =
-    useState('');
-  const [otpMethod, setOtpMethod] =
-    useState('');
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationMethod, setValidationMethod] = useState('');
+  const [otpMethod, setOtpMethod] = useState('');
   const [isAgreed, setIsAgreed] = useState(false);
 
   const placeholder = useMemo(() => {
-
     switch (loginType) {
       case 'Mobile Number':
         return 'Enter mobile number';
@@ -290,36 +137,6 @@ const LoginScreen = () => {
         return 'Enter value';
     }
   }, [loginType]);
-
-  const isFormValid = getIsFormValid();
-
-  const RadioItem = ({
-    title,
-    selected,
-    onPress,
-  }: any) => (
-    <TouchableOpacity
-      style={styles.radioRow}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View
-        style={[
-          styles.radioOuter,
-          selected &&
-          styles.radioOuterActive,
-        ]}
-      >
-        {selected && (
-          <View style={styles.radioInner} />
-        )}
-      </View>
-
-      <Text style={styles.radioText}>
-        {title}
-      </Text>
-    </TouchableOpacity>
-  );
 
   const renderValidationOptions = () => {
     if (loginType === 'Mobile Number') {
@@ -521,66 +338,16 @@ const LoginScreen = () => {
     return null;
   };
 
-  const formatAadhaar = (value: string) => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 12);
-
-    return cleaned
-      .replace(/(\d{4})(\d)/, '$1-$2')
-      .replace(/(\d{4})-(\d{4})(\d)/, '$1-$2-$3');
-  };
-
-
   const refreshCaptcha = () => {
     setCaptcha(generateCaptcha());
     setCaptchaValue('');
   };
 
-  const validateCaptcha = () => {
-    return Number(captchaValue) === captcha.answer;
-  };
-
-  const formatAbhaNumber = (value: string) => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 14);
-
-    if (cleaned.length <= 2) return cleaned;
-
-    if (cleaned.length <= 6)
-      return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
-
-    if (cleaned.length <= 10)
-      return `${cleaned.slice(0, 2)}-${cleaned.slice(
-        2,
-        6,
-      )}-${cleaned.slice(6)}`;
-
-    return `${cleaned.slice(0, 2)}-${cleaned.slice(
-      2,
-      6,
-    )}-${cleaned.slice(6, 10)}-${cleaned.slice(10)}`;
-  };
-
   const maxLength =
-    loginType === 'Aadhaar Number'
-      ? 14 // 1234-5678-9012
-      : loginType === 'ABHA Number' ||
-        loginType === 'Create ABHA Number'
-        ? 17 // 12-3456-7890-1234
-        : loginType === 'Mobile Number'
-          ? 10
+    loginType === 'Aadhaar Number' ? 14 // 1234-5678-9012
+      : loginType === 'ABHA Number' || loginType === 'Create ABHA Number' ? 17 // 12-3456-7890-1234
+        : loginType === 'Mobile Number' ? 10
           : 100;
-
-
-  const steps = [
-    "Consent Collection",
-    "Aadhaar Authentication",
-    "Communication Details",
-    "ABHA Address Creation"
-  ]
-
-  const stepsDL = [
-    "Mobile Number",
-    "Create ABHA",
-  ]
 
   const [selectedItem, setSelectedItem] =
     useState<string | null>(null);
@@ -597,21 +364,16 @@ const LoginScreen = () => {
     });
   };
 
-  
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return <>
-
           <>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>
                 Enter Details <Text style={{ color: 'red' }}>*</Text>
               </Text>
-
               <View style={styles.inputContainer}>
-
                 <TextInput
                   value={stepOne.aadhaarNumber}
 
@@ -639,12 +401,6 @@ const LoginScreen = () => {
                   style={styles.input}
                 />
               </View>
-              {/* <Text>
-                    Please ensure that mobile number is linked with Aadhaar as it will be required for OTP authentication.
-                    If you do not have a mobile number linked, visit the nearest ABDM participating facility and seek assistance.
-                  </Text> */}
-
-
             </View>
             <View style={[styles.termsContainer, { marginTop: 0 }]}>
               <Text style={styles.termsTitle}>
@@ -697,7 +453,6 @@ const LoginScreen = () => {
                 </View>
               </View>
             </View>
-
             <Text style={[styles.cardTitle, { marginHorizontal: 20 }]}>
               Authentication type <Text style={{ color: 'red' }}>*</Text>
             </Text>
@@ -762,7 +517,6 @@ const LoginScreen = () => {
                 />
               </View>
             </View>
-
             <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
               <View>
                 <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
@@ -792,14 +546,9 @@ const LoginScreen = () => {
               </View>
             </View>
           </>
-
-
         </>;
-
       case 2:
         return <>
-
-
           <OtpInput
             setOpt={(e) => {
               setStepTwo({
@@ -814,7 +563,6 @@ const LoginScreen = () => {
             <Text style={styles.cardTitle}>
               Enter Details <Text style={{ color: 'red' }}>*</Text>
             </Text>
-
             <View style={styles.inputContainer}>
               <Text style={styles.prefix}>+91</Text>
               <TextInput
@@ -858,7 +606,6 @@ const LoginScreen = () => {
                 <Text style={styles.cardTitle}>
                   Enter Details <Text style={{ color: 'red' }}>*</Text>
                 </Text>
-
                 <View style={styles.inputContainer}>
                   <Text style={styles.prefix}>+91</Text>
                   <TextInput
@@ -885,7 +632,6 @@ const LoginScreen = () => {
                     }
                     style={styles.input}
                   />
-
                 </View>
                 <Text style={{ marginVertical: 8 }}>
                   • The Mobile number you have provided will be used for all the communications related to ABHA.
@@ -902,7 +648,6 @@ const LoginScreen = () => {
                     showToast('error', 'Please fill mobile correctly');
                     return;
                   }
-
                   const encryptedValue =
                     encryptData(
                       stepThree.stepThreeMobile,
@@ -956,7 +701,6 @@ const LoginScreen = () => {
 
                   {
                     stepThree.stepThreeEmailOPTVerify ? <>
-
                       <OtpInput
                         setOpt={(e) => {
                           setStepThree({
@@ -966,7 +710,6 @@ const LoginScreen = () => {
                         }}
                         title='Confirm OTP'
                         subTitle='OTP sent to Aadhaar mobile number ending with ******s8@gmail.com' />
-
 
                     </> : <>
 
@@ -1027,23 +770,12 @@ const LoginScreen = () => {
                               "EMAIL LINK RESULT =>",
                               result
                             );
-
                             const response =
                               await enrolSuggestion({
                                 txnId,
                               }).unwrap();
-
-                            console.log(
-                              response.abhaAddressList
-                            );
-
                             setAbhaSuggestionList(response.abhaAddressList)
                             setCurrentStep(4)
-                            // setStepThree({
-                            //   ...stepThree,
-                            //   stepThreeEmailVarifying: true,
-                            //   stepThreeEmailOPTVerify: true
-                            // });
                           }}
                         >
                           <Text style={{
@@ -1052,24 +784,14 @@ const LoginScreen = () => {
                             borderBottomColor: '#D96A27',
                           }}>Verify</Text>
                         </TouchableOpacity>
-
                       </View>
                     </>
                   }
-
-
                 </>
               }
-
             </>
           }
-
-
-
-          {/* */}
         </>
-
-
       case 4:
         return <>
 
@@ -1152,7 +874,6 @@ const LoginScreen = () => {
           </View>
 
         </>;
-
       default:
         return null;
     }
@@ -1165,8 +886,6 @@ const LoginScreen = () => {
           {
             stepOneDL.stepOneDLMobileVerifying ?
               <>
-
-
                 <OtpInput
                   setOpt={(e) => {
                     setStepOneDL({
@@ -1186,12 +905,11 @@ const LoginScreen = () => {
                       showToast('error', 'Please fill OTP')
                       return;
                     }
-                     setStepOneDL({
-                                ...stepOneDL,
-                                stepOneDLMobileVerifying: false,
-                              });
+                    setStepOneDL({
+                      ...stepOneDL,
+                      stepOneDLMobileVerifying: false,
+                    });
                     setCurrentStepDL(2)
-                     
                   }}>
                     <Text style={{
                       color: '#D96A27',
@@ -1199,17 +917,13 @@ const LoginScreen = () => {
                       borderBottomColor: '#D96A27',
                     }}>Verify</Text>
                   </TouchableOpacity>
-
                 </View>
               </>
-
               : <>
-
                 <View style={styles.card}>
                   <Text style={styles.cardTitle}>
                     Enter Details <Text style={{ color: 'red' }}>*</Text>
                   </Text>
-
                   <View style={styles.inputContainer}>
                     <Text style={styles.prefix}>+91</Text>
                     <TextInput
@@ -1236,101 +950,41 @@ const LoginScreen = () => {
                       }
                       style={styles.input}
                     />
-
                   </View>
-
-
                 </View>
-
-                    <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
-              <View>
-                <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
-              </View>
-              <View style={styles.captchaContainer}>
-
-                <Text style={styles.captchaText}>
-                  {captcha.question}
-                </Text>
-
-                <TextInput
-                  placeholder="Enter answer"
-                  keyboardType="number-pad"
-                  value={captchaValue}
-                  onChangeText={setCaptchaValue}
-                  style={styles.captchaInput}
-                />
-
-                <TouchableOpacity onPress={refreshCaptcha}>
-                  <MaterialIcons
-                    name="loop"
-                    size={28}
-                    color="#1E40AF"
-                  />
-
-                </TouchableOpacity>
-              </View>
-            </View>
-               
+                <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
+                  <View>
+                    <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
+                  </View>
+                  <View style={styles.captchaContainer}>
+                    <Text style={styles.captchaText}>
+                      {captcha.question}
+                    </Text>
+                    <TextInput
+                      placeholder="Enter answer"
+                      keyboardType="number-pad"
+                      value={captchaValue}
+                      onChangeText={setCaptchaValue}
+                      style={styles.captchaInput}
+                    />
+                    <TouchableOpacity onPress={refreshCaptcha}>
+                      <MaterialIcons
+                        name="loop"
+                        size={28}
+                        color="#1E40AF"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </>
-
           }
-
-
         </>;
       case 2:
         return <><DLStepTwo /></>;
     }
   }
 
-  const stepOneValidator = () => {
-    if (
-      stepOne.aadhaarNumber.replace(/-/g, '').length !== 12
-    ) {
-      return false;
-    }
-    const termsRequired = true;
-    console.log('termsRequired =>', termsRequired);
-    if (termsRequired && !stepOne.termsAgree) {
-      console.log('❌ Terms not accepted');
-      return false;
-    }
 
-    if (!captchaValue) {
-      console.log('❌ Captcha empty');
-      return false;
-    }
-
-    console.log('✅ Captcha value entered');
-
-    console.log(
-      'captcha compare =>',
-      Number(captchaValue),
-      captcha.answer,
-    );
-
-    if (Number(captchaValue) !== captcha.answer) {
-      console.log('❌ Captcha validation failed');
-      return false;
-    }
-
-    return true;
-  };
-
-  const stepTwoValidator = () => {
-    if (
-      stepTwo.stepTwoOTP !== ''
-    ) {
-      return false;
-    }
-    if (
-      stepTwo.stepTwoMobileNumber.replace(/-/g, '').length !== 10
-    ) {
-      return false;
-    }
-
-
-    return true;
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -1363,20 +1017,15 @@ const LoginScreen = () => {
             }
           </Text>
         </View>
-
-
         {
           isFromRegister ? <>
-
             <View style={{ height: '85%' }}>
               {
                 loginType === 'Aadhaar Number' ? <>
-
                   <View style={styles.stepContainer}>
                     {steps.map((item, index) => {
                       const stepNumber = index + 1;
                       const isActive = currentStep >= stepNumber;
-
                       return (
                         <React.Fragment key={index}>
                           <TouchableOpacity
@@ -1408,7 +1057,6 @@ const LoginScreen = () => {
                               Step {stepNumber}
                             </Text>
                           </TouchableOpacity>
-
                           {index < steps.length - 1 && (
                             <View
                               style={[
@@ -1424,13 +1072,9 @@ const LoginScreen = () => {
                   <ScrollView
                     showsVerticalScrollIndicator={false}
                     style={{ flex: 0.8, padding: 0 }}>
-
-
-
                     {renderStep()}
                   </ScrollView>
                   <View style={[styles.buttonContainer, {
-
                   }]}>
                     <View style={[
                       {
@@ -1452,9 +1096,7 @@ const LoginScreen = () => {
                           dispatch(showLoader());
                           if (currentStep === 1) {
                             //step 1
-
-
-                            const validate = stepOneValidator();
+                            const validate = stepOneValidator(stepOne, captchaValue, captcha);
                             console.log("validate +++++ ++ + + +++++ ", validate)
                             if (!validate) {
                               showToast('error', "Please fill all fields correctly")
@@ -1464,8 +1106,6 @@ const LoginScreen = () => {
                               ...stepOne,
                               passedForVarification: !stepOne.passedForVarification,
                             });
-
-
                             const encryptedValue =
                               encryptData(
                                 loginValue,
@@ -1483,41 +1123,27 @@ const LoginScreen = () => {
                               stepTwoTitle: result?.message,
                             });
                             setCurrentStep(2)
-                            // navigation.navigate('OtpVerification', {
-                            //   loginType,
-                            //   mobileNumber: loginValue,
-                            // });
-                            // setCurrentStep(2)
 
                           } else if (currentStep === 2) {
                             //step 2
-                            const validate = stepTwoValidator();
-                            console.log("validate222222222 +++++ ++ + + +++++ ", validate)
+                            const validate = stepTwoValidator(stepTwo);
                             if (!validate) {
                               showToast('error', "Please fill all fields correctly")
                               return;
                             }
-
                             const encryptedValue =
                               encryptData(
                                 stepTwo.stepTwoOTP,
                                 publicKey,
                               );
-                            console.log(
-                              "txnId =>",
-                              txnId
-                            );
                             const payloadPassed = getEnrolByAadhaarPayload(
                               txnId,
                               encryptedValue,
                               stepTwo.stepTwoMobileNumber,
-
                             );
                             const result = await enrolByAadhaar(payloadPassed).unwrap();
                             console.log("result ------+++++++++++++-------- ", result)
-
                             if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
-                              // setCurrentStep(4)
                               const responseProfile =
                                 await getProfileAccount();
                               console.log(responseProfile);
@@ -1527,8 +1153,6 @@ const LoginScreen = () => {
                             } else {
                               setCurrentStep(3)
                             }
-
-                            // setCurrentStep(3)
                           } else if (currentStep === 3) {
                             //step 3
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
@@ -1537,18 +1161,15 @@ const LoginScreen = () => {
                                   stepThree.stepThreeMobileOTP,
                                   publicKey
                                 );
-
                               const payload =
                                 getAuthByAbdmPayload(
                                   txnId,
                                   encryptedOtp
                                 );
-
                               const result =
                                 await authByAbdm(
                                   payload
                                 ).unwrap();
-
                               console.log(
                                 "AUTH BY ABDM RESULT =>",
                                 result
@@ -1559,7 +1180,6 @@ const LoginScreen = () => {
                                   stepThreeMobileAuthDone: true,
                                 });
                               }
-
                               return;
                             }
                             if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
@@ -1573,20 +1193,9 @@ const LoginScreen = () => {
                               showToast('error', "Please varify email")
                               return;
                             }
-                            if (stepThree.stepThreeEmailOTP.length === 6 && stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                              // setCurrentStep(4)
-                              // 
-                              return;
-                            }
-                            if (stepThree.stepThreeEmailVarifying) {
-                              // setCurrentStep(4)
-                              return;
-                            }
                             showToast('error', "Please verify mobile")
-                            // setCurrentStep(4)
                           } else if (currentStep === 4) {
                             //step 4
-
                             if (!stepFour.userName && stepFour.userName === '') {
                               showToast('error', "Please fill abha address")
                               return;
@@ -1599,7 +1208,6 @@ const LoginScreen = () => {
                                   1
                                 )
                               ).unwrap();
-
                             const responseProfile =
                               await getProfileAccount();
                             console.log(responseProfile);
@@ -1613,8 +1221,6 @@ const LoginScreen = () => {
                         } finally {
                           dispatch(hideLoader());
                         }
-
-                        // nextStep()
                       }}
                       style={styles.nextButton}
                     >
@@ -1625,9 +1231,7 @@ const LoginScreen = () => {
                       </Text>
                     </TouchableOpacity>
                   </View>
-
                 </> : <>
-
                   <View style={styles.stepContainer}>
                     {stepsDL.map((item, index) => {
                       const stepNumber = index + 1;
@@ -1683,7 +1287,7 @@ const LoginScreen = () => {
                     {renderDLStep()}
                   </ScrollView>
 
-                   <View style={[styles.buttonContainer, {
+                  <View style={[styles.buttonContainer, {
 
                   }]}>
                     <View style={[
@@ -1702,37 +1306,34 @@ const LoginScreen = () => {
                     </View>
 
                     {
-                    !stepOneDL.stepOneDLMobileVerifying &&  <TouchableOpacity
-                      onPress={async () => {
-                        if(currentStepDL === 1){
-                          if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
-                                showToast('error', 'Please fill mobile number')
-                                return;
-                              }
-                              setStepOneDL({
-                                ...stepOneDL,
-                                stepOneDLMobileVerifying: true,
-                              });
-                          }else{
+                      !stepOneDL.stepOneDLMobileVerifying && <TouchableOpacity
+                        onPress={async () => {
+                          if (currentStepDL === 1) {
+                            if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
+                              showToast('error', 'Please fill mobile number')
+                              return;
+                            }
+                            setStepOneDL({
+                              ...stepOneDL,
+                              stepOneDLMobileVerifying: true,
+                            });
+                          } else {
 
                           }
-                      }}
-                      style={styles.nextButton}
-                    >
-                      <Text style={{ color: '#FFF' }}>
-                        { 'Next'}
-                      </Text>
-                    </TouchableOpacity>
+                        }}
+                        style={styles.nextButton}
+                      >
+                        <Text style={{ color: '#FFF' }}>
+                          {'Next'}
+                        </Text>
+                      </TouchableOpacity>
                     }
-                   
                   </View>
                 </>
               }
-
             </View>
-
-
-          </> : <>  <ScrollView
+          </> : <>  
+          <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingBottom: 140,
@@ -1751,7 +1352,6 @@ const LoginScreen = () => {
                 </Text>
               }
             </View>
-
             <View style={{
               width: '94%',
               alignContent: 'center',
@@ -1771,8 +1371,6 @@ const LoginScreen = () => {
                     }
                   </>
               }
-
-
             </View>
             {
               !isFromForgotAbhaNumber && <View style={styles.card}>
@@ -1808,7 +1406,6 @@ const LoginScreen = () => {
                         default:
                           break;
                       }
-
                       setLoginValue(value);
                     }}
                     placeholder={placeholder}
@@ -1831,30 +1428,10 @@ const LoginScreen = () => {
                       @abdm
                     </Text>
                   }
-
                 </View>
-
                 {
                   <TouchableOpacity
                     onPress={() => {
-                      const payload = {
-                        loginType,
-                        loginValue,
-                        password,
-                        validationMethod,
-                        otpMethod,
-                        isAgreed,
-                        isFromRegister,
-                        isFromCreate,
-                        isFromMobileRegister,
-                        isFromForgotAbhaNumber,
-                        isFromForgotAbhaNumberWithType,
-                      };
-
-                      console.log(
-                        "Form Data =>",
-                        JSON.stringify(payload, null, 2)
-                      );
                       setValidationMethod('')
                       setTimeout(() => {
                         setValidationMethod('Aadhaar Number')
@@ -1870,7 +1447,6 @@ const LoginScreen = () => {
                           isFromMobileRegister: false,
                           isFromForgotAbhaNumber: true
                         })
-
                       })
                     }}>
                     <Text style={[styles.forgotText, {
@@ -1883,15 +1459,12 @@ const LoginScreen = () => {
                 }
               </View>
             }
-
             {
               isFromForgotAbhaNumberWithType && <View style={styles.card}>
                 <Text style={styles.cardTitle}>
                   Enter Details <Text style={{ color: 'red' }}>*</Text>
                 </Text>
-
                 <View style={styles.inputContainer}>
-
                   <TextInput
                     value={loginValue}
                     onChangeText={text => {
@@ -1900,7 +1473,6 @@ const LoginScreen = () => {
                           loginType === 'Aadhaar Number'
                           ? text.replace(/[^0-9]/g, '')
                           : text;
-
                       setLoginValue(value);
                     }}
                     placeholder={placeholder}
@@ -1920,21 +1492,15 @@ const LoginScreen = () => {
                       {errorMessage}
                     </Text>
                   )}
-
                 </View>
-
               </View>
             }
-
             {loginType === 'Forgot ABHA Number' && renderValidationOptions()}
-
-
             {
               isFromForgotAbhaNumber && <View style={styles.card}>
                 <Text style={styles.cardTitle}>
                   Enter Details <Text style={{ color: 'red' }}>*</Text>
                 </Text>
-
                 <View style={styles.inputContainer}>
                   {(validationMethod === 'Mobile Number' ||
                     validationMethod === 'Register with Mobile Number') && (
@@ -1944,26 +1510,21 @@ const LoginScreen = () => {
                     value={loginValue}
                     onChangeText={text => {
                       let value = text;
-
                       switch (validationMethod) {
                         case 'Mobile Number':
                         case 'Register with Mobile Number':
                           value = text.replace(/\D/g, '').slice(0, 10);
                           break;
-
                         case 'Aadhaar Number':
                           value = formatAadhaar(text);
                           break;
-
                         case 'ABHA Number':
                         case 'Create ABHA Number':
                           value = formatAbhaNumber(text);
                           break;
-
                         default:
                           break;
                       }
-
                       setLoginValue(value);
                     }}
                     placeholder={validationMethod === 'Mobile Number' ? 'Enter mobile number' : 'Enter aadhaar number'}
@@ -1983,9 +1544,7 @@ const LoginScreen = () => {
                       {errorMessage}
                     </Text>
                   )}
-
                 </View>
-
               </View>
             }
 
@@ -1994,7 +1553,6 @@ const LoginScreen = () => {
                 <Text style={styles.cardTitle}>
                   Password
                 </Text>
-
                 <View style={styles.passwordContainer}>
                   <TextInput
                     secureTextEntry={!showPassword}
@@ -2003,7 +1561,6 @@ const LoginScreen = () => {
                     placeholder="Enter Password"
                     style={styles.passwordInput}
                   />
-
                   <TouchableOpacity
                     onPress={() =>
                       setShowPassword(
@@ -2052,7 +1609,6 @@ const LoginScreen = () => {
                       )
                     }
                   />
-
                   <RadioItem
                     title="Mobile OTP"
                     selected={
@@ -2065,7 +1621,6 @@ const LoginScreen = () => {
                       )
                     }
                   />
-
                 </View>
               )}
             {
@@ -2076,11 +1631,7 @@ const LoginScreen = () => {
 
                 <View style={styles.termsCard}>
                   <Text style={styles.termsText}>
-                    I hereby declare that I am voluntarily sharing my
-                    Aadhaar Number and demographic information issued
-                    by UIDAI with National Health Authority (NHA) for
-                    the sole purpose of authentication and healthcare
-                    services under ABDM.
+                    {TERMS_ONE}
                   </Text>
 
                   <View style={styles.termsFooter}>
@@ -2125,7 +1676,7 @@ const LoginScreen = () => {
                   <View style={{ height: 140, marginVertical: 8 }}>
                     <ScrollView>
                       <Text style={styles.termsText}>
-                        I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under. I authorize NHA to use my Aadhaar number for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of “Yes” with NHA upon successful authentication. I have been duly informed about the option of using other IDs apart from Aadhaar; however, I consciously choose to use Aadhaar number for the purpose of availing benefits across the NDHE. I am aware that my personal identifiable information excluding Aadhaar number / VID number can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time as per provisions of Aadhaar Act and Regulations.
+                        {TERMS_TWO}
                       </Text>
                     </ScrollView>
                   </View>
@@ -2176,10 +1727,15 @@ const LoginScreen = () => {
                     <ScrollView>
                       {
                         validationMethod === 'Aadhaar Number' ? <Text style={styles.termsText}>
-                          I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under. I authorize NHA to use my Aadhaar number for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of “Yes” with NHA upon successful authentication. I have been duly informed about the option of using other IDs apart from Aadhaar; however, I consciously choose to use Aadhaar number for the purpose of availing benefits across the NDHE. I am aware that my personal identifiable information excluding Aadhaar number / VID number can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time as per provisions of Aadhaar Act and Regulations.                    </Text>
+                          {
+                            TERMS_FOUR
+                          }
+                        </Text>
                           : <Text style={styles.termsText}>
-                            I, hereby declare that I am voluntarily sharing my identity information with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM (Ayushman Bharat Digital Mission) from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under.
-                            I am aware that my personal identifiable information can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time.                   </Text>
+                            {
+                              TERMS_FIVE
+                            }
+                          </Text>
 
                       }
                     </ScrollView>
@@ -2227,11 +1783,9 @@ const LoginScreen = () => {
 
                 <View style={styles.termsCard}>
                   <Text style={styles.termsText}>
-                    I hereby declare that I am voluntarily sharing my
-                    Aadhaar Number and demographic information issued
-                    by UIDAI with National Health Authority (NHA) for
-                    the sole purpose of authentication and healthcare
-                    services under ABDM.
+                    {
+                      TERMS_SIX
+                    }
                   </Text>
 
                   <View style={styles.termsFooter}>
@@ -2266,7 +1820,6 @@ const LoginScreen = () => {
                 </View>
               </View>
             }
-
             <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
               <View>
                 <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
@@ -2295,52 +1848,28 @@ const LoginScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
-
-
           </ScrollView>
-
-
-
             <View style={styles.bottomBar}>
               <TouchableOpacity
-                disabled={!getIsFormValid()}
+                disabled={!getIsFormValid(loginType, loginValue, isFromForgotAbhaNumber, isAgreed, captchaValue, captcha)}
                 style={[
                   styles.continueBtn,
-                  !getIsFormValid() && {
+                  !getIsFormValid(loginType, loginValue, isFromForgotAbhaNumber, isAgreed, captchaValue, captcha) && {
                     opacity: 0.5
                   }
                 ]}
                 onPress={async () => {
                   try {
-                    const error = validateForm();
-
+                    const error = validateForm(loginType, loginValue, captchaValue, captcha);
                     if (error) {
                       showToast('error', error);
                       return;
                     }
-
-                    if (!getIsFormValid()) {
-
+                    if (!getIsFormValid(loginType, loginValue, isFromForgotAbhaNumber, isAgreed, captchaValue, captcha)) {
                       showToast('error', 'Please fill all fields correctly');
                       return;
                     }
                     dispatch(showLoader());
-
-                    const payload = {
-                      loginType,
-                      loginValue,
-                      password,
-                      validationMethod,
-                      otpMethod,
-                      isAgreed,
-                      isFromRegister,
-                      isFromCreate,
-                      isFromMobileRegister,
-                      isFromForgotAbhaNumber,
-                      isFromForgotAbhaNumberWithType,
-                    };
-
-                    console.log("isFromRegisterisFromRegisterisFromRegisterisFromRegisterisFromRegister", isFromRegister)
                     if (isFromRegister) {
                       const encryptedValue =
                         encryptData(
@@ -2359,10 +1888,7 @@ const LoginScreen = () => {
                         mobileNumber: loginValue,
                       });
                     } else {
-                      console.log(
-                        "Form Data =>",
-                        JSON.stringify(payload, null, 2)
-                      );
+
                       const encryptedValue =
                         encryptData(
                           loginValue,
@@ -2398,33 +1924,8 @@ const LoginScreen = () => {
               {
                 !isFromForgotAbhaNumber && loginType !== 'Register with Mobile Number' &&
                 <View style={styles.footer}>
-
-
-                  {/* <Text style={styles.footerText}>
-                    {
-                      isFromCreate ? `Don't have an Aadhaar number?` : `Don't have an ABHA number?`
-                    }
-                  </Text> */}
-
                   <TouchableOpacity
                     onPress={() => {
-                      const payload = {
-                        loginType,
-                        loginValue,
-                        password,
-                        validationMethod,
-                        otpMethod,
-                        isAgreed,
-                        isFromRegister,
-                        isFromCreate,
-                        isFromMobileRegister,
-                        isFromForgotAbhaNumber,
-                        isFromForgotAbhaNumberWithType,
-                      };
-                      console.log(
-                        "Form Data ====>- ......... ====>- ",
-                        JSON.stringify(payload, null, 2)
-                      );
                       setValidationMethod('')
                       setLoginValue('')
                       setCaptchaValue("")

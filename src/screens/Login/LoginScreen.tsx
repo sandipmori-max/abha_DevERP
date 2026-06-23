@@ -27,6 +27,8 @@ import { getEmailVerificationLinkPayload, useRequestEmailVerificationLinkMutatio
 import { useEnrolSuggestionMutation } from '../../redux/api/enrolSuggestionApi';
 import { getEnrolAbhaAddressPayload, useEnrolAbhaAddressMutation } from '../../redux/api/enrolAbhaAddressApi';
 import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
+import DLStepTwo from './DLStepTwo';
+import { styles } from './style';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -78,11 +80,23 @@ const LoginScreen = () => {
     stepThreeEmailVarifyDone: false
   })
 
+
   const [stepFour, setStepFour] = useState<any>({
     userName: ""
   })
 
+
+  const [stepOneDL, setStepOneDL] = useState<any>({
+    stepOneDLTitle: "",
+    stepOneDLOTP: '',
+    stepOneDLMobileNumber: "",
+    stepOneDLMobileVerifying: false,
+    stepOneDLDone: false,
+  })
+
   const [currentStep, setCurrentStep] = useState(1);
+  const [currentStepDL, setCurrentStepDL] = useState(1);
+
 
   const nextStep = () => {
     if (currentStep < 4) {
@@ -563,6 +577,11 @@ const LoginScreen = () => {
     "ABHA Address Creation"
   ]
 
+  const stepsDL = [
+    "Mobile Number",
+    "Create ABHA",
+  ]
+
   const [selectedItem, setSelectedItem] =
     useState<string | null>(null);
 
@@ -578,6 +597,7 @@ const LoginScreen = () => {
     });
   };
 
+  
 
   const renderStep = () => {
     switch (currentStep) {
@@ -1138,6 +1158,130 @@ const LoginScreen = () => {
     }
   };
 
+  const renderDLStep = () => {
+    switch (currentStepDL) {
+      case 1:
+        return <>
+          {
+            stepOneDL.stepOneDLMobileVerifying ?
+              <>
+
+
+                <OtpInput
+                  setOpt={(e) => {
+                    setStepOneDL({
+                      ...stepOneDL,
+                      stepOneDLOTP: e,
+                    });
+                  }}
+                  title='Confirm OTP'
+                  subTitle={stepOneDL.stepOneDLOTP} />
+                <View style={{
+                  alignContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  marginBottom: 18, marginHorizontal: 24
+                }}>
+                  <TouchableOpacity onPress={async () => {
+                    if (stepOneDL.stepOneDLOTP === '') {
+                      showToast('error', 'Please fill OTP')
+                      return;
+                    }
+                     setStepOneDL({
+                                ...stepOneDL,
+                                stepOneDLMobileVerifying: false,
+                              });
+                    setCurrentStepDL(2)
+                     
+                  }}>
+                    <Text style={{
+                      color: '#D96A27',
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#D96A27',
+                    }}>Verify</Text>
+                  </TouchableOpacity>
+
+                </View>
+              </>
+
+              : <>
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>
+                    Enter Details <Text style={{ color: 'red' }}>*</Text>
+                  </Text>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.prefix}>+91</Text>
+                    <TextInput
+                      value={stepOneDL.stepOneDLMobileNumber}
+                      onChangeText={text => {
+                        let value = text.replace(/\D/g, '').slice(0, 10);;
+                        setStepOneDL({
+                          ...stepOneDL,
+                          stepOneDLMobileNumber: value,
+                        });
+                      }}
+                      placeholder={'Enter Mobile Number'}
+                      maxLength={10}
+                      keyboardType={
+                        [
+                          'Mobile Number',
+                          'Register with Mobile Number',
+                          'Aadhaar Number',
+                          'ABHA Number',
+                          'Create ABHA Number',
+                        ].includes(loginType)
+                          ? 'number-pad'
+                          : 'default'
+                      }
+                      style={styles.input}
+                    />
+
+                  </View>
+
+
+                </View>
+
+                    <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
+              <View>
+                <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>
+              </View>
+              <View style={styles.captchaContainer}>
+
+                <Text style={styles.captchaText}>
+                  {captcha.question}
+                </Text>
+
+                <TextInput
+                  placeholder="Enter answer"
+                  keyboardType="number-pad"
+                  value={captchaValue}
+                  onChangeText={setCaptchaValue}
+                  style={styles.captchaInput}
+                />
+
+                <TouchableOpacity onPress={refreshCaptcha}>
+                  <MaterialIcons
+                    name="loop"
+                    size={28}
+                    color="#1E40AF"
+                  />
+
+                </TouchableOpacity>
+              </View>
+            </View>
+               
+              </>
+
+          }
+
+
+        </>;
+      case 2:
+        return <><DLStepTwo /></>;
+    }
+  }
+
   const stepOneValidator = () => {
     if (
       stepOne.aadhaarNumber.replace(/-/g, '').length !== 12
@@ -1225,259 +1369,366 @@ const LoginScreen = () => {
           isFromRegister ? <>
 
             <View style={{ height: '85%' }}>
-              <View style={styles.stepContainer}>
-                {steps.map((item, index) => {
-                  const stepNumber = index + 1;
-                  const isActive = currentStep >= stepNumber;
+              {
+                loginType === 'Aadhaar Number' ? <>
 
-                  return (
-                    <React.Fragment key={index}>
-                      <TouchableOpacity
-                        style={styles.stepItem}
-                        disabled
-                      >
-                        <View
-                          style={[
-                            styles.circle,
-                            isActive && styles.activeCircle,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.circleText,
-                              isActive && styles.activeCircleText,
-                            ]}
+                  <View style={styles.stepContainer}>
+                    {steps.map((item, index) => {
+                      const stepNumber = index + 1;
+                      const isActive = currentStep >= stepNumber;
+
+                      return (
+                        <React.Fragment key={index}>
+                          <TouchableOpacity
+                            style={styles.stepItem}
+                            disabled
                           >
-                            {stepNumber}
-                          </Text>
-                        </View>
+                            <View
+                              style={[
+                                styles.circle,
+                                isActive && styles.activeCircle,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.circleText,
+                                  isActive && styles.activeCircleText,
+                                ]}
+                              >
+                                {stepNumber}
+                              </Text>
+                            </View>
 
-                        <Text
-                          style={[
-                            styles.stepLabel,
-                            isActive && styles.activeStepLabel,
-                          ]}
-                        >
-                          Step {stepNumber}
-                        </Text>
-                      </TouchableOpacity>
+                            <Text
+                              style={[
+                                styles.stepLabel,
+                                isActive && styles.activeStepLabel,
+                              ]}
+                            >
+                              Step {stepNumber}
+                            </Text>
+                          </TouchableOpacity>
 
-                      {index < steps.length - 1 && (
-                        <View
-                          style={[
-                            styles.line,
-                            currentStep > stepNumber && styles.activeLine,
-                          ]}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </View>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                style={{ flex: 0.8, padding: 0 }}>
-
-
-
-                {renderStep()}
-              </ScrollView>
-              <View style={[styles.buttonContainer, {
-
-              }]}>
-                <View style={[
-                  {
-                    backgroundColor: '#173D8F',
-                    borderRadius: 4,
-                    alignContent: 'center',
-                    alignItems: 'center',
-                    alignSelf: 'center',
-                    padding: 10
-                  }
-                ]}>
-                  <Text style={styles.typeText}>
-                    {steps[currentStep - 1]}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={async () => {
-                    try {
-                      dispatch(showLoader());
-                      if (currentStep === 1) {
-                        //step 1
+                          {index < steps.length - 1 && (
+                            <View
+                              style={[
+                                styles.line,
+                                currentStep > stepNumber && styles.activeLine,
+                              ]}
+                            />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    style={{ flex: 0.8, padding: 0 }}>
 
 
-                        const validate = stepOneValidator();
-                        console.log("validate +++++ ++ + + +++++ ", validate)
-                        if (!validate) {
-                          showToast('error', "Please fill all fields correctly")
-                          return;
-                        }
-                        setStepOne({
-                          ...stepOne,
-                          passedForVarification: !stepOne.passedForVarification,
-                        });
+
+                    {renderStep()}
+                  </ScrollView>
+                  <View style={[styles.buttonContainer, {
+
+                  }]}>
+                    <View style={[
+                      {
+                        backgroundColor: '#173D8F',
+                        borderRadius: 4,
+                        alignContent: 'center',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        padding: 10
+                      }
+                    ]}>
+                      <Text style={styles.typeText}>
+                        {steps[currentStep - 1]}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={async () => {
+                        try {
+                          dispatch(showLoader());
+                          if (currentStep === 1) {
+                            //step 1
 
 
-                        const encryptedValue =
-                          encryptData(
-                            loginValue,
-                            publicKey,
-                          );
-                        const payloadPassed = getEnrollmentPayload(
-                          loginType,
-                          encryptedValue,
-                          txnId,
-                        );
-                        const result = await enrollmentRequestOtp(payloadPassed).unwrap();
-                        console.log("result ------+++++++++++++-------- ", result)
-                        setStepTwo({
-                          ...stepTwo,
-                          stepTwoTitle: result?.message,
-                        });
-                        setCurrentStep(2)
-                        // navigation.navigate('OtpVerification', {
-                        //   loginType,
-                        //   mobileNumber: loginValue,
-                        // });
-                        // setCurrentStep(2)
+                            const validate = stepOneValidator();
+                            console.log("validate +++++ ++ + + +++++ ", validate)
+                            if (!validate) {
+                              showToast('error', "Please fill all fields correctly")
+                              return;
+                            }
+                            setStepOne({
+                              ...stepOne,
+                              passedForVarification: !stepOne.passedForVarification,
+                            });
 
-                      } else if (currentStep === 2) {
-                        //step 2
-                        const validate = stepTwoValidator();
-                        console.log("validate222222222 +++++ ++ + + +++++ ", validate)
-                        if (!validate) {
-                          showToast('error', "Please fill all fields correctly")
-                          return;
-                        }
 
-                        const encryptedValue =
-                          encryptData(
-                            stepTwo.stepTwoOTP,
-                            publicKey,
-                          );
-                        console.log(
-                          "txnId =>",
-                          txnId
-                        );
-                        const payloadPassed = getEnrolByAadhaarPayload(
-                          txnId,
-                          encryptedValue,
-                          stepTwo.stepTwoMobileNumber,
-
-                        );
-                        const result = await enrolByAadhaar(payloadPassed).unwrap();
-                        console.log("result ------+++++++++++++-------- ", result)
-
-                        if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
-                          // setCurrentStep(4)
-                          const responseProfile =
-                            await getProfileAccount();
-                          console.log(responseProfile);
-                          navigation.navigate("Profile", {
-                            profile: responseProfile.data,
-                          });
-                        } else {
-                          setCurrentStep(3)
-                        }
-
-                        // setCurrentStep(3)
-                      } else if (currentStep === 3) {
-                        //step 3
-                        if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
-                          const encryptedOtp =
-                            encryptData(
-                              stepThree.stepThreeMobileOTP,
-                              publicKey
-                            );
-
-                          const payload =
-                            getAuthByAbdmPayload(
+                            const encryptedValue =
+                              encryptData(
+                                loginValue,
+                                publicKey,
+                              );
+                            const payloadPassed = getEnrollmentPayload(
+                              loginType,
+                              encryptedValue,
                               txnId,
-                              encryptedOtp
                             );
+                            const result = await enrollmentRequestOtp(payloadPassed).unwrap();
+                            console.log("result ------+++++++++++++-------- ", result)
+                            setStepTwo({
+                              ...stepTwo,
+                              stepTwoTitle: result?.message,
+                            });
+                            setCurrentStep(2)
+                            // navigation.navigate('OtpVerification', {
+                            //   loginType,
+                            //   mobileNumber: loginValue,
+                            // });
+                            // setCurrentStep(2)
 
-                          const result =
-                            await authByAbdm(
-                              payload
-                            ).unwrap();
+                          } else if (currentStep === 2) {
+                            //step 2
+                            const validate = stepTwoValidator();
+                            console.log("validate222222222 +++++ ++ + + +++++ ", validate)
+                            if (!validate) {
+                              showToast('error', "Please fill all fields correctly")
+                              return;
+                            }
 
-                          console.log(
-                            "AUTH BY ABDM RESULT =>",
-                            result
-                          );
-                          if (result?.authResult === 'success') {
-                            setStepThree({
-                              ...stepThree,
-                              stepThreeMobileAuthDone: true,
+                            const encryptedValue =
+                              encryptData(
+                                stepTwo.stepTwoOTP,
+                                publicKey,
+                              );
+                            console.log(
+                              "txnId =>",
+                              txnId
+                            );
+                            const payloadPassed = getEnrolByAadhaarPayload(
+                              txnId,
+                              encryptedValue,
+                              stepTwo.stepTwoMobileNumber,
+
+                            );
+                            const result = await enrolByAadhaar(payloadPassed).unwrap();
+                            console.log("result ------+++++++++++++-------- ", result)
+
+                            if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
+                              // setCurrentStep(4)
+                              const responseProfile =
+                                await getProfileAccount();
+                              console.log(responseProfile);
+                              navigation.navigate("Profile", {
+                                profile: responseProfile.data,
+                              });
+                            } else {
+                              setCurrentStep(3)
+                            }
+
+                            // setCurrentStep(3)
+                          } else if (currentStep === 3) {
+                            //step 3
+                            if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
+                              const encryptedOtp =
+                                encryptData(
+                                  stepThree.stepThreeMobileOTP,
+                                  publicKey
+                                );
+
+                              const payload =
+                                getAuthByAbdmPayload(
+                                  txnId,
+                                  encryptedOtp
+                                );
+
+                              const result =
+                                await authByAbdm(
+                                  payload
+                                ).unwrap();
+
+                              console.log(
+                                "AUTH BY ABDM RESULT =>",
+                                result
+                              );
+                              if (result?.authResult === 'success') {
+                                setStepThree({
+                                  ...stepThree,
+                                  stepThreeMobileAuthDone: true,
+                                });
+                              }
+
+                              return;
+                            }
+                            if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
+                              setStepThree({
+                                ...stepThree,
+                                stepThreeEmailVarifying: true,
+                              });
+                              return;
+                            }
+                            if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+                              showToast('error', "Please varify email")
+                              return;
+                            }
+                            if (stepThree.stepThreeEmailOTP.length === 6 && stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
+                              // setCurrentStep(4)
+                              // 
+                              return;
+                            }
+                            if (stepThree.stepThreeEmailVarifying) {
+                              // setCurrentStep(4)
+                              return;
+                            }
+                            showToast('error', "Please verify mobile")
+                            // setCurrentStep(4)
+                          } else if (currentStep === 4) {
+                            //step 4
+
+                            if (!stepFour.userName && stepFour.userName === '') {
+                              showToast('error', "Please fill abha address")
+                              return;
+                            }
+                            const response =
+                              await enrolAbhaAddress(
+                                getEnrolAbhaAddressPayload(
+                                  txnId,
+                                  stepFour.userName,
+                                  1
+                                )
+                              ).unwrap();
+
+                            const responseProfile =
+                              await getProfileAccount();
+                            console.log(responseProfile);
+                            navigation.navigate("Profile", {
+                              profile: responseProfile.data,
                             });
                           }
+                        } catch (error) {
+                          console.log("--------------------", error)
+                          dispatch(hideLoader());
+                        } finally {
+                          dispatch(hideLoader());
+                        }
 
-                          return;
-                        }
-                        if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
-                          setStepThree({
-                            ...stepThree,
-                            stepThreeEmailVarifying: true,
-                          });
-                          return;
-                        }
-                        if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                          showToast('error', "Please varify email")
-                          return;
-                        }
-                        if (stepThree.stepThreeEmailOTP.length === 6 && stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                          // setCurrentStep(4)
-                          // 
-                          return;
-                        }
-                        if (stepThree.stepThreeEmailVarifying) {
-                          // setCurrentStep(4)
-                          return;
-                        }
-                        showToast('error', "Please verify mobile")
-                        // setCurrentStep(4)
-                      } else if (currentStep === 4) {
-                        //step 4
+                        // nextStep()
+                      }}
+                      style={styles.nextButton}
+                    >
+                      <Text style={{ color: '#FFF' }}>
+                        {currentStep === 4 ? 'Create ABHA' : currentStep === 3 ?
+                          stepThree.stepThreeMobileAuthDone ?
+                            "Skip for now" : "Next" : 'Next'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
 
-                        if (!stepFour.userName && stepFour.userName === '') {
-                          showToast('error', "Please fill abha address")
-                          return;
-                        }
-                        const response =
-                          await enrolAbhaAddress(
-                            getEnrolAbhaAddressPayload(
-                              txnId,
-                              stepFour.userName,
-                              1
-                            )
-                          ).unwrap();
+                </> : <>
 
-                        const responseProfile =
-                          await getProfileAccount();
-                        console.log(responseProfile);
-                        navigation.navigate("Profile", {
-                          profile: responseProfile.data,
-                        });
+                  <View style={styles.stepContainer}>
+                    {stepsDL.map((item, index) => {
+                      const stepNumber = index + 1;
+                      const isActive = currentStepDL >= stepNumber;
+                      return (
+                        <React.Fragment key={index}>
+                          <TouchableOpacity
+                            style={styles.stepItem}
+                            disabled
+                          >
+                            <View
+                              style={[
+                                styles.circle,
+                                isActive && styles.activeCircle,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.circleText,
+                                  isActive && styles.activeCircleText,
+                                ]}
+                              >
+                                {stepNumber}
+                              </Text>
+                            </View>
+
+                            <Text
+                              style={[
+                                styles.stepLabel,
+                                isActive && styles.activeStepLabel,
+                              ]}
+                            >
+                              Step {stepNumber}
+                            </Text>
+                          </TouchableOpacity>
+
+                          {index < stepsDL.length - 1 && (
+                            <View
+                              style={[
+                                styles.line,
+                                currentStep > stepNumber && styles.activeLine,
+                              ]}
+                            />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+
+                  </View>
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    style={{ flex: 0.8, padding: 0 }}>
+                    {renderDLStep()}
+                  </ScrollView>
+
+                   <View style={[styles.buttonContainer, {
+
+                  }]}>
+                    <View style={[
+                      {
+                        backgroundColor: '#173D8F',
+                        borderRadius: 4,
+                        alignContent: 'center',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        padding: 10
                       }
-                    } catch (error) {
-                      console.log("--------------------", error)
-                      dispatch(hideLoader());
-                    } finally {
-                      dispatch(hideLoader());
-                    }
+                    ]}>
+                      <Text style={styles.typeText}>
+                        {stepsDL[currentStepDL - 1]}
+                      </Text>
+                    </View>
 
-                    // nextStep()
-                  }}
-                  style={styles.nextButton}
-                >
-                  <Text style={{ color: '#FFF' }}>
-                    {currentStep === 4 ? 'Create ABHA' : currentStep === 3 ?
-                      stepThree.stepThreeMobileAuthDone ?
-                        "Skip for now" : "Next" : 'Next'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                    {
+                    !stepOneDL.stepOneDLMobileVerifying &&  <TouchableOpacity
+                      onPress={async () => {
+                        if(currentStepDL === 1){
+                          if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
+                                showToast('error', 'Please fill mobile number')
+                                return;
+                              }
+                              setStepOneDL({
+                                ...stepOneDL,
+                                stepOneDLMobileVerifying: true,
+                              });
+                          }else{
+
+                          }
+                      }}
+                      style={styles.nextButton}
+                    >
+                      <Text style={{ color: '#FFF' }}>
+                        { 'Next'}
+                      </Text>
+                    </TouchableOpacity>
+                    }
+                   
+                  </View>
+                </>
+              }
+
             </View>
 
 
@@ -2206,451 +2457,3 @@ const LoginScreen = () => {
 };
 
 export default LoginScreen;
-
-const styles = StyleSheet.create({
-  stepContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginTop: 20,
-  },
-
-  stepItem: {
-    alignItems: 'center',
-  },
-
-  circle: {
-    width: 35,
-    height: 35,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: '#CFCFCF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-  },
-
-  activeCircle: {
-    backgroundColor: '#2E7D32',
-    borderColor: '#2E7D32',
-  },
-
-  circleText: {
-    color: '#999',
-    fontWeight: '600',
-  },
-
-  activeCircleText: {
-    color: '#FFF',
-  },
-
-  stepLabel: {
-    marginTop: 6,
-    fontSize: 12,
-    color: '#999',
-  },
-
-  activeStepLabel: {
-    color: '#2E7D32',
-    fontWeight: '600',
-  },
-
-  line: {
-    top: 20,
-    flex: 0.7,
-    height: 2,
-    backgroundColor: '#DADADA',
-  },
-
-  activeLine: {
-    backgroundColor: '#2E7D32',
-  },
-  stepContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 20,
-  },
-
-  stepItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-
-  stepCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#E5E5E5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  activeCircle: {
-    backgroundColor: '#4F6EDB',
-  },
-
-  stepNumber: {
-    color: '#999',
-    fontWeight: '600',
-  },
-
-  activeNumber: {
-    color: '#FFF',
-  },
-
-  stepLabel: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#999',
-  },
-
-  activeLabel: {
-    color: '#000',
-    fontWeight: '600',
-  },
-
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-    paddingHorizontal: 24
-  },
-
-  backButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-  },
-
-  nextButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: '#D96A27',
-    borderRadius: 8,
-  },
-
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#F6F8FC',
-  },
-  captchaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  captchaInput: {
-    flex: 1,
-    height: 46,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    backgroundColor: '#FFF',
-    marginHorizontal: 12,
-  },
-  captchaCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-
-  },
-
-  captchaLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
-    marginBottom: 12,
-  },
-
-  captchaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  captchaBox: {
-    width: 110,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  captchaText: {
-    fontSize: 34,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-
-  answerInput: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    marginHorizontal: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-
-  iconButton: {
-    height: 42,
-    width: 42,
-    borderRadius: 21,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  prefix: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginRight: 10,
-  },
-  header: {
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 8
-  },
-  back: {
-    fontSize: 28,
-    color: '#173D8F',
-  },
-  hero: {
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  welcome: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#173D8F',
-  },
-  subtitle: {
-    color: '#666',
-  },
-  typeChip: {
-    marginHorizontal: 20,
-    marginBottom: 15,
-    backgroundColor: '#173D8F',
-    borderRadius: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    flexDirection: 'row'
-  },
-  typeText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  forgotText: {
-    color: '#D96A27',
-    fontWeight: '600',
-  },
-  card: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 15,
-    borderRadius: 8,
-    padding: 16,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  radioRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  radioOuter: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#999',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioOuterActive: {
-    borderColor: '#D96A27',
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#D96A27',
-  },
-  radioText: {
-    marginLeft: 12,
-    fontSize: 16,
-  },
-  bottomBar: {
-    backgroundColor: '#fff',
-    padding: 16,
-  },
-  continueBtn: {
-    height: 46,
-    backgroundColor: '#D96A27',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  continueText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 18,
-  },
-  faceAuthCard: {
-    backgroundColor: '#FFF',
-    marginHorizontal: 20,
-    borderRadius: 8,
-    padding: 20,
-    alignItems: 'center',
-  },
-
-  faceEmoji: {
-    fontSize: 42,
-  },
-
-  faceText: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: '#173D8F',
-    fontSize: 16,
-  },
-  footer: {
-    marginTop: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  footerText: {
-    color: '#555',
-    fontSize: 10,
-  },
-
-  createNow: {
-    marginLeft: 6,
-    color: '#D96A27',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 48,
-  },
-
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-  },
-  hintText: {
-    fontSize: 12,
-    color: '#000',
-    marginLeft: 8,
-  },
-  termsContainer: {
-    marginHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 12
-  },
-
-  termsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#222',
-  },
-
-  termsCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    borderColor: '#E5E5E5',
-    overflow: 'hidden',
-  },
-
-  termsText: {
-    padding: 18,
-    fontSize: 14,
-    lineHeight: 24,
-    color: '#555',
-  },
-
-  termsFooter: {
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#173D8F',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  checkboxActive: {
-    backgroundColor: '#173D8F',
-  },
-
-  checkmark: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  agreeText: {
-    marginLeft: 10,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
-  },
-
-  speakerIcon: {
-    fontSize: 22,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 48,
-  },
-
-  passwordInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-  },
-
-  eyeIcon: {
-    fontSize: 20,
-  },
-});

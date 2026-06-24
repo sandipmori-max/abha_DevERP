@@ -424,6 +424,20 @@ const DLStepTwo = ({
             image={
               formData.frontSidePhoto
             }
+             onPress={async () => {
+    const hasPermission = await requestPermission("camera");
+
+    if (!hasPermission) {
+      return;
+    }
+
+    openImagePicker(asset => {
+      updateField(
+        "frontSidePhoto",
+        asset.base64 || ""
+      );
+    });
+  }}
           />
 
           <UploadBox
@@ -431,6 +445,20 @@ const DLStepTwo = ({
             image={
               formData.backSidePhoto
             }
+             onPress={async () => {
+    const hasPermission = await requestPermission("camera");
+
+    if (!hasPermission) {
+      return;
+    }
+
+    openImagePicker(asset => {
+      updateField(
+        "frontSidePhoto",
+        asset.base64 || ""
+      );
+    });
+  }}
           />
         </View>
         <View style={styles.card}>
@@ -663,8 +691,10 @@ const Input = ({
 const UploadBox = ({
   title,
   image,
+  onPress
 }: any) => (
   <TouchableOpacity
+    onPress={onPress}
     style={styles.uploadBox}
   >
     {image ? (

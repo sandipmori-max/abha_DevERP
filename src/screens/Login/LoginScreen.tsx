@@ -504,6 +504,7 @@ const LoginScreen = () => {
             </Text>
 
           </TouchableOpacity>
+          
           <Text style={[styles.welcome, isFromRegister && {
             fontSize: 18
           }]}>

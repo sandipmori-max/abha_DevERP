@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,11 +12,33 @@ import {
   View,
 } from "react-native";
 import RadioItem from "./RadioItem";
-import { TERMS_ONE } from "../../utils/helpers";
-
+import DateTimePicker from "@react-native-community/datetimepicker";
 const DLStepTwo = ({
   navigation,
 }: any) => {
+
+ const [showDatePicker, setShowDatePicker] =
+  useState(false);
+
+const [tempDate, setTempDate] =
+  useState(new Date());
+
+  console.log("showDatePicker", showDatePicker)
+const [dob, setDob] = useState("");
+const formatDate = (date: Date) => {
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const year =
+    date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
   const [formData, setFormData] =
     useState({
       documentId: "",
@@ -76,6 +100,7 @@ const DLStepTwo = ({
         }
       >
 
+  
         <View style={styles.infoBanner}>
           <Text style={styles.infoIcon}>
             ℹ️
@@ -162,7 +187,7 @@ const DLStepTwo = ({
             }
           />
 
-          <Input
+          {/* <Input
             label="DOB (DD-MM-YYYY)"
             value={formData.dob}
             onChangeText={text =>
@@ -171,7 +196,25 @@ const DLStepTwo = ({
                 text
               )
             }
-          />
+          /> */}
+          <Text style={styles.fieldLabel}>
+            DOB (DD-MM-YYYY)
+          </Text>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              setShowDatePicker(true)
+            }}
+          >
+            <TextInput
+              value={dob}
+              editable={false}
+              pointerEvents="none"
+              placeholder="Select DOB"
+              style={styles.input}
+            />
+          </TouchableOpacity>
 
           <Text style={styles.fieldLabel}>
             Gender
@@ -370,6 +413,89 @@ const DLStepTwo = ({
           </View>
         </View>
       </ScrollView>
+   <Modal
+  visible={showDatePicker}
+  transparent
+  animationType="fade"
+>
+  <TouchableOpacity
+    activeOpacity={1}
+    style={styles.modalOverlay}
+    onPress={() =>
+      setShowDatePicker(false)
+    }
+  >
+    <TouchableOpacity
+      activeOpacity={1}
+      style={styles.bottomSheet}
+    >
+      <View style={styles.sheetHandle} />
+
+      <Text style={styles.sheetTitle}>
+        Select Date of Birth
+      </Text>
+
+      <DateTimePicker
+        value={tempDate}
+        mode="date"
+        display="spinner"
+        maximumDate={new Date()}
+        onChange={(
+          event,
+          selectedDate
+        ) => {
+          if (selectedDate) {
+            setTempDate(
+              selectedDate
+            );
+          }
+        }}
+      />
+
+      <View style={styles.footerButtons}>
+        <TouchableOpacity
+          style={styles.cancelBtn}
+          onPress={() =>
+            setShowDatePicker(false)
+          }
+        >
+          <Text
+            style={
+              styles.cancelBtnText
+            }
+          >
+            Cancel
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.doneBtn}
+          onPress={() => {
+            const formatted =
+              formatDate(tempDate);
+
+            setDob(formatted);
+
+            updateField(
+              "dob",
+              formatted
+            );
+
+            setShowDatePicker(false);
+          }}
+        >
+          <Text
+            style={
+              styles.doneBtnText
+            }
+          >
+            Confirm
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  </TouchableOpacity>
+</Modal>
     </View>
   );
 };
@@ -510,7 +636,46 @@ const styles =
       fontSize: 16,
       fontWeight: '700',
     },
+modalOverlay: {
+  flex: 1,
+  justifyContent: "flex-end",
+  backgroundColor:
+    "rgba(0,0,0,0.4)",
+},
 
+bottomSheet: {
+  backgroundColor: "#FFF",
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  paddingBottom: 30,
+},
+
+header: {
+  flexDirection: "row",
+  justifyContent:
+    "space-between",
+  alignItems: "center",
+  paddingHorizontal: 20,
+  paddingVertical: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: "#EEE",
+},
+
+title: {
+  fontSize: 16,
+  fontWeight: "600",
+},
+
+cancel: {
+  color: "#64748B",
+  fontSize: 15,
+},
+
+done: {
+  color: "#D96A27",
+  fontSize: 15,
+  fontWeight: "600",
+},
 
     infoText: {
       marginTop: 4,
@@ -733,4 +898,73 @@ const styles =
       justifyContent: 'space-between',
       alignItems: 'center',
     },
+    modalOverlay: {
+  flex: 1,
+  backgroundColor:
+    "rgba(0,0,0,0.45)",
+  justifyContent: "flex-end",
+},
+
+bottomSheet: {
+  backgroundColor: "#FFF",
+  borderTopLeftRadius: 28,
+  borderTopRightRadius: 28,
+  paddingTop: 12,
+  paddingHorizontal: 20,
+  paddingBottom: 30,
+},
+
+sheetHandle: {
+  width: 48,
+  height: 5,
+  borderRadius: 10,
+  backgroundColor: "#D1D5DB",
+  alignSelf: "center",
+  marginBottom: 20,
+},
+
+sheetTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#111827",
+  textAlign: "center",
+  marginBottom: 10,
+},
+
+footerButtons: {
+  flexDirection: "row",
+  marginTop: 10,
+},
+
+cancelBtn: {
+  flex: 1,
+  height: 50,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 8,
+},
+
+doneBtn: {
+  flex: 1,
+  height: 50,
+  borderRadius: 12,
+  backgroundColor: "#D96A27",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+cancelBtnText: {
+  fontSize: 15,
+  fontWeight: "600",
+  color: "#6B7280",
+},
+
+doneBtnText: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#FFF",
+},
   });

@@ -18,4 +18,6 @@ export const END_POINTS = {
   enrolAbhaAddress:
   "enrollment/enrol/abha-address",
   profileAccount: "profile/account",
+  dlEnrollmentRequestOtp:
+  "enrollment/request/otp",
 }

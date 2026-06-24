@@ -35,6 +35,7 @@ import StepTwo from './StepTwo';
 import StepThree from './StepThree';
 import StepFour from './StepFour';
 import DLStepOne from './DLStepOne';
+import { getDlEnrollmentRequestOtpPayload, useDlEnrollmentRequestOtpMutation } from '../../redux/api/dlEnrollmentRequestOtpApi';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -111,6 +112,8 @@ const LoginScreen = () => {
   const [enrolSuggestion,] = useEnrolSuggestionMutation();
   const [enrolAbhaAddress,] = useEnrolAbhaAddressMutation();
   const [getProfileAccount,] = useLazyProfileAccountQuery();
+  const [dlEnrollmentRequestOtp,] = useDlEnrollmentRequestOtpMutation();
+
 
   const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
   const [loginValue, setLoginValue] = useState('');
@@ -425,6 +428,38 @@ const LoginScreen = () => {
     }
   };
 
+  const handleOTPVerify = async () => {
+    if (stepOneDL.stepOneDLOTP === '') {
+      showToast('error', 'Please fill OTP')
+      return;
+    }
+    const encryptedOtp =
+      encryptData(
+        stepOneDL.stepOneDLOTP,
+        publicKey
+      );
+    const payload =
+      getAuthByAbdmPayload(
+        txnId,
+        encryptedOtp
+      );
+    const result =
+      await authByAbdm(
+        payload
+      ).unwrap();
+    console.log(
+      "AUTH BY ABDM RESULT =>",
+      result
+    );
+    if (result?.authResult === 'success') {
+      setStepOneDL({
+        ...stepOneDL,
+        stepOneDLMobileVerifying: false,
+      });
+      setCurrentStepDL(2)
+    }
+
+  }
   const renderDLStep = () => {
     switch (currentStepDL) {
       case 1:
@@ -438,10 +473,13 @@ const LoginScreen = () => {
             captcha={captcha}
             captchaValue={captchaValue}
             setCaptchaValue={setCaptchaValue}
+            handleOTPVerify={handleOTPVerify}
           />
         </>;
       case 2:
-        return <><DLStepTwo /></>;
+        return <><DLStepTwo mobileNumber={stepOneDL?.stepOneDLMobileNumber} /></>;
+      case 3:
+        return <></>
     }
   }
 
@@ -767,18 +805,45 @@ const LoginScreen = () => {
                     {
                       !stepOneDL.stepOneDLMobileVerifying && <TouchableOpacity
                         onPress={async () => {
-                          if (currentStepDL === 1) {
-                            if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
-                              showToast('error', 'Please fill mobile number')
-                              return;
-                            }
-                            setStepOneDL({
-                              ...stepOneDL,
-                              stepOneDLMobileVerifying: true,
-                            });
-                          } else {
+                          try {
+                            dispatch(showLoader())
+                            if (currentStepDL === 1) {
+                              if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
+                                showToast('error', 'Please fill mobile number')
+                                return;
+                              }
+                              const encryptedMobile = encryptData(
+                                stepOneDL.stepOneDLMobileNumber,
+                                publicKey,
+                              );
+                              const payload =
+                                getDlEnrollmentRequestOtpPayload(
+                                  encryptedMobile
+                                );
 
+                              const response =
+                                await dlEnrollmentRequestOtp(
+                                  payload
+                                ).unwrap();
+
+                              console.log("response -- -- - - - - - - - - - - - - - - ", response);
+                              showToast('success', response?.message)
+                              setStepOneDL({
+                                ...stepOneDL,
+                                stepOneDLTitle: response?.message,
+                                stepOneDLMobileVerifying: true,
+                              });
+                            } else {
+
+                            }
+                          } catch (error) {
+                            showToast('error', `${error}`)
+                            dispatch(hideLoader())
+                          } finally {
+                            dispatch(hideLoader())
                           }
+
+
                         }}
                         style={styles.nextButton}
                       >
@@ -1090,7 +1155,11 @@ const LoginScreen = () => {
 
                   <View style={styles.termsCard}>
                     <Text style={styles.termsText}>
-                      {TERMS_ONE}
+                     I hereby declare that I am voluntarily sharing my
+                    Aadhaar Number and demographic information issued
+                    by UIDAI with National Health Authority (NHA) for
+                    the sole purpose of authentication and healthcare
+                    services under ABDM.
                     </Text>
 
                     <View style={styles.termsFooter}>
@@ -1242,9 +1311,11 @@ const LoginScreen = () => {
 
                   <View style={styles.termsCard}>
                     <Text style={styles.termsText}>
-                      {
-                        TERMS_SIX
-                      }
+                      I hereby declare that I am voluntarily sharing my
+                    Aadhaar Number and demographic information issued
+                    by UIDAI with National Health Authority (NHA) for
+                    the sole purpose of authentication and healthcare
+                    services under ABDM.
                     </Text>
 
                     <View style={styles.termsFooter}>

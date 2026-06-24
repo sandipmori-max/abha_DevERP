@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 import { ABHA_ICON } from '../../assets';
 import { encryptData } from '../../utils/encrypt';
+import EnrollmentInfoModal from '../Login/EnrollmentInfoModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -120,6 +121,7 @@ export default function IntroScreen() {
     );
     const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
+    const [showInfoModal, setShowInfoModal] = useState(false);
 
     const registerAnim = useRef(
         new Animated.Value(250),
@@ -482,6 +484,11 @@ export default function IntroScreen() {
                                     ]}
                                     onPress={() => {
                                         setSelectedLoginType(item)
+                                        if (item === 'Driving Licence') {
+                                            setShowLoginSheet(false)
+                                            setShowInfoModal(true)
+                                            return;
+                                        }
                                         setTimeout(() => {
                                             setShowLoginSheet(false)
                                             navigation.navigate("Login", {
@@ -545,7 +552,7 @@ export default function IntroScreen() {
                                     <TouchableOpacity
                                         style={styles.loginBtnText}
                                         onPress={() => {
-                                             setBottomSheetType('Register')
+                                            setBottomSheetType('Register')
                                         }}
                                     >
                                         <Text
@@ -566,6 +573,22 @@ export default function IntroScreen() {
                     </Animated.View>
                 </Modal>
             )}
+
+            <EnrollmentInfoModal
+                visible={showInfoModal}
+                onClose={() => {
+                    setShowInfoModal(false)
+                    setTimeout(() => {
+                        setShowLoginSheet(false)
+                        navigation.navigate("Login", {
+                            loginType: 'Driving Licence',
+                            isFromRegister: true
+                        })
+                    })
+                }
+
+                }
+            />
 
         </SafeAreaView>
     );

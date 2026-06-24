@@ -75,8 +75,9 @@ export  const formatAadhaar = (value: string) => {
    ]
  
  export  const stepsDL = [
-     "Mobile Number",
-     "Create ABHA",
+     "Mobile Authentication",
+     "Profile & Consent Collection",
+     "Process Completion"
    ] 
 
 export   const stepOneValidator = (stepOne, captchaValue, captcha) => {

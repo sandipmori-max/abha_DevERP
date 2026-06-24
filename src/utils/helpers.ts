@@ -279,7 +279,7 @@ export const TERMS_SIX = `I hereby declare that I am voluntarily sharing my
                     the sole purpose of authentication and healthcare
                     services under ABDM.`
 
-                    export function isStrictIndianMobile(input: string): boolean {
+export function isStrictIndianMobile(input: string): boolean {
   if (typeof input !== "string") return false;
 
   // 1. Basic cleanup (only outer spaces)

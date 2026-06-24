@@ -12,6 +12,12 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		DA769E842FEC0AA700659A9C /* DocumentScanner.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA769E832FEC0AA700659A9C /* DocumentScanner.mm */; };
+		DA769E872FEC0CD800659A9C /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E862FEC0CD800659A9C /* Vision.framework */; };
+		DA769E882FEC0CDE00659A9C /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E862FEC0CD800659A9C /* Vision.framework */; };
+		DA769E8A2FEC0CE400659A9C /* VisionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E892FEC0CE400659A9C /* VisionKit.framework */; };
+		DA769E8C2FEC0CEA00659A9C /* VisualIntelligence.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E8B2FEC0CEA00659A9C /* VisualIntelligence.framework */; };
+		DA769E8E2FEC0D1500659A9C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E8D2FEC0D1500659A9C /* UIKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +30,14 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-AbhaDevERP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AbhaDevERP.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = AbhaDevERP/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = AbhaDevERP/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		DA769E812FEC0A9400659A9C /* DevERP-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DevERP-Bridging-Header.h"; sourceTree = "<group>"; };
+		DA769E822FEC0AA000659A9C /* DocumentScanner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DocumentScanner.h; sourceTree = "<group>"; };
+		DA769E832FEC0AA700659A9C /* DocumentScanner.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DocumentScanner.mm; sourceTree = "<group>"; };
+		DA769E852FEC0AA900659A9C /* AbhaDevERP-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AbhaDevERP-Bridging-Header.h"; sourceTree = "<group>"; };
+		DA769E862FEC0CD800659A9C /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
+		DA769E892FEC0CE400659A9C /* VisionKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VisionKit.framework; path = System/Library/Frameworks/VisionKit.framework; sourceTree = SDKROOT; };
+		DA769E8B2FEC0CEA00659A9C /* VisualIntelligence.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VisualIntelligence.framework; path = System/Library/Frameworks/VisualIntelligence.framework; sourceTree = SDKROOT; };
+		DA769E8D2FEC0D1500659A9C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -32,7 +46,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA769E8C2FEC0CEA00659A9C /* VisualIntelligence.framework in Frameworks */,
+				DA769E8E2FEC0D1500659A9C /* UIKit.framework in Frameworks */,
+				DA769E872FEC0CD800659A9C /* Vision.framework in Frameworks */,
+				DA769E882FEC0CDE00659A9C /* Vision.framework in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-AbhaDevERP.a in Frameworks */,
+				DA769E8A2FEC0CE400659A9C /* VisionKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,11 +61,15 @@
 		13B07FAE1A68108700A75B9A /* AbhaDevERP */ = {
 			isa = PBXGroup;
 			children = (
+				DA769E832FEC0AA700659A9C /* DocumentScanner.mm */,
+				DA769E822FEC0AA000659A9C /* DocumentScanner.h */,
+				DA769E812FEC0A9400659A9C /* DevERP-Bridging-Header.h */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				DA769E852FEC0AA900659A9C /* AbhaDevERP-Bridging-Header.h */,
 			);
 			name = AbhaDevERP;
 			sourceTree = "<group>";
@@ -54,6 +77,10 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DA769E8D2FEC0D1500659A9C /* UIKit.framework */,
+				DA769E8B2FEC0CEA00659A9C /* VisualIntelligence.framework */,
+				DA769E892FEC0CE400659A9C /* VisionKit.framework */,
+				DA769E862FEC0CD800659A9C /* Vision.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-AbhaDevERP.a */,
 			);
@@ -131,7 +158,7 @@
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 2630;
 					};
 				};
 			};
@@ -191,9 +218,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -230,9 +261,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -247,6 +282,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				DA769E842FEC0AA700659A9C /* DocumentScanner.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +313,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = AbhaDevERP;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OBJC_BRIDGING_HEADER = "AbhaDevERP-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -307,6 +344,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = AbhaDevERP;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OBJC_BRIDGING_HEADER = "AbhaDevERP-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";

@@ -12,11 +12,10 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '16.0'
 
 prepare_react_native_project!
 
-# Required Permissions
 setup_permissions([
   'Camera',
   'PhotoLibrary',
@@ -34,14 +33,16 @@ target 'AbhaDevERP' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :hermes_enabled => true,
+    :fabric_enabled => false,
   )
+
+  pod 'GoogleMLKit/TextRecognitionChinese'
 
   post_install do |installer|
     react_native_post_install(
       installer,
-      config[:reactNativePath],
-      :mac_catalyst_enabled => false
+      config[:reactNativePath]
     )
   end
 end

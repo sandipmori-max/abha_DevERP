@@ -27,13 +27,13 @@ const EnrollmentInfoModal = ({ visible, onClose }: Props) => {
         style={styles.closeBtn}
         onPress={onClose}
       >
-        <MaterialIcons name="close" size={22} color="#6B7280" />
+        <MaterialIcons name="close" size={20} color="#6B7280" />
       </TouchableOpacity>
 
       <View style={styles.warningCircle}>
         <MaterialIcons
           name='add-alert'
-          size={42}
+          size={32}
           color="#F97316"
         />
       </View>
@@ -122,9 +122,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     top: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     backgroundColor: "#F3F4F6",
     justifyContent: "center",
     alignItems: "center",
@@ -132,9 +132,9 @@ const styles = StyleSheet.create({
   },
 
   warningCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 46,
+    height: 46,
+    borderRadius: 10,
     backgroundColor: "#FFF4ED",
     justifyContent: "center",
     alignItems: "center",
@@ -144,18 +144,16 @@ const styles = StyleSheet.create({
 
   title: {
     marginTop: 24,
-    fontSize: 30,
+    fontSize: 16,
     fontWeight: "700",
     textAlign: "center",
     color: "#111827",
   },
 
   subtitle: {
-    marginTop: 10,
-    fontSize: 18,
+    marginTop: 10, 
     color: "#6B7280",
-    textAlign: "center",
-    lineHeight: 26,
+    textAlign: "center", 
   },
 
   divider: {
@@ -171,29 +169,26 @@ const styles = StyleSheet.create({
   },
 
   badge: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 4,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
   },
 
   badgeText: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: 16,
   },
 
   message: {
-    flex: 1,
-    fontSize: 17,
-    color: "#374151",
-    lineHeight: 30,
+    flex: 1, 
+    color: "#374151", 
   },
 
   highlight: {
     color: "#F97316",
-    fontWeight: "700",
+    fontWeight: "400",
   },
 
   button: {

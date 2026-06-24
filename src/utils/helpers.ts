@@ -121,7 +121,7 @@ export   const stepOneValidator = (stepOne, captchaValue, captcha) => {
 
 export  const stepTwoValidator = (stepTwo) => {
     if (
-      stepTwo.stepTwoOTP !== ''
+      stepTwo.stepTwoOTP === ''
     ) {
       return false;
     }
@@ -278,3 +278,74 @@ export const TERMS_SIX = `I hereby declare that I am voluntarily sharing my
                     by UIDAI with National Health Authority (NHA) for
                     the sole purpose of authentication and healthcare
                     services under ABDM.`
+
+                    export function isStrictIndianMobile(input: string): boolean {
+  if (typeof input !== "string") return false;
+
+  // 1. Basic cleanup (only outer spaces)
+  const value = input.trim();
+
+  // 2. Must match EXACT +91 format only
+  const match = value.match(/^\+91(\d{10})$/);
+
+  if (!match) return false;
+
+  const number = match[1];
+
+  // 3. Must be numeric (extra safety)
+  if (!/^\d{10}$/.test(number)) return false;
+
+  // 4. Must start with 6-9
+  if (!/^[6-9]/.test(number)) return false;
+
+  // 5. Reject obvious invalid patterns (all same digits)
+  if (/^(\d)\1{9}$/.test(number)) return false;
+
+  // 6. Reject sequential patterns (1234567890, 9876543210)
+  const sequences = [
+    "0123456789",
+    "1234567890",
+    "0987654321",
+    "9876543210",
+  ];
+  if (sequences.includes(number)) return false;
+
+  return true;
+}
+
+export function isValidEmail(email: string): boolean {
+  if (typeof email !== "string") return false;
+
+  const value = email.trim().toLowerCase();
+
+  // 1. Basic length check
+  if (value.length < 5 || value.length > 254) return false;
+
+  // 2. Must contain single @
+  const atCount = (value.match(/@/g) || []).length;
+  if (atCount !== 1) return false;
+
+  const [local, domain] = value.split("@");
+
+  if (!local || !domain) return false;
+
+  // 3. Local part rules
+  if (local.length > 64) return false;
+  if (/^\./.test(local) || /\.$/.test(local)) return false;
+  if (/\.\./.test(local)) return false;
+
+  // Allowed characters check (strict but practical)
+  if (!/^[a-z0-9._%+-]+$/.test(local)) return false;
+
+  // 4. Domain rules
+  if (domain.length > 253) return false;
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) return false;
+
+  if (domain.startsWith("-") || domain.endsWith("-")) return false;
+  if (domain.includes("..")) return false;
+
+  // 5. Reject IP-style domain (optional strict govt rule)
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(domain)) return false;
+
+  return true;
+}

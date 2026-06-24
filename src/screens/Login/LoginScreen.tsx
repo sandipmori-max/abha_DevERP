@@ -29,13 +29,14 @@ import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
 import DLStepTwo from './DLStepTwo';
 import { styles } from './style';
 import RadioItem from './RadioItem';
-import { formatAadhaar, formatAbhaNumber, generateCaptcha, getIsFormValid, stepOneValidator, steps, stepsDL, stepTwoValidator, TERMS_FIVE, TERMS_FOUR, TERMS_ONE, TERMS_SIX, TERMS_TWO, validateForm } from '../../utils/helpers';
+import { formatAadhaar, formatAbhaNumber, generateCaptcha, getIsFormValid, isStrictIndianMobile, stepOneValidator, steps, stepsDL, stepTwoValidator, TERMS_FIVE, TERMS_FOUR, TERMS_ONE, TERMS_SIX, TERMS_TWO, validateForm } from '../../utils/helpers';
 import StepOne from './StepOne';
 import StepTwo from './StepTwo';
 import StepThree from './StepThree';
 import StepFour from './StepFour';
 import DLStepOne from './DLStepOne';
 import { getDlEnrollmentRequestOtpPayload, useDlEnrollmentRequestOtpMutation } from '../../redux/api/dlEnrollmentRequestOtpApi';
+import { isValidAadhaar } from '../../utils/aadhaarValidator';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -429,7 +430,7 @@ const LoginScreen = () => {
   };
 
   const handleOTPVerify = async () => {
-    if (stepOneDL.stepOneDLOTP === '') {
+    if (stepOneDL.stepOneDLOTP === '' || stepOneDL.stepOneDLOTP.length < 6) {
       showToast('error', 'Please fill OTP')
       return;
     }
@@ -594,10 +595,15 @@ const LoginScreen = () => {
                           dispatch(showLoader());
                           if (currentStep === 1) {
                             //step 1
+                            
                             const validate = stepOneValidator(stepOne, captchaValue, captcha);
                             console.log("validate +++++ ++ + + +++++ ", validate)
                             if (!validate) {
                               showToast('error', "Please fill all fields correctly")
+                              return;
+                            }
+                            if(!isValidAadhaar(stepOne?.aadhaarNumber)){
+                              showToast('error', "Please fill valid aadhaar number")
                               return;
                             }
                             setStepOne({
@@ -625,8 +631,15 @@ const LoginScreen = () => {
                           } else if (currentStep === 2) {
                             //step 2
                             const validate = stepTwoValidator(stepTwo);
+
+
                             if (!validate) {
                               showToast('error', "Please fill all fields correctly")
+                              return;
+                            }
+
+                            if(!isStrictIndianMobile(`+91${stepTwo.stepTwoMobileNumber}`)){
+                              showToast('error', "Please fill valid mobile number")
                               return;
                             }
                             const encryptedValue =
@@ -653,7 +666,20 @@ const LoginScreen = () => {
                             }
                           } else if (currentStep === 3) {
                             //step 3
+                            if(stepThree.stepThreeMobile === '' || stepThree.stepThreeMobile.length < 10){
+                              showToast('error', "Please fill mobile number")
+                              return;
+                            }
+                            
+                            if(!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)){
+                              showToast('error', "Please fill valid mobile number")
+                              return;
+                            }
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
+                              if(stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6){
+                                   showToast('error', "Please fill valid OTP")
+                                  return;
+                              }
                               const encryptedOtp =
                                 encryptData(
                                   stepThree.stepThreeMobileOTP,
@@ -688,10 +714,20 @@ const LoginScreen = () => {
                               return;
                             }
                             if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                              showToast('error', "Please varify email")
+                              // showToast('error', "Please varify email")
+                              // return;
+                                const response =
+                                await enrolSuggestion({
+                                  txnId,
+                                }).unwrap();
+                              setAbhaSuggestionList(response.abhaAddressList)
+                              setCurrentStep(4)
                               return;
                             }
                             showToast('error', "Please verify mobile")
+
+
+
                           } else if (currentStep === 4) {
                             //step 4
                             if (!stepFour.userName && stepFour.userName === '') {
@@ -811,6 +847,20 @@ const LoginScreen = () => {
                             if (currentStepDL === 1) {
                               if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
                                 showToast('error', 'Please fill mobile number')
+                                return;
+                              }
+                              const isNumberValid = isStrictIndianMobile(`+91${stepOneDL.stepOneDLMobileNumber}`)
+                              if(!isNumberValid){
+                                showToast('error', 'Please fill valid mobile number')
+                                return;
+                              }
+                              if (!captchaValue) {
+                                showToast('error', 'Please fill captcha')
+                                return;
+                              }
+
+                              if (Number(captchaValue) !== captcha.answer) {
+                                showToast('error', 'Please fill valid captcha')
                                 return;
                               }
                               const encryptedMobile = encryptData(

@@ -20,13 +20,13 @@ const StepFour = ({stepFour, loginType, abhaSuggestionList, selectedItem, handle
      
                    <TextInput
                      value={stepFour.userName}
-                     onChangeText={text => {
-                       let value = text;
-                       stepFour({
-                         ...stepFour,
-                         userName: value
-                       })
-                     }}
+                    //  onChangeText={text => {
+                    //    let value = text;
+                    //    stepFour({
+                    //      ...stepFour,
+                    //      userName: value
+                    //    })
+                    //  }}
                      placeholder={'Enter abha address'}
                      maxLength={14}
                      keyboardType={

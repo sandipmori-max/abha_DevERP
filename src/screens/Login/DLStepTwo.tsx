@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -13,32 +13,44 @@ import {
 } from "react-native";
 import RadioItem from "./RadioItem";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  launchCamera,
+  launchImageLibrary,
+  Asset,
+} from "react-native-image-picker";
+import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
+
+
+
+
+
 const DLStepTwo = ({
   navigation,
 }: any) => {
 
- const [showDatePicker, setShowDatePicker] =
-  useState(false);
 
-const [tempDate, setTempDate] =
-  useState(new Date());
+  const [showDatePicker, setShowDatePicker] =
+    useState(false);
+
+  const [tempDate, setTempDate] =
+    useState(new Date());
 
   console.log("showDatePicker", showDatePicker)
-const [dob, setDob] = useState("");
-const formatDate = (date: Date) => {
-  const day = String(
-    date.getDate()
-  ).padStart(2, "0");
+  const [dob, setDob] = useState("");
+  const formatDate = (date: Date) => {
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
 
-  const year =
-    date.getFullYear();
+    const year =
+      date.getFullYear();
 
-  return `${day}-${month}-${year}`;
-};
+    return `${day}-${month}-${year}`;
+  };
   const [formData, setFormData] =
     useState({
       documentId: "",
@@ -54,6 +66,125 @@ const formatDate = (date: Date) => {
       district: "",
       pinCode: "",
     });
+
+  const pendingCameraAction = useRef(false);
+
+  const requestPermission = async (
+    type: "camera" | "gallery",
+  ): Promise<boolean> => {
+    try {
+      let permission;
+
+      if (type === "gallery") {
+        return true;
+      }
+      if (type === "camera") {
+        permission =
+          Platform.OS === "ios"
+            ? PERMISSIONS.IOS.CAMERA
+            : PERMISSIONS.ANDROID.CAMERA;
+      } else {
+        // Gallery / Photos
+        if (Platform.OS === "ios") {
+          permission = PERMISSIONS.IOS.PHOTO_LIBRARY;
+        }
+
+      }
+
+      let result = await check(permission);
+
+      if (result === RESULTS.GRANTED) return true;
+
+      if (result === RESULTS.DENIED) {
+        result = await request(permission);
+        if (result === RESULTS.GRANTED) return true;
+      }
+
+      if (result === RESULTS.BLOCKED || result === RESULTS.DENIED) {
+        Alert.alert('Errrorrorororororororor')
+
+        if (type === "camera") pendingCameraAction.current = true;
+        return false;
+      }
+
+      return result === RESULTS.GRANTED;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const openImagePicker = (
+    onSuccess: (
+      asset: Asset
+    ) => void
+  ) => {
+    Alert.alert(
+      "Select Image",
+      "Choose image source",
+      [
+        {
+          text: "Camera",
+          onPress: () => {
+            launchCamera(
+              {
+                mediaType: "photo",
+                quality: 0.8,
+                includeBase64: true,
+                saveToPhotos: true,
+              },
+              response => {
+                if (
+                  response.didCancel
+                )
+                  return;
+
+                if (
+                  response.assets?.[0]
+                ) {
+                  onSuccess(
+                    response
+                      .assets[0]
+                  );
+                }
+              }
+            );
+          },
+        },
+        {
+          text: "Gallery",
+          onPress: () => {
+            launchImageLibrary(
+              {
+                mediaType: "photo",
+                quality: 0.8,
+                includeBase64: true,
+                selectionLimit: 1,
+              },
+              response => {
+                if (
+                  response.didCancel
+                )
+                  return;
+
+                if (
+                  response.assets?.[0]
+                ) {
+                  onSuccess(
+                    response
+                      .assets[0]
+                  );
+                }
+              }
+            );
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  };
 
   const updateField = (
     key: string,
@@ -100,7 +231,7 @@ const formatDate = (date: Date) => {
         }
       >
 
-  
+
         <View style={styles.infoBanner}>
           <Text style={styles.infoIcon}>
             ℹ️
@@ -375,10 +506,10 @@ const formatDate = (date: Date) => {
           <View style={styles.termsCard}>
             <Text style={styles.termsText}>
               I hereby declare that I am voluntarily sharing my
-                    Aadhaar Number and demographic information issued
-                    by UIDAI with National Health Authority (NHA) for
-                    the sole purpose of authentication and healthcare
-                    services under ABDM.
+              Aadhaar Number and demographic information issued
+              by UIDAI with National Health Authority (NHA) for
+              the sole purpose of authentication and healthcare
+              services under ABDM.
             </Text>
 
             <View style={styles.termsFooter}>
@@ -413,89 +544,89 @@ const formatDate = (date: Date) => {
           </View>
         </View>
       </ScrollView>
-   <Modal
-  visible={showDatePicker}
-  transparent
-  animationType="fade"
->
-  <TouchableOpacity
-    activeOpacity={1}
-    style={styles.modalOverlay}
-    onPress={() =>
-      setShowDatePicker(false)
-    }
-  >
-    <TouchableOpacity
-      activeOpacity={1}
-      style={styles.bottomSheet}
-    >
-      <View style={styles.sheetHandle} />
-
-      <Text style={styles.sheetTitle}>
-        Select Date of Birth
-      </Text>
-
-      <DateTimePicker
-        value={tempDate}
-        mode="date"
-        display="spinner"
-        maximumDate={new Date()}
-        onChange={(
-          event,
-          selectedDate
-        ) => {
-          if (selectedDate) {
-            setTempDate(
-              selectedDate
-            );
-          }
-        }}
-      />
-
-      <View style={styles.footerButtons}>
+      <Modal
+        visible={showDatePicker}
+        transparent
+        animationType="fade"
+      >
         <TouchableOpacity
-          style={styles.cancelBtn}
+          activeOpacity={1}
+          style={styles.modalOverlay}
           onPress={() =>
             setShowDatePicker(false)
           }
         >
-          <Text
-            style={
-              styles.cancelBtnText
-            }
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.bottomSheet}
           >
-            Cancel
-          </Text>
+            <View style={styles.sheetHandle} />
+
+            <Text style={styles.sheetTitle}>
+              Select Date of Birth
+            </Text>
+
+            <DateTimePicker
+              value={tempDate}
+              mode="date"
+              display="spinner"
+              maximumDate={new Date()}
+              onChange={(
+                event,
+                selectedDate
+              ) => {
+                if (selectedDate) {
+                  setTempDate(
+                    selectedDate
+                  );
+                }
+              }}
+            />
+
+            <View style={styles.footerButtons}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() =>
+                  setShowDatePicker(false)
+                }
+              >
+                <Text
+                  style={
+                    styles.cancelBtnText
+                  }
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.doneBtn}
+                onPress={() => {
+                  const formatted =
+                    formatDate(tempDate);
+
+                  setDob(formatted);
+
+                  updateField(
+                    "dob",
+                    formatted
+                  );
+
+                  setShowDatePicker(false);
+                }}
+              >
+                <Text
+                  style={
+                    styles.doneBtnText
+                  }
+                >
+                  Confirm
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.doneBtn}
-          onPress={() => {
-            const formatted =
-              formatDate(tempDate);
-
-            setDob(formatted);
-
-            updateField(
-              "dob",
-              formatted
-            );
-
-            setShowDatePicker(false);
-          }}
-        >
-          <Text
-            style={
-              styles.doneBtnText
-            }
-          >
-            Confirm
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  </TouchableOpacity>
-</Modal>
+      </Modal>
     </View>
   );
 };
@@ -636,46 +767,46 @@ const styles =
       fontSize: 16,
       fontWeight: '700',
     },
-modalOverlay: {
-  flex: 1,
-  justifyContent: "flex-end",
-  backgroundColor:
-    "rgba(0,0,0,0.4)",
-},
+    modalOverlay: {
+      flex: 1,
+      justifyContent: "flex-end",
+      backgroundColor:
+        "rgba(0,0,0,0.4)",
+    },
 
-bottomSheet: {
-  backgroundColor: "#FFF",
-  borderTopLeftRadius: 20,
-  borderTopRightRadius: 20,
-  paddingBottom: 30,
-},
+    bottomSheet: {
+      backgroundColor: "#FFF",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingBottom: 30,
+    },
 
-header: {
-  flexDirection: "row",
-  justifyContent:
-    "space-between",
-  alignItems: "center",
-  paddingHorizontal: 20,
-  paddingVertical: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: "#EEE",
-},
+    header: {
+      flexDirection: "row",
+      justifyContent:
+        "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: "#EEE",
+    },
 
-title: {
-  fontSize: 16,
-  fontWeight: "600",
-},
+    title: {
+      fontSize: 16,
+      fontWeight: "600",
+    },
 
-cancel: {
-  color: "#64748B",
-  fontSize: 15,
-},
+    cancel: {
+      color: "#64748B",
+      fontSize: 15,
+    },
 
-done: {
-  color: "#D96A27",
-  fontSize: 15,
-  fontWeight: "600",
-},
+    done: {
+      color: "#D96A27",
+      fontSize: 15,
+      fontWeight: "600",
+    },
 
     infoText: {
       marginTop: 4,
@@ -864,7 +995,7 @@ done: {
     genderLabelSelected: {
       color: "#D96A27",
     },
-    termsContainer: { 
+    termsContainer: {
       marginTop: 8,
       marginBottom: 12
     },
@@ -899,72 +1030,72 @@ done: {
       alignItems: 'center',
     },
     modalOverlay: {
-  flex: 1,
-  backgroundColor:
-    "rgba(0,0,0,0.45)",
-  justifyContent: "flex-end",
-},
+      flex: 1,
+      backgroundColor:
+        "rgba(0,0,0,0.45)",
+      justifyContent: "flex-end",
+    },
 
-bottomSheet: {
-  backgroundColor: "#FFF",
-  borderTopLeftRadius: 28,
-  borderTopRightRadius: 28,
-  paddingTop: 12,
-  paddingHorizontal: 20,
-  paddingBottom: 30,
-},
+    bottomSheet: {
+      backgroundColor: "#FFF",
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      paddingTop: 12,
+      paddingHorizontal: 20,
+      paddingBottom: 30,
+    },
 
-sheetHandle: {
-  width: 48,
-  height: 5,
-  borderRadius: 10,
-  backgroundColor: "#D1D5DB",
-  alignSelf: "center",
-  marginBottom: 20,
-},
+    sheetHandle: {
+      width: 48,
+      height: 5,
+      borderRadius: 10,
+      backgroundColor: "#D1D5DB",
+      alignSelf: "center",
+      marginBottom: 20,
+    },
 
-sheetTitle: {
-  fontSize: 18,
-  fontWeight: "700",
-  color: "#111827",
-  textAlign: "center",
-  marginBottom: 10,
-},
+    sheetTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#111827",
+      textAlign: "center",
+      marginBottom: 10,
+    },
 
-footerButtons: {
-  flexDirection: "row",
-  marginTop: 10,
-},
+    footerButtons: {
+      flexDirection: "row",
+      marginTop: 10,
+    },
 
-cancelBtn: {
-  flex: 1,
-  height: 50,
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-  justifyContent: "center",
-  alignItems: "center",
-  marginRight: 8,
-},
+    cancelBtn: {
+      flex: 1,
+      height: 50,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: "#E5E7EB",
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 8,
+    },
 
-doneBtn: {
-  flex: 1,
-  height: 50,
-  borderRadius: 12,
-  backgroundColor: "#D96A27",
-  justifyContent: "center",
-  alignItems: "center",
-},
+    doneBtn: {
+      flex: 1,
+      height: 50,
+      borderRadius: 12,
+      backgroundColor: "#D96A27",
+      justifyContent: "center",
+      alignItems: "center",
+    },
 
-cancelBtnText: {
-  fontSize: 15,
-  fontWeight: "600",
-  color: "#6B7280",
-},
+    cancelBtnText: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: "#6B7280",
+    },
 
-doneBtnText: {
-  fontSize: 15,
-  fontWeight: "700",
-  color: "#FFF",
-},
+    doneBtnText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: "#FFF",
+    },
   });

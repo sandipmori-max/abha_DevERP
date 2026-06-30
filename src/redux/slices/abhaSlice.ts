@@ -6,6 +6,7 @@ const initialState = {
   abhaNumber: null,
   tToken: null,
   txnId: null,
+  activeUser: null
 };
 
 const abhaSlice = createSlice({
@@ -19,6 +20,14 @@ const abhaSlice = createSlice({
       action
     ) => {
       state.otpTxnId =
+        action.payload;
+    },
+
+     setActiveUser: (
+      state,
+      action
+    ) => {
+      state.activeUser =
         action.payload;
     },
 
@@ -74,7 +83,8 @@ export const {
   setTToken,
   clearFlow,
   setTxnId,
-  clearTxnId
+  clearTxnId,
+  setActiveUser
 } = abhaSlice.actions;
 
 export default abhaSlice.reducer;

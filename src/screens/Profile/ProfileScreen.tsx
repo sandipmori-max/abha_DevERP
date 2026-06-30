@@ -1,16 +1,25 @@
+// Full updated ProfileScreen in a single file
+// NOTE: No extra npm package required.
+
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import React from "react";
 import {
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { useSelector } from "react-redux";
 
-const ProfileScreen = ({
-  route,
-}: any) => {
-  const profile =
-    route?.params?.profile;
+const ProfileScreen = ({ route }: any) => {
+
+  const proReduxData = useSelector(
+    (state: any) => state.abha.activeUser
+  );
+
+  console.log('proReduxData', proReduxData)
+  const profile = proReduxData?.ABHAProfile || {};
 
   const fullName = [
     profile?.firstName,
@@ -21,246 +30,317 @@ const ProfileScreen = ({
     .join(" ");
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={
-        false
-      }
-    >
-      {/* HEADER CARD */}
-      <View style={styles.headerCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {profile?.firstName?.[0] ||
-              "A"}
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 30,
+        }}
+      >
+
+         
+        {/* Header */}
+        <View style={styles.headerCard}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {profile?.firstName?.[0] || "A"}
+            </Text>
+          </View>
+
+          <Text style={styles.name}>
+            {fullName || "-"}
           </Text>
+
+          <Text style={styles.abhaAddress}>
+            {profile?.preferredAbhaAddress || "-"}
+          </Text>
+
+          {/* Floating Cards */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>
+                ABHA Number
+              </Text>
+
+              <Text
+                numberOfLines={1}
+                style={styles.statValue}
+              >
+                {profile?.ABHANumber || "-"}
+              </Text>
+            </View>
+
+            <View style={{ width: '50%', flexDirection: 'row' }}>
+              <View style={[styles.statCard, {
+                width: 100
+              }]}>
+                <Text style={styles.statTitle}>
+                  Status
+                </Text>
+
+                <Text
+                  style={[
+                    styles.statValue,
+                    {
+                      color: "#16A34A",
+                    },
+                  ]}
+                >
+                  ● {profile?.abhaStatus || "-"}
+                </Text>
+              </View>
+              <View style={[styles.statCard, {
+                width: 60,
+                justifyContent: 'center',
+                alignContent: 'center',
+                alignItems: 'center'
+              }]}>
+                <MaterialIcons
+                  name='downloading'
+                  size={30}
+                />
+              </View>
+            </View>
+
+
+          </View>
         </View>
 
-        <Text style={styles.name}>
-          {fullName}
-        </Text>
+        {/* ABHA */}
+        <SectionCard ezstyle={{
+          marginTop: 50
+        }} title="ABHA Details">
+          <InfoRow
+            icon="🆔"
+            label="ABHA Number"
+            value={profile?.ABHANumber}
+          />
 
-        <Text style={styles.abhaAddress}>
-          {
-            profile?.preferredAbhaAddress
-          }
-        </Text>
-
-        <View style={styles.statusBadge}>
-          <Text
-            style={
-              styles.statusText
+          <InfoRow
+            icon="🏥"
+            label="ABHA Address"
+            value={
+              profile?.preferredAbhaAddress
             }
-          >
-            {
-              profile?.abhaStatus
-            }
-          </Text>
-        </View>
-      </View>
+          />
+        </SectionCard>
 
-      {/* ABHA INFO */}
-      <SectionCard
-        title="ABHA Details"
-      >
-        <InfoRow
-          label="ABHA Number"
-          value={
-            profile?.ABHANumber
-          }
-        />
+        {/* Personal */}
+        <SectionCard title="Personal Information">
+          <InfoRow
+            icon="👤"
+            label="Gender"
+            value={profile?.gender}
+          />
 
-        <InfoRow
-          label="ABHA Address"
-          value={
-            profile?.preferredAbhaAddress
-          }
-        />
-      </SectionCard>
+          <InfoRow
+            icon="🎂"
+            label="Date of Birth"
+            value={profile?.dob}
+          />
 
-      {/* PERSONAL INFO */}
-      <SectionCard
-        title="Personal Information"
-      >
-        <InfoRow
-          label="Gender"
-          value={
-            profile?.gender
-          }
-        />
+          <InfoRow
+            icon="📱"
+            label="Mobile"
+            value={profile?.mobile}
+          />
 
-        <InfoRow
-          label="Date of Birth"
-          value={profile?.dob}
-        />
+          <InfoRow
+            icon="✉️"
+            label="Email"
+            value={profile?.email}
+          />
+        </SectionCard>
 
-        <InfoRow
-          label="Mobile"
-          value={
-            profile?.mobile
-          }
-        />
+        {/* Address */}
+        <SectionCard title="Location">
+          <InfoRow
+            icon="📍"
+            label="State"
+            value={profile?.stateName}
+          />
 
-        <InfoRow
-          label="Email"
-          value={
-            profile?.email
-          }
-        />
-      </SectionCard>
+          <InfoRow
+            icon="🏙"
+            label="District"
+            value={profile?.districtName}
+          />
 
-      {/* ADDRESS */}
-      <SectionCard
-        title="Location"
-      >
-        <InfoRow
-          label="State"
-          value={
-            profile?.stateName
-          }
-        />
-
-        <InfoRow
-          label="District"
-          value={
-            profile?.districtName
-          }
-        />
-
-        <InfoRow
-          label="Address"
-          value={
-            profile?.address
-          }
-        />
-      </SectionCard>
-    </ScrollView>
+          <InfoRow
+            icon="🏠"
+            label="Address"
+            value={profile?.address}
+          />
+        </SectionCard>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const SectionCard = ({
   title,
   children,
-}: any) => (
-  <View style={styles.card}>
-    <Text
-      style={styles.sectionTitle}
-    >
-      {title}
-    </Text>
-    {children}
-  </View>
-);
+  ezstyle
+}: any) => {
+  return (
+    <View style={[styles.card, ezstyle]}>
+      <Text style={styles.sectionTitle}>
+        {title}
+      </Text>
+
+      {children}
+    </View>
+  );
+};
 
 const InfoRow = ({
+  icon,
   label,
   value,
-}: any) => (
-  <View style={styles.infoRow}>
-    <Text style={styles.label}>
-      {label}
-    </Text>
+}: any) => {
+  return (
+    <View style={styles.infoRow}>
+      <View style={styles.leftContainer}>
+        <Text style={styles.icon}>
+          {icon}
+        </Text>
 
-    <Text style={styles.value}>
-      {value || "-"}
-    </Text>
-  </View>
-);
+        <Text style={styles.label}>
+          {label}
+        </Text>
+      </View>
+
+      <Text
+        numberOfLines={2}
+        style={styles.value}
+      >
+        {value || "-"}
+      </Text>
+    </View>
+  );
+};
 
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:
-      "#F5F7FB",
   },
 
   headerCard: {
-    backgroundColor:
-      "#2563EB",
-    margin: 16,
-    borderRadius: 24,
-    padding: 24,
+    backgroundColor: "#2563EB",
+    paddingTop: 45,
+    paddingBottom: 90,
     alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor:
-      "rgba(255,255,255,0.2)",
+    width: 95,
+    height: 95,
+    borderRadius: 24,
+    backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",
   },
 
   avatarText: {
-    color: "#FFF",
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "700",
+    color: "#2563EB",
   },
 
   name: {
     color: "#FFF",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
-    marginTop: 12,
+    marginTop: 15,
   },
 
   abhaAddress: {
-    color:
-      "rgba(255,255,255,0.85)",
-    marginTop: 6,
-    fontSize: 14,
+    color: "#EAF1FF",
+    fontSize: 15,
+    marginTop: 5,
   },
 
-  statusBadge: {
-    backgroundColor:
-      "#10B981",
-    marginTop: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 30,
+  statsContainer: {
+    flexDirection: "row",
+    position: "absolute",
+    bottom: -30,
   },
 
-  statusText: {
-    color: "#FFF",
-    fontWeight: "600",
+  statCard: {
+    backgroundColor: "#FFF",
+    width: 180,
+    borderRadius: 8,
+    padding: 8,
+    paddingVertical: 12,
+    marginHorizontal: 8,
+    borderWidth: 0.4,
+    borderColor: '#ccc'
+
+  },
+
+  statTitle: {
+    color: "#64748B",
+    fontSize: 12,
+    marginBottom: 8,
+  },
+
+  statValue: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "700",
   },
 
   card: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#fff",
     marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 20,
-    padding: 18,
-    elevation: 3,
+    borderRadius: 8,
+    padding: 20,
+    marginTop: 8,
+    borderWidth: 0.4,
+    borderColor: '#ccc'
   },
 
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
-    marginBottom: 14,
     color: "#111827",
+    marginBottom: 15,
   },
 
   infoRow: {
-    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor:
-      "#F1F5F9",
+    borderBottomColor: "#EEF2F7",
+  },
+
+  leftContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+
+  icon: {
+    fontSize: 18,
+    marginRight: 10,
   },
 
   label: {
-    fontSize: 12,
+    fontSize: 15,
     color: "#64748B",
-    marginBottom: 4,
   },
 
   value: {
+    flex: 1,
+    textAlign: "right",
     fontSize: 15,
+    color: "#111827",
     fontWeight: "600",
-    color: "#0F172A",
   },
 });

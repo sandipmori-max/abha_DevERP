@@ -1,58 +1,50 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import DetailsScreen from '../screens/DetailsScreen';
-import IntroScreen from '../screens/Intro/IntroScreen';
-import LoginScreen from '../screens/Login/LoginScreen';
-import OtpVerificationScreen from '../screens/Login/OtpVerificationScreen';
-import ProfileScreen from '../screens/Profile/ProfileScreen';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useSelector } from "react-redux";
+import IntroScreen from "../screens/Intro/IntroScreen";
+import LoginScreen from "../screens/Login/LoginScreen";
+import OtpVerificationScreen from "../screens/Login/OtpVerificationScreen";
+import BottomTabNavigator from "./BottomTabNavigator";
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
+  const proReduxData = useSelector(
+    (state: any) => state.abha.activeUser
+  );
+
+  const isLoggedIn = !!proReduxData;
+
   return (
     <Stack.Navigator
-      initialRouteName="Home"
       screenOptions={{
         headerShown: false,
-        headerTitleAlign: 'center',
+        headerTitleAlign: "center",
       }}
     >
-      <Stack.Screen
-        name="Home"
-        component={IntroScreen}
-        options={{
-          title: 'Home Screen',
-        }}
-      />
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{
-          title: 'Login Screen',
-        }}
-      />
-       <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: 'Profile Screen',
-        }}
-      />
-      <Stack.Screen
-        name="OtpVerification"
-        component={OtpVerificationScreen}
-        options={{
-          title: 'Otp Verification',
-        }}
-      />
-      <Stack.Screen
-        name="Details"
-        component={DetailsScreen}
-        options={{
-          title: 'Details Screen',
-        }}
-      />
+      {isLoggedIn ? (
+        <>
+          <Stack.Screen
+            name="Main"
+            component={BottomTabNavigator}
+          />
+        </>
+      ) : (
+        <>
+          <Stack.Screen
+            name="Home"
+            component={IntroScreen}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+          />
+          <Stack.Screen
+            name="OtpVerification"
+            component={OtpVerificationScreen}
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
 };

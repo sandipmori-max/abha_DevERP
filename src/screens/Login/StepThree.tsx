@@ -18,7 +18,8 @@ const StepThree = ({
   setStepThree,
   loginType,
   publicKey,
-  txnId, enrollmentRequestOtp, getEmailVerificationLinkPayload }: any) => {
+  txnId, enrollmentRequestOtp, getEmailVerificationLinkPayload,
+mobileNumer }: any) => {
   const dispatch = useDispatch()
 
   return (
@@ -32,7 +33,7 @@ const StepThree = ({
             <View style={styles.inputContainer}>
               <Text style={styles.prefix}>+91</Text>
               <TextInput
-                value={stepThree.stepThreeMobile}
+                value={mobileNumer}
                 onChangeText={text => {
                   let value = text.replace(/\D/g, '').slice(0, 10);;
                   setStepThree({
@@ -41,19 +42,9 @@ const StepThree = ({
                   });
                 }}
                 placeholder={'Enter Mobile Number'}
-                maxLength={10}
-                keyboardType={
-                  [
-                    'Mobile Number',
-                    'Register with Mobile Number',
-                    'Aadhaar Number',
-                    'ABHA Number',
-                    'Create ABHA Number',
-                  ].includes(loginType)
-                    ? 'number-pad'
-                    : 'default'
-                }
+                maxLength={10} 
                 style={styles.input}
+                editable={false}
               />
             </View>
             <Text style={{ marginVertical: 8 }}>
@@ -67,11 +58,11 @@ const StepThree = ({
             marginBottom: 18, marginHorizontal: 24
           }}>
             <TouchableOpacity onPress={async () => {
-              if (!stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobile.length < 10) {
+              if (!stepThree.stepThreeMobileVerifyed && mobileNumer.length < 10) {
                 showToast('error', 'Please enter a valid mobile number.');
                 return;
               }
-              if (!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)) {
+              if (!isStrictIndianMobile(`+91${mobileNumer}`)) {
                 showToast('error', "Please enter a valid mobile number.")
                 return;
               }
@@ -79,7 +70,7 @@ const StepThree = ({
                 dispatch(showLoader());
                 const encryptedValue =
                   encryptData(
-                    stepThree.stepThreeMobile,
+                    mobileNumer,
                     publicKey
                   );
 
@@ -138,7 +129,7 @@ const StepThree = ({
                     dispatch(showLoader());
                     const encryptedValue =
                       encryptData(
-                        stepThree.stepThreeMobile,
+                        mobileNumer,
                         publicKey
                       );
 

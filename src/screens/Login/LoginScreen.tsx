@@ -38,6 +38,7 @@ import DLStepOne from './DLStepOne';
 import { getDlEnrollmentRequestOtpPayload, useDlEnrollmentRequestOtpMutation } from '../../redux/api/dlEnrollmentRequestOtpApi';
 import { isValidAadhaar } from '../../utils/aadhaarValidator';
 import ValidationErrorBottomSheet from './ValidationErrorBottomSheet';
+import { setActiveUser } from '../../redux/slices/abhaSlice';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -419,8 +420,8 @@ const LoginScreen = () => {
             publicKey={publicKey}
             txnId={txnId}
             enrollmentRequestOtp={enrollmentRequestOtp}
-            getEmailVerificationLinkPayload={getEmailVerificationLinkPayload
-            }
+            getEmailVerificationLinkPayload={getEmailVerificationLinkPayload } 
+            mobileNumer={stepTwo?.stepTwoMobileNumber}
           />
         </>
       case 4:
@@ -667,27 +668,18 @@ const LoginScreen = () => {
                             );
                             const result = await enrolByAadhaar(payloadPassed).unwrap();
                             console.log("result ------+++++++++++++-------- ", result)
+                            dispatch(setActiveUser(result))
+
                             if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
                               const responseProfile =
                                 await getProfileAccount();
                               console.log(responseProfile);
-                              navigation.navigate("Profile", {
-                                profile: responseProfile.data,
-                              });
+                              navigation.navigate("Profile");
                             } else {
                               setCurrentStep(3)
                             }
                           } else if (currentStep === 3) {
-                            //step 3
-                            if (stepThree.stepThreeMobile === '' || stepThree.stepThreeMobile.length < 10) {
-                              showToast('error', "Please enter your mobile number.")
-                              return;
-                            }
-
-                            if (!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)) {
-                              showToast('error', "Please enter a valid mobile number.")
-                              return;
-                            }
+                             
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
                               if (stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6) {
                                 showToast('error', "Please enter a valid OTP.")
@@ -755,8 +747,11 @@ const LoginScreen = () => {
                                   1
                                 )
                               ).unwrap();
+                            console.log("response", response)
                             const responseProfile =
                               await getProfileAccount();
+
+                            console.log("responseProfile", responseProfile)
                             console.log(responseProfile);
                             navigation.navigate("Profile", {
                               profile: responseProfile.data,

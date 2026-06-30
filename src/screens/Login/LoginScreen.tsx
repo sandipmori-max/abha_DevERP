@@ -437,7 +437,7 @@ const LoginScreen = () => {
 
   const handleOTPVerify = async () => {
     if (stepOneDL.stepOneDLOTP === '' || stepOneDL.stepOneDLOTP.length < 6) {
-      showToast('error', 'Please fill OTP')
+      showToast('error', 'Please enter OTP.')
       return;
     }
     const encryptedOtp =
@@ -608,11 +608,11 @@ const LoginScreen = () => {
                             const validate = stepOneValidator(stepOne, captchaValue, captcha);
                             console.log("validate +++++ ++ + + +++++ ", validate)
                             if (!validate) {
-                              showToast('error', "Please fill all fields correctly")
+                              showToast('error', "Please fill in all required fields correctly.")
                               return;
                             }
                             if (!isValidAadhaar(stepOne?.aadhaarNumber)) {
-                              showToast('error', "Please fill valid aadhaar number")
+                              showToast('error', "Please enter a valid Aadhaar number.")
                               return;
                             }
                             setStepOne({
@@ -643,12 +643,12 @@ const LoginScreen = () => {
 
 
                             if (!validate) {
-                              showToast('error', "Please fill all fields correctly")
+                              showToast('error', "Please fill in all required fields correctly.")
                               return;
                             }
 
                             if (!isStrictIndianMobile(`+91${stepTwo.stepTwoMobileNumber}`)) {
-                              showToast('error', "Please fill valid mobile number")
+                              showToast('error', "Please enter a valid mobile number.")
                               return;
                             }
                             const encryptedValue =
@@ -676,17 +676,17 @@ const LoginScreen = () => {
                           } else if (currentStep === 3) {
                             //step 3
                             if (stepThree.stepThreeMobile === '' || stepThree.stepThreeMobile.length < 10) {
-                              showToast('error', "Please fill mobile number")
+                              showToast('error', "Please enter your mobile number.")
                               return;
                             }
 
                             if (!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)) {
-                              showToast('error', "Please fill valid mobile number")
+                              showToast('error', "Please enter a valid mobile number.")
                               return;
                             }
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
                               if (stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6) {
-                                showToast('error', "Please fill valid OTP")
+                                showToast('error', "Please enter a valid OTP.")
                                 return;
                               }
                               const encryptedOtp =
@@ -733,14 +733,14 @@ const LoginScreen = () => {
                               setCurrentStep(4)
                               return;
                             }
-                            showToast('error', "Please verify mobile")
+                            showToast('error', "Please verify your mobile number.")
 
 
 
                           } else if (currentStep === 4) {
                             //step 4
                             if (!stepFour.userName && stepFour.userName === '') {
-                              showToast('error', "Please fill abha address")
+                              showToast('error', "Please enter your ABHA address.")
                               return;
                             }
                             const response =
@@ -855,21 +855,21 @@ const LoginScreen = () => {
                             dispatch(showLoader())
                             if (currentStepDL === 1) {
                               if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
-                                showToast('error', 'Please fill mobile number')
+                                showToast('error', 'Please enter your mobile number.')
                                 return;
                               }
                               const isNumberValid = isStrictIndianMobile(`+91${stepOneDL.stepOneDLMobileNumber}`)
                               if (!isNumberValid) {
-                                showToast('error', 'Please fill valid mobile number')
+                                showToast('error', 'Please enter a valid mobile number.')
                                 return;
                               }
                               if (!captchaValue) {
-                                showToast('error', 'Please fill captcha')
+                                showToast('error', 'Please enter the CAPTCHA.')
                                 return;
                               }
 
                               if (Number(captchaValue) !== captcha.answer) {
-                                showToast('error', 'Please fill valid captcha')
+                                showToast('error', 'Please enter a valid CAPTCHA.')
                                 return;
                               }
                               const encryptedMobile = encryptData(
@@ -1465,7 +1465,7 @@ const LoginScreen = () => {
                       return;
                     }
                     if (!getIsFormValid(loginType, loginValue, isFromForgotAbhaNumber, isAgreed, captchaValue, captcha)) {
-                      showToast('error', 'Please fill all fields correctly');
+                      showToast('error', 'Please fill in all required fields correctly.');
                       return;
                     }
                     dispatch(showLoader());

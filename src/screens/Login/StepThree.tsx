@@ -60,11 +60,11 @@ const StepThree = ({
           }}>
             <TouchableOpacity onPress={async () => {
               if (!stepThree.stepThreeMobileVerifyed && stepThree.stepThreeMobile.length < 10) {
-                showToast('error', 'Please fill mobile correctly');
+                showToast('error', 'Please enter a valid mobile number.');
                 return;
               }
               if (!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)) {
-                showToast('error', "Please fill valid mobile number")
+                showToast('error', "Please enter a valid mobile number.")
                 return;
               }
               const encryptedValue =
@@ -166,11 +166,11 @@ const StepThree = ({
                     <TouchableOpacity
                       onPress={async () => {
                         if (stepThree.stepThreeEmail.length === 0) {
-                          showToast('error', 'Please fill email');
+                          showToast('error', 'Please enter your email address.');
                           return;
                         }
                         if(!isValidEmail(stepThree.stepThreeEmail)){
-                          showToast('error', 'Please fill valid email');
+                          showToast('error', 'Please enter a valid email address.');
                           return;
                         }
                         const encryptedEmail =

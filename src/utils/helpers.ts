@@ -41,7 +41,7 @@ export const generateCaptcha = () => {
 
 export const validateForm = (loginType, loginValue, captchaValue, captcha) => {
   if (!loginValue) {
-    return 'Please enter mobile number';
+    return 'Please enter your mobile number.';
   }
 
   if (loginType === 'Mobile Number' && !/^[6-9]\d{9}$/.test(loginValue)) {
@@ -49,7 +49,7 @@ export const validateForm = (loginType, loginValue, captchaValue, captcha) => {
   }
 
   if (!captchaValue) {
-    return 'Please enter captcha';
+    return 'Please enter the CAPTCHA.';
   }
 
   if (Number(captchaValue) !== Number(captcha.answer)) {
@@ -349,3 +349,25 @@ export function isValidEmail(email: string): boolean {
 
   return true;
 }
+
+export const VALIDATION_MESSAGES = {
+  REQUIRED_FIELDS: "Please fill in all required fields correctly.",
+
+  OTP_REQUIRED: "Please enter OTP.",
+  OTP_INVALID: "Please enter a valid OTP.",
+
+  MOBILE_REQUIRED: "Please enter your mobile number.",
+  MOBILE_INVALID: "Please enter a valid mobile number.",
+  MOBILE_VERIFY: "Please verify your mobile number.",
+
+  AADHAAR_REQUIRED: "Please enter your Aadhaar number.",
+  AADHAAR_INVALID: "Please enter a valid Aadhaar number.",
+
+  EMAIL_REQUIRED: "Please enter your email address.",
+  EMAIL_INVALID: "Please enter a valid email address.",
+
+  ABHA_ADDRESS_REQUIRED: "Please enter your ABHA address.",
+
+  CAPTCHA_REQUIRED: "Please enter the CAPTCHA.",
+  CAPTCHA_INVALID: "Please enter a valid CAPTCHA.",
+} as const;

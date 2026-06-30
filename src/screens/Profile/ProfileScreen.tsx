@@ -4,13 +4,16 @@
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import React from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
+import Header from "../../Components/Header";
 
 const ProfileScreen = ({ route }: any) => {
 
@@ -32,19 +35,21 @@ const ProfileScreen = ({ route }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 30,
         }}
       >
+        <Header title="" />
 
-         
         {/* Header */}
         <View style={styles.headerCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {profile?.firstName?.[0] || "A"}
-            </Text>
+          <Image
+      source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
+      style={styles.avatarImage}
+    />
           </View>
 
           <Text style={styles.name}>
@@ -52,7 +57,7 @@ const ProfileScreen = ({ route }: any) => {
           </Text>
 
           <Text style={styles.abhaAddress}>
-            {profile?.preferredAbhaAddress || "-"}
+            {profile?.mobile || "-"}
           </Text>
 
           {/* Floating Cards */}
@@ -226,11 +231,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  avatarImage: {
+  width: "100%",
+  height: "100%",
+  borderRadius: 80,
+},
 
   headerCard: {
-    backgroundColor: "#2563EB",
-    paddingTop: 45,
-    paddingBottom: 90,
+    backgroundColor: "#D96A27",
+    paddingTop: 10,
+    paddingBottom: 50,
     alignItems: "center",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -239,7 +249,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 95,
     height: 95,
-    borderRadius: 24,
+    borderRadius: 80,
     backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",

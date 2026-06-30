@@ -5,6 +5,7 @@ import IntroScreen from "../screens/Intro/IntroScreen";
 import LoginScreen from "../screens/Login/LoginScreen";
 import OtpVerificationScreen from "../screens/Login/OtpVerificationScreen";
 import BottomTabNavigator from "./BottomTabNavigator";
+import DrawerNavigator from "./DrawerNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -26,7 +27,7 @@ const RootNavigator = () => {
         <>
           <Stack.Screen
             name="Main"
-            component={BottomTabNavigator}
+            component={DrawerNavigator}
           />
         </>
       ) : (

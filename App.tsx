@@ -6,11 +6,14 @@ import { store } from './src/redux/store';
 import GlobalLoader from './GlobalLoader';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './ToastConfig';
+import { StatusBar } from 'react-native';
 
 const App = () => {
   return (
     <Provider store={store}>
+      
       <NavigationContainer>
+        
         <RootNavigator />
         <GlobalLoader />
         <Toast config={toastConfig}

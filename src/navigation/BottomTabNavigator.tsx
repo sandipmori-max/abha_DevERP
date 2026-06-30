@@ -30,7 +30,7 @@ const BottomTabNavigator = () => {
                 size={28}
                 color={
                     selectedTab === routeName
-                        ? "#2563EB"
+                        ? "#D96A27"
                         : "#94A3B8"
                 }
             />
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: "#2563EB",
+        backgroundColor: "#D96A27",
         justifyContent: "center",
         alignItems: "center",
      },

@@ -185,7 +185,7 @@ export default function IntroScreen() {
 
     const registerOptions = [
         'Aadhaar Number',
-        // 'Driving Licence',
+        'Driving Licence',
     ];
 
     const optionList = bottomSheetType === 'Login' ? loginOptions : registerOptions;

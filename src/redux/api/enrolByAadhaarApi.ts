@@ -3,7 +3,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_ENROL_BY_AADHAAR = false;
+const MOCK_ENROL_BY_AADHAAR = true;
 
 export interface EnrolByAadhaarPayload {
   authData: {

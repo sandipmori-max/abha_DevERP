@@ -148,6 +148,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#FFF',
     marginHorizontal: 12,
+    fontWeight: '600'
   },
   captchaCard: {
     backgroundColor: '#fff',
@@ -446,5 +447,21 @@ export const styles = StyleSheet.create({
   eyeIcon: {
     fontSize: 20,
   },
-  
+   aadhaarContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignContent:'center',
+    alignItems:'center'
+  },
+
+  box: {
+    width: 100,
+    height: 46,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });

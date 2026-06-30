@@ -1,23 +1,23 @@
 export const END_POINTS = {
-    certificate : 'profile/public/certificate',
-    sessions: 'sessions',
-      requestOtp:
+  certificate: 'profile/public/certificate',
+  sessions: 'sessions',
+  requestOtp:
     "profile/login/request/otp",
-     verifyOtp:
+  verifyOtp:
     "profile/login/verify",
-      enrollmentRequestOtp:
+  enrollmentRequestOtp:
     "enrollment/request/otp",
-    enrolByAadhaar:
+  enrolByAadhaar:
     "enrollment/enrol/byAadhaar",
-    authByAbdm:
-  "enrollment/auth/byAbdm",
+  authByAbdm:
+    "enrollment/auth/byAbdm",
   requestEmailVerificationLink:
-  "profile/account/request/emailVerificationLink",
+    "profile/account/request/emailVerificationLink",
   enrolSuggestion:
-  "enrollment/enrol/suggestion",
+    "enrollment/enrol/suggestion",
   enrolAbhaAddress:
-  "enrollment/enrol/abha-address",
+    "enrollment/enrol/abha-address",
   profileAccount: "profile/account",
   dlEnrollmentRequestOtp:
-  "enrollment/request/otp",
+    "enrollment/request/otp",
 }

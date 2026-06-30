@@ -4,7 +4,7 @@ import { setTxnId } from "../slices/abhaSlice";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_REQUEST_OTP = false;
+const MOCK_REQUEST_OTP = true;
 
 export interface RequestOtpPayload {
   scope: string[];

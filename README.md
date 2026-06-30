@@ -98,9 +98,11 @@ To learn more about React Native, take a look at the following resources:
 
 <!-- aa = 541245512030 -->
 
-<!-- 7619 8714 0371
+<!-- 
+7619 8714 0371
 2865 6926 3981
-8991 3736 2188 -->
+8991 3736 2188
+-->
 
 // --- android build ----
 // ./gradlew --stop

@@ -1,5 +1,5 @@
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { styles } from './style';
 import { formatAadhaar } from '../../utils/helpers';
 import RadioItem from './RadioItem';
@@ -16,38 +16,176 @@ const StepOne = ({
     refreshCaptcha,
     setCaptchaValue,
     setValidationMethod }: any) => {
+
+    const input1Ref = useRef<TextInput>(null);
+    const input2Ref = useRef<TextInput>(null);
+    const input3Ref = useRef<TextInput>(null);
+    const [focusedInput, setFocusedInput] = useState<
+        "part1" | "part2" | "part3" | null
+    >(null);
+
+    const getBorderColor = (
+        key: "part1" | "part2" | "part3"
+    ) => {
+        if (aadhaar[key].length === 4) {
+            return "#22C55E"; // Green
+        }
+
+        if (focusedInput === key) {
+            return "#2563EB"; // Blue
+        }
+
+        return "#D1D5DB"; // Gray
+    };
+
+    const [aadhaar, setAadhaar] = useState({
+        part1: "",
+        part2: "",
+        part3: "",
+    });
+
+    const updateAadhaar = (
+        part1: string,
+        part2: string,
+        part3: string,
+    ) => {
+        const aadhaarNumber = part1 + part2 + part3;
+
+        setStepOne(prev => ({
+            ...prev,
+            aadhaarNumber,
+        }));
+    };
+
     return (
         <>
             <View style={styles.card}>
                 <Text style={styles.cardTitle}>
-                    Enter Details <Text style={{ color: 'red' }}>*</Text>
+                    Enter Aadhaar number <Text style={{ color: 'red' }}>*</Text>
                 </Text>
-                <View style={styles.inputContainer}>
+                <View style={styles.aadhaarContainer}>
                     <TextInput
-                        value={stepOne.aadhaarNumber}
+                        ref={input1Ref}
+                        style={[
+                            styles.box,
+                            {
+                                borderColor: getBorderColor("part1"),
+                            },
+                        ]}
+                        onFocus={() => setFocusedInput("part1")}
+                        onBlur={() => setFocusedInput(null)}
+                        keyboardType="number-pad"
+                        placeholder='0000'
+                        maxLength={4}
+                        value={aadhaar.part1}
+                        onChangeText={(text) => {
+                            const value = text.replace(/\D/g, "");
+                            setAadhaar(prev => {
+                                const updated = { ...prev, part1: value };
 
-                        onChangeText={text => {
-                            let value = formatAadhaar(text);
+                                updateAadhaar(
+                                    updated.part1,
+                                    updated.part2,
+                                    updated.part3,
+                                );
 
-                            setStepOne({
-                                ...stepOne,
-                                aadhaarNumber: value,
+                                return updated;
                             });
+
+                            if (value.length === 4) {
+                                input2Ref.current?.focus();
+                            }
                         }}
-                        placeholder={'Enter Aadhaar Number'}
-                        maxLength={17}
-                        keyboardType={
-                            [
-                                'Mobile Number',
-                                'Register with Mobile Number',
-                                'Aadhaar Number',
-                                'ABHA Number',
-                                'Create ABHA Number',
-                            ].includes(loginType)
-                                ? 'number-pad'
-                                : 'default'
-                        }
-                        style={styles.input}
+                    />
+                    <View style={{
+                        height: 1,
+                        width: 4,
+                        backgroundColor: '#ccc'
+                    }}></View>
+                    <TextInput
+                        ref={input2Ref}
+                        style={[
+                            styles.box,
+                            {
+                                borderColor: getBorderColor("part2"),
+                            },
+                        ]}
+                        onFocus={() => setFocusedInput("part2")}
+                        onBlur={() => setFocusedInput(null)}
+                        keyboardType="number-pad"
+                        placeholder='0000'
+                        maxLength={4}
+                        value={aadhaar.part2}
+                        onKeyPress={({ nativeEvent }) => {
+                            if (
+                                nativeEvent.key === "Backspace" &&
+                                aadhaar.part2.length === 0
+                            ) {
+                                input1Ref.current?.focus();
+                            }
+                        }}
+                        onChangeText={(text) => {
+                            const value = text.replace(/\D/g, "");
+                            setAadhaar(prev => {
+                                const updated = { ...prev, part2: value };
+
+                                updateAadhaar(
+                                    updated.part1,
+                                    updated.part2,
+                                    updated.part3,
+                                );
+
+                                return updated;
+                            });
+
+                            if (value.length === 4) {
+                                input3Ref.current?.focus();
+                            }
+                        }}
+                    />
+                    <View style={{
+                        height: 1,
+                        width: 4,
+                        backgroundColor: '#ccc'
+                    }}></View>
+
+                    <TextInput
+                        ref={input3Ref}
+                        style={[
+                            styles.box,
+                            {
+                                borderColor: getBorderColor("part3"),
+                            },
+                        ]}
+                        onFocus={() => setFocusedInput("part3")}
+                        onBlur={() => setFocusedInput(null)}
+                        keyboardType="number-pad"
+                        maxLength={4}
+                        placeholder='0000'
+                        value={aadhaar.part3}
+                        onKeyPress={({ nativeEvent }) => {
+                            if (
+                                nativeEvent.key === "Backspace" &&
+                                aadhaar.part3.length === 0
+                            ) {
+                                input2Ref.current?.focus();
+                            }
+                        }}
+                        onChangeText={(text) => {
+                            const value = text.replace(/\D/g, "");
+                            setAadhaar(prev => {
+                                const updated = { ...prev, part3: value };
+
+                                updateAadhaar(
+                                    updated.part1,
+                                    updated.part2,
+                                    updated.part3,
+                                );
+
+                                return updated;
+                            });
+
+                        }}
                     />
                 </View>
             </View>

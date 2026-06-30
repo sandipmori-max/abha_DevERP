@@ -6,13 +6,21 @@ import { encryptData } from '../../utils/encrypt';
 import { getEnrollmentPayload } from '../../redux/api/enrollmentApi';
 import OtpInput from '../../Components/OtpInput';
 import { isStrictIndianMobile, isValidEmail } from '../../utils/helpers';
+import { useDispatch } from 'react-redux';
+import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 
 const StepThree = ({
   requestEmailVerificationLink,
   enrolSuggestion,
   setAbhaSuggestionList,
   setCurrentStep,
-  stepThree, setStepThree, loginType, publicKey, txnId, enrollmentRequestOtp, getEmailVerificationLinkPayload }: any) => {
+  stepThree,
+  setStepThree,
+  loginType,
+  publicKey,
+  txnId, enrollmentRequestOtp, getEmailVerificationLinkPayload }: any) => {
+  const dispatch = useDispatch()
+
   return (
     <>
       {
@@ -67,34 +75,42 @@ const StepThree = ({
                 showToast('error', "Please enter a valid mobile number.")
                 return;
               }
-              const encryptedValue =
-                encryptData(
-                  stepThree.stepThreeMobile,
-                  publicKey
+              try {
+                dispatch(showLoader());
+                const encryptedValue =
+                  encryptData(
+                    stepThree.stepThreeMobile,
+                    publicKey
+                  );
+
+                const payload =
+                  getEnrollmentPayload(
+                    "Mobile Number",
+                    encryptedValue,
+                    txnId
+                  );
+
+                const result =
+                  await enrollmentRequestOtp(
+                    payload
+                  ).unwrap();
+
+                console.log(
+                  "Mobile OTP Response =>",
+                  result
                 );
 
-              const payload =
-                getEnrollmentPayload(
-                  "Mobile Number",
-                  encryptedValue,
-                  txnId
-                );
+                setStepThree({
+                  ...stepThree,
+                  stepThreeMobileVerifyed: true,
+                  mobileTitle: result?.message
+                });
+              } catch (error) {
+                dispatch(hideLoader());
+              } finally {
+                dispatch(hideLoader());
+              }
 
-              const result =
-                await enrollmentRequestOtp(
-                  payload
-                ).unwrap();
-
-              console.log(
-                "Mobile OTP Response =>",
-                result
-              );
-
-              setStepThree({
-                ...stepThree,
-                stepThreeMobileVerifyed: true,
-                mobileTitle: result?.message
-              });
             }}>
               <Text style={{
                 color: '#D96A27',
@@ -115,7 +131,41 @@ const StepThree = ({
                   });
                 }}
                 title='Confirm OTP'
-                subTitle={stepThree.mobileTitle} />
+                subTitle={stepThree.mobileTitle}
+                handleOTPReSendCalled={async () => {
+                  console.log("handleOTPReSendCalled")
+                  try {
+                    dispatch(showLoader());
+                    const encryptedValue =
+                      encryptData(
+                        stepThree.stepThreeMobile,
+                        publicKey
+                      );
+
+                    const payload =
+                      getEnrollmentPayload(
+                        "Mobile Number",
+                        encryptedValue,
+                        txnId
+                      );
+
+                    const result =
+                      await enrollmentRequestOtp(
+                        payload
+                      ).unwrap();
+
+                    console.log(
+                      "Mobile OTP Response =>",
+                      result
+                    );
+                  } catch (error) {
+                    dispatch(hideLoader());
+                  } finally {
+                    dispatch(hideLoader());
+                  }
+
+                }}
+              />
             </> : <>
 
               {
@@ -128,7 +178,35 @@ const StepThree = ({
                       });
                     }}
                     title='Confirm OTP'
-                    subTitle='OTP sent to Aadhaar mobile number ending with ******s8@gmail.com' />
+                    subTitle='OTP sent to Aadhaar mobile number ending with ******s8@gmail.com'
+                    handleOTPReSendCalled={async () => {
+                      try {
+                        dispatch(showLoader())
+                        const encryptedEmail =
+                          encryptData(
+                            stepThree.stepThreeEmail,
+                            publicKey
+                          );
+
+                        const payload =
+                          getEmailVerificationLinkPayload(
+                            encryptedEmail
+                          );
+
+                        const result =
+                          await requestEmailVerificationLink(
+                            payload
+                          ).unwrap();
+
+                        console.log(
+                          "EMAIL LINK RESULT =>",
+                          result
+                        );
+                      } catch (error) {
+                        dispatch(hideLoader())
+                      }
+
+                    }} />
 
                 </> : <>
 
@@ -169,35 +247,42 @@ const StepThree = ({
                           showToast('error', 'Please enter your email address.');
                           return;
                         }
-                        if(!isValidEmail(stepThree.stepThreeEmail)){
+                        if (!isValidEmail(stepThree.stepThreeEmail)) {
                           showToast('error', 'Please enter a valid email address.');
                           return;
                         }
-                        const encryptedEmail =
-                          encryptData(
-                            stepThree.stepThreeEmail,
-                            publicKey
+                        try {
+                          dispatch(showLoader())
+                          const encryptedEmail =
+                            encryptData(
+                              stepThree.stepThreeEmail,
+                              publicKey
+                            );
+
+                          const payload =
+                            getEmailVerificationLinkPayload(
+                              encryptedEmail
+                            );
+
+                          const result =
+                            await requestEmailVerificationLink(
+                              payload
+                            ).unwrap();
+
+                          console.log(
+                            "EMAIL LINK RESULT =>",
+                            result
                           );
-
-                        const payload =
-                          getEmailVerificationLinkPayload(
-                            encryptedEmail
-                          );
-
-                        const result =
-                          await requestEmailVerificationLink(
-                            payload
-                          ).unwrap();
-
-                        console.log(
-                          "EMAIL LINK RESULT =>",
-                          result
-                        );
-                        const response =
-                          await enrolSuggestion({
-                            txnId,
-                          }).unwrap();
-                        setAbhaSuggestionList(response.abhaAddressList)
+                          const response =
+                            await enrolSuggestion({
+                              txnId,
+                            }).unwrap();
+                          setAbhaSuggestionList(response.abhaAddressList)
+                        } catch (error) {
+                          dispatch(hideLoader())
+                        } finally {
+                           dispatch(hideLoader());
+                        }
                         setCurrentStep(4)
                       }}
                     >

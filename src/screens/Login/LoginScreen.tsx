@@ -400,6 +400,9 @@ const LoginScreen = () => {
             setStepTwo={setStepTwo}
             stepTwo={stepTwo}
             loginType={loginType}
+            loginValue={loginValue}
+            publicKey={publicKey}
+            txnId={txnId}
           />
         </>;
 
@@ -639,6 +642,7 @@ const LoginScreen = () => {
 
                           } else if (currentStep === 2) {
                             //step 2
+                            dispatch(showLoader());
                             const validate = stepTwoValidator(stepTwo);
 
 
@@ -767,7 +771,7 @@ const LoginScreen = () => {
                       }}
                       style={styles.nextButton}
                     >
-                      <Text style={{ color: '#FFF' }}>
+                      <Text style={{ color: '#FFF', fontWeight: '600', fontSize: 16 }}>
                         {currentStep === 4 ? 'Create ABHA' : currentStep === 3 ?
                           stepThree.stepThreeMobileAuthDone ?
                             "Skip for now" : "Next" : 'Next'}

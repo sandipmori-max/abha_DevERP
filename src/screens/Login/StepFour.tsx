@@ -27,18 +27,8 @@ const StepFour = ({stepFour, loginType, abhaSuggestionList, selectedItem, handle
                     //      userName: value
                     //    })
                     //  }}
-                     placeholder={'Enter abha address'}
-                     maxLength={14}
-                     keyboardType={
-                       [
-                         'Mobile Number',
-                         'Register with Mobile Number',
-                         'Aadhaar Number',
-                         'ABHA Number',
-                         'Create ABHA Number',
-                       ].includes(loginType)
-                         ? 'number-pad'
-                         : 'default'
+                     placeholder={'Select abha address'}
+                      keyboardType={'default'
                      }
                      style={styles.input}
                    />
@@ -70,12 +60,14 @@ const StepFour = ({stepFour, loginType, abhaSuggestionList, selectedItem, handle
                              ? "green"
                              : "#ccc",
                            borderRadius: 8,
+                           flexDirection:'row',
+                           justifyContent:'space-between'
                          }}
                        >
                          <Text>{item}</Text>
      
                          {isSelected && (
-                           <Text>✓ Selected</Text>
+                           <Text>✓</Text>
                          )}
                        </TouchableOpacity>
                      );

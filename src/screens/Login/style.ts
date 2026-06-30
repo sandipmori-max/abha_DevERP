@@ -207,7 +207,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
-    marginRight: 10,
+    marginHorizontal: 10, 
   },
   header: {
     paddingTop: 20,
@@ -342,8 +342,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: 8, 
+    backgroundColor:'#ccc',
     height: 48,
   },
 
@@ -351,11 +351,17 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#222',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor:'#fff',
+    height: 48,
+    paddingLeft: 12,
+      borderRadius: 8, 
   },
   hintText: {
     fontSize: 12,
     color: '#000',
-    marginLeft: 8,
+    marginHorizontal: 8,
   },
   termsContainer: {
     marginHorizontal: 20,

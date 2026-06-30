@@ -18,6 +18,7 @@ const OtpInput = ({
   title,
   subTitle,
   setOpt,
+  handleOTPReSendCalled
 }: any) => {
   const [otp, setOtp] = useState('');
   const [timer, setTimer] =
@@ -262,8 +263,10 @@ const OtpInput = ({
 
         <TouchableOpacity
           disabled={timer > 0}
-          onPress={
-            handleResend
+          onPress={() =>{
+            handleResend()
+            handleOTPReSendCalled()
+          }
           }
         >
           <Text

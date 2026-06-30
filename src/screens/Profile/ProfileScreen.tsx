@@ -46,10 +46,10 @@ const ProfileScreen = ({ route }: any) => {
         {/* Header */}
         <View style={styles.headerCard}>
           <View style={styles.avatar}>
-          <Image
-      source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
-      style={styles.avatarImage}
-    />
+            <Image
+              source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
+              style={styles.avatarImage}
+            />
           </View>
 
           <Text style={styles.name}>
@@ -232,10 +232,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatarImage: {
-  width: "100%",
-  height: "100%",
-  borderRadius: 80,
-},
+    width: "100%",
+    height: "100%",
+    borderRadius: 80,
+  },
 
   headerCard: {
     backgroundColor: "#D96A27",

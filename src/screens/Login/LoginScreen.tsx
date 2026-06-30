@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,7 @@ import StepFour from './StepFour';
 import DLStepOne from './DLStepOne';
 import { getDlEnrollmentRequestOtpPayload, useDlEnrollmentRequestOtpMutation } from '../../redux/api/dlEnrollmentRequestOtpApi';
 import { isValidAadhaar } from '../../utils/aadhaarValidator';
+import ValidationErrorBottomSheet from './ValidationErrorBottomSheet';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -57,7 +58,12 @@ const LoginScreen = () => {
   const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
   const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
   const [errorMessage, setErrorMessage] = useState('');
+  const [showErrors, setShowErrors] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [showValidationSheet, setShowValidationSheet] = useState(false);
 
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const stepTwoRef = useRef<any>(null);
   const [stepOne, setStepOne] = useState<any>({
     aadhaarNumber: '',
     termsAgree: false,
@@ -478,7 +484,9 @@ const LoginScreen = () => {
           />
         </>;
       case 2:
-        return <><DLStepTwo mobileNumber={stepOneDL?.stepOneDLMobileNumber} /></>;
+        return <><DLStepTwo
+          ref={stepTwoRef}
+          mobileNumber={stepOneDL?.stepOneDLMobileNumber} /></>;
       case 3:
         return <></>
     }
@@ -499,13 +507,14 @@ const LoginScreen = () => {
             onPress={() =>
               navigation.goBack()
             }
+            style={{ marginVertical: 4 }}
           >
-            <Text style={styles.back}>
-              ←
-            </Text>
-
+            <MaterialIcons
+              name='arrow-back'
+              size={20}
+            />
           </TouchableOpacity>
-          
+
           <Text style={[styles.welcome, isFromRegister && {
             fontSize: 18
           }]}>
@@ -595,14 +604,14 @@ const LoginScreen = () => {
                           dispatch(showLoader());
                           if (currentStep === 1) {
                             //step 1
-                            
+
                             const validate = stepOneValidator(stepOne, captchaValue, captcha);
                             console.log("validate +++++ ++ + + +++++ ", validate)
                             if (!validate) {
                               showToast('error', "Please fill all fields correctly")
                               return;
                             }
-                            if(!isValidAadhaar(stepOne?.aadhaarNumber)){
+                            if (!isValidAadhaar(stepOne?.aadhaarNumber)) {
                               showToast('error', "Please fill valid aadhaar number")
                               return;
                             }
@@ -638,7 +647,7 @@ const LoginScreen = () => {
                               return;
                             }
 
-                            if(!isStrictIndianMobile(`+91${stepTwo.stepTwoMobileNumber}`)){
+                            if (!isStrictIndianMobile(`+91${stepTwo.stepTwoMobileNumber}`)) {
                               showToast('error', "Please fill valid mobile number")
                               return;
                             }
@@ -666,19 +675,19 @@ const LoginScreen = () => {
                             }
                           } else if (currentStep === 3) {
                             //step 3
-                            if(stepThree.stepThreeMobile === '' || stepThree.stepThreeMobile.length < 10){
+                            if (stepThree.stepThreeMobile === '' || stepThree.stepThreeMobile.length < 10) {
                               showToast('error', "Please fill mobile number")
                               return;
                             }
-                            
-                            if(!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)){
+
+                            if (!isStrictIndianMobile(`+91${stepThree.stepThreeMobile}`)) {
                               showToast('error', "Please fill valid mobile number")
                               return;
                             }
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
-                              if(stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6){
-                                   showToast('error', "Please fill valid OTP")
-                                  return;
+                              if (stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6) {
+                                showToast('error', "Please fill valid OTP")
+                                return;
                               }
                               const encryptedOtp =
                                 encryptData(
@@ -716,7 +725,7 @@ const LoginScreen = () => {
                             if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
                               // showToast('error', "Please varify email")
                               // return;
-                                const response =
+                              const response =
                                 await enrolSuggestion({
                                   txnId,
                                 }).unwrap();
@@ -850,7 +859,7 @@ const LoginScreen = () => {
                                 return;
                               }
                               const isNumberValid = isStrictIndianMobile(`+91${stepOneDL.stepOneDLMobileNumber}`)
-                              if(!isNumberValid){
+                              if (!isNumberValid) {
                                 showToast('error', 'Please fill valid mobile number')
                                 return;
                               }
@@ -884,8 +893,17 @@ const LoginScreen = () => {
                                 stepOneDLTitle: response?.message,
                                 stepOneDLMobileVerifying: true,
                               });
-                            } else {
+                            } else if (currentStepDL === 2) {
+                              const result = stepTwoRef.current?.validateForm();
 
+                              if (!result.isValid) {
+                                setValidationErrors(result.errors);
+                                setShowValidationSheet(true); // Bottom Sheet open
+                                return;
+                              }
+
+
+                              console.log(result.data);
                             }
                           } catch (error) {
                             showToast('error', `${error}`)
@@ -1206,11 +1224,11 @@ const LoginScreen = () => {
 
                   <View style={styles.termsCard}>
                     <Text style={styles.termsText}>
-                     I hereby declare that I am voluntarily sharing my
-                    Aadhaar Number and demographic information issued
-                    by UIDAI with National Health Authority (NHA) for
-                    the sole purpose of authentication and healthcare
-                    services under ABDM.
+                      I hereby declare that I am voluntarily sharing my
+                      Aadhaar Number and demographic information issued
+                      by UIDAI with National Health Authority (NHA) for
+                      the sole purpose of authentication and healthcare
+                      services under ABDM.
                     </Text>
 
                     <View style={styles.termsFooter}>
@@ -1363,10 +1381,10 @@ const LoginScreen = () => {
                   <View style={styles.termsCard}>
                     <Text style={styles.termsText}>
                       I hereby declare that I am voluntarily sharing my
-                    Aadhaar Number and demographic information issued
-                    by UIDAI with National Health Authority (NHA) for
-                    the sole purpose of authentication and healthcare
-                    services under ABDM.
+                      Aadhaar Number and demographic information issued
+                      by UIDAI with National Health Authority (NHA) for
+                      the sole purpose of authentication and healthcare
+                      services under ABDM.
                     </Text>
 
                     <View style={styles.termsFooter}>
@@ -1533,6 +1551,11 @@ const LoginScreen = () => {
               }
             </View></>
         }
+        <ValidationErrorBottomSheet
+          visible={showValidationSheet}
+          errors={validationErrors}
+          onClose={() => setShowValidationSheet(false)}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

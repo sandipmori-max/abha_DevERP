@@ -185,7 +185,7 @@ export default function IntroScreen() {
 
     const registerOptions = [
         'Aadhaar Number',
-        'Driving Licence',
+        // 'Driving Licence',
     ];
 
     const optionList = bottomSheetType === 'Login' ? loginOptions : registerOptions;
@@ -723,12 +723,12 @@ const styles = StyleSheet.create({
     bottomSheet: {
         position: 'absolute',
         bottom: 0,
-        width: '100%',
-        height: '42%',
+         height: '42%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 20,
+         marginHorizontal: 12
     },
 
     dragHandle: {

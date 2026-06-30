@@ -96,8 +96,18 @@ To learn more about React Native, take a look at the following resources:
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 
-aa = 541245512030
+<!-- aa = 541245512030 -->
 
-7619 8714 0371
+<!-- 7619 8714 0371
 2865 6926 3981
-8991 3736 2188
+8991 3736 2188 -->
+
+// --- android build ----
+// ./gradlew --stop
+// ./gradlew clean
+// ./gradlew generateCodegenArtifactsFromSchema 
+// cmd - gradlew assemble[BRAND_NAME]Release
+
+- auto foucus on input - opt 
+- DL - mobile - number keypad
+- 

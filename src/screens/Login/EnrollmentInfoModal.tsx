@@ -104,18 +104,12 @@ const styles = StyleSheet.create({
 
   modal: {
     width: "100%",
+    position:'absolute',
+    bottom: 0,
     maxWidth: 420,
     backgroundColor: "#FFF",
     borderRadius: 18,
-    padding: 24,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 12,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 30,
-    elevation: 12,
+    padding: 24, 
   },
 
   closeBtn: {

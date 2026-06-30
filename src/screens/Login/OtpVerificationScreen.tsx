@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Keyboard,
 } from 'react-native';
 import {
   useNavigation,
@@ -73,6 +74,27 @@ const OtpVerificationScreen = () => {
     // Verify OTP API
   };
 
+  useEffect(() => {
+    const showListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        console.log('Keyboard Open');
+      },
+    );
+
+    const hideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        console.log('Keyboard Close');
+      },
+    );
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -107,7 +129,6 @@ const OtpVerificationScreen = () => {
         </View>
 
         <ScrollView
-          keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             paddingTop: 30,
             paddingBottom: 140,
@@ -144,7 +165,7 @@ const OtpVerificationScreen = () => {
             )}
           </Text>
 
-          
+
 
           {/* Hidden Input */}
 
@@ -166,18 +187,18 @@ const OtpVerificationScreen = () => {
             }}
             keyboardType="number-pad"
             maxLength={6}
-            style={
-              styles.hiddenInput
-            }
+
           />
 
           {/* OTP Boxes */}
 
           <TouchableOpacity
             activeOpacity={1}
-            onPress={() =>
-              inputRef.current?.focus()
-            }
+            onPress={() => {
+              setTimeout(() => {
+                inputRef.current?.focus();
+              }, 100);
+            }}
           >
             <View
               style={
@@ -377,8 +398,8 @@ const styles =
     },
 
     hiddenInput: {
-      position: 'absolute',
-      opacity: 0,
+      width: 1,
+      height: 1,
     },
 
     otpContainer: {
@@ -432,7 +453,7 @@ const styles =
       position: 'absolute',
       bottom: 0,
       left: 0,
-      right: 0, 
+      right: 0,
       padding: 20,
       borderTopWidth: 1,
       borderTopColor:

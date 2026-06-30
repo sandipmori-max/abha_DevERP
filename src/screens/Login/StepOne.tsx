@@ -102,7 +102,7 @@ const StepOne = ({
                     </View>
                 </View>
             </View>
-            <Text style={[styles.cardTitle, { marginHorizontal: 20 }]}>
+            {/* <Text style={[styles.cardTitle, { marginHorizontal: 20 }]}>
                 Authentication type <Text style={{ color: 'red' }}>*</Text>
             </Text>
             <View style={[styles.card, {
@@ -165,7 +165,7 @@ const StepOne = ({
                         }
                     />
                 </View>
-            </View>
+            </View> */}
             <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
                 <View>
                     <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>

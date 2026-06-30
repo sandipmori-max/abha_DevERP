@@ -4,304 +4,306 @@ import React, {
   useState,
 } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
+  Keyboard,
+  Animated,
 } from 'react-native';
-import {
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
 
+const OtpInput = ({
+  title,
+  subTitle,
+  setOpt,
+}: any) => {
+  const [otp, setOtp] = useState('');
+  const [timer, setTimer] =
+    useState(60);
 
-const OtpInput = ({title, subTitle, setOpt}: any) => {
+  const inputRef =
+    useRef<TextInput>(null);
 
+  const blinkAnim =
+    useRef(
+      new Animated.Value(1),
+    ).current;
 
-    const [otp, setOtp] = useState('');
-    const [timer, setTimer] = useState(60);
-    
-      const inputRef = useRef<TextInput>(null);
-    
-      useEffect(() => {
+  useEffect(() => {
+    const keyboardShow =
+      Keyboard.addListener(
+        'keyboardDidShow',
+        () => {
+          console.log(
+            'Keyboard Open',
+          );
+        },
+      );
+
+    const keyboardHide =
+      Keyboard.addListener(
+        'keyboardDidHide',
+        () => {
+          console.log(
+            'Keyboard Close',
+          );
+        },
+      );
+
+    return () => {
+      keyboardShow.remove();
+      keyboardHide.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeout =
+      setTimeout(() => {
         inputRef.current?.focus();
-      }, []);
-    
-      useEffect(() => {
-        if (timer <= 0) {
-          return;
-        }
-    
-        const interval = setInterval(() => {
-          setTimer(prev => prev - 1);
-        }, 1000);
-    
-        return () => clearInterval(interval);
-      }, [timer]);
-    
-      const maskNumber = (number: string) => {
-        if (!number) {
-          return '******0000';
-        }
-    
-        return `******${number.slice(-4)}`;
-      };
-    
-      const handleResend = () => {
-        setTimer(60);
-    
-        // Resend OTP API Call
-      };
-    
-      const handleVerify = () => {
-        if (otp.length !== 6) {
-          return;
-        }
-    
-        console.log('OTP:', otp);
-    
-        // Verify OTP API
-      };
-    
+      }, 300);
+
+    return () =>
+      clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (otp.length >= 6) {
+      return;
+    }
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(
+          blinkAnim,
+          {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          },
+        ),
+        Animated.timing(
+          blinkAnim,
+          {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          },
+        ),
+      ]),
+    ).start();
+  }, [otp.length]);
+
+  useEffect(() => {
+    if (timer <= 0) {
+      return;
+    }
+
+    const interval =
+      setInterval(() => {
+        setTimer(
+          prev => prev - 1,
+        );
+      }, 1000);
+
+    return () =>
+      clearInterval(interval);
+  }, [timer]);
+
+  const handleChangeOtp = (
+    text: string,
+  ) => {
+    const numeric =
+      text.replace(
+        /[^0-9]/g,
+        '',
+      );
+
+    const value =
+      numeric.slice(0, 6);
+
+    setOtp(value);
+    setOpt?.(value);
+  };
+
+  const handleResend = () => {
+    setTimer(60);
+    setOtp('');
+
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 200);
+  };
 
   return (
-     <ScrollView
-             keyboardShouldPersistTaps="handled"
-             contentContainerStyle={{
-               paddingBottom: 14,
-             }}
-             showsVerticalScrollIndicator={
-               false
-             }
-           >
-             {/* Illustration */}
-   
-             {/* <View style={styles.iconWrap}>
-               <Text style={styles.lockIcon}>
-                 🔐
-               </Text>
-             </View> */}
-   
-             {/* Title */}
-   
-           <View style={{marginHorizontal: 24}}>
-              <Text style={styles.title}>
-              {title}
-             </Text>
-   
-             <Text
-               style={styles.subtitle}
-             >
-               {subTitle}
-             </Text>
-    
-   
-           </View>
-             
-   
-             {/* Hidden Input */}
-   
-             <TextInput
-               ref={inputRef}
-               value={otp}
-               onChangeText={text => {
-                 const numeric =
-                   text.replace(
-                     /[^0-9]/g,
-                     '',
-                   );
-   
-                 if (
-                   numeric.length <= 6
-                 ) {
-                   setOtp(numeric);
-                   setOpt(numeric)
-                 }
-               }}
-               keyboardType="number-pad"
-               maxLength={6}
-               style={
-                 styles.hiddenInput
-               }
-             />
-   
-             {/* OTP Boxes */}
-   
-             <TouchableOpacity
-               activeOpacity={1}
-               onPress={() =>
-                 inputRef.current?.focus()
-               }
-             >
-               <View
-                 style={
-                   styles.otpContainer
-                 }
-               >
-                 {[0, 1, 2, 3, 4, 5].map(
-                   index => (
-                     <View
-                       key={index}
-                       style={
-                         styles.otpBox
-                       }
-                     >
-                       <Text
-                         style={
-                           styles.otpText
-                         }
-                       >
-                         {otp[index] ||
-                           ''}
-                       </Text>
-                     </View>
-                   ),
-                 )}
-               </View>
-             </TouchableOpacity>
-   
-             {/* Timer */}
-   
-             <View
-               style={
-                 styles.timerContainer
-               }
-             >
-               <Text
-                 style={
-                   styles.timerText
-                 }
-               >
-                 Resend in:{' '}
-                 {timer}s
-               </Text>
-   
-               <TouchableOpacity
-                 disabled={
-                   timer > 0
-                 }
-                 onPress={
-                   handleResend
-                 }
-               >
-                 <Text
-                   style={[
-                     styles.resendText,
-                     timer > 0 && {
-                       opacity: 0.4,
-                     },
-                   ]}
-                 >
-                   Resend OTP
-                 </Text>
-               </TouchableOpacity>
-             </View>
-           </ScrollView>
-  )
-}
+    <ScrollView
+      keyboardShouldPersistTaps="always"
+      contentContainerStyle={{
+        paddingBottom: 20,
+      }}
+      showsVerticalScrollIndicator={
+        false
+      }
+    >
+      <View
+        style={{
+          marginHorizontal: 24,
+        }}
+      >
+        <Text style={styles.title}>
+          {title}
+        </Text>
 
-export default OtpInput
+        <Text
+          style={styles.subtitle}
+        >
+          {subTitle}
+        </Text>
+      </View>
+
+      {/* Hidden Input */}
+
+      <TextInput
+        ref={inputRef}
+        value={otp}
+        onChangeText={
+          handleChangeOtp
+        }
+        keyboardType="number-pad"
+        maxLength={6}
+        autoFocus
+        caretHidden
+        contextMenuHidden={
+          false
+        }
+        style={
+          styles.hiddenInput
+        }
+      />
+
+      {/* OTP BOXES */}
+
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={() =>
+          inputRef.current?.focus()
+        }
+      >
+        <View
+          style={
+            styles.otpContainer
+          }
+        >
+          {[0, 1, 2, 3, 4, 5].map(
+            index => {
+              const isActive =
+                otp.length ===
+                index;
+
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.otpBox,
+                    isActive && {
+                      borderColor:
+                        '#D96A27',
+                    },
+                  ]}
+                >
+                  {otp[index] ? (
+                    <Text
+                      style={
+                        styles.otpText
+                      }
+                    >
+                      {
+                        otp[
+                          index
+                        ]
+                      }
+                    </Text>
+                  ) : isActive &&
+                    otp.length <
+                      6 ? (
+                    <Animated.View
+                      style={[
+                        styles.cursor,
+                        {
+                          opacity:
+                            blinkAnim,
+                        },
+                      ]}
+                    />
+                  ) : null}
+                </View>
+              );
+            },
+          )}
+        </View>
+      </TouchableOpacity>
+
+      {/* TIMER */}
+
+      <View
+        style={
+          styles.timerContainer
+        }
+      >
+        <Text
+          style={
+            styles.timerText
+          }
+        >
+          Resend in:{' '}
+          {timer}s
+        </Text>
+
+        <TouchableOpacity
+          disabled={timer > 0}
+          onPress={
+            handleResend
+          }
+        >
+          <Text
+            style={[
+              styles.resendText,
+              timer > 0 && {
+                opacity: 0.4,
+              },
+            ]}
+          >
+            Resend OTP
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default OtpInput;
 
 const styles =
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor:
-        '#F7F8FC',
-    },
-
-    header: {
-      height: 65,
-      backgroundColor:
-        '#FFFFFF',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent:
-        'space-between',
-      paddingHorizontal: 15,
-      borderBottomWidth: 1,
-      borderBottomColor:
-        '#ECECEC',
-    },
-
-    backButton: {
-      width: 40,
-      justifyContent:
-        'center',
-    },
-
-    backIcon: {
-      fontSize: 30,
-      color: '#173D8F',
-      fontWeight: '700',
-    },
-
-    headerTitle: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: '#173D8F',
-    },
-
-    iconWrap: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      backgroundColor:
-        '#E9EEFF',
-      alignSelf: 'center',
-      justifyContent:
-        'center',
-      alignItems: 'center',
-      marginTop: 20,
-    },
-
-    lockIcon: {
-      fontSize: 50,
-    },
-
     title: {
       fontSize: 18,
       fontWeight: '700',
-      color: '#173D8F', 
+      color: '#173D8F',
       marginTop: 25,
     },
 
     subtitle: {
       fontSize: 15,
-      color: '#666', 
+      color: '#666',
       marginTop: 10,
-    },
-
-    mobile: {
-      fontSize: 18,
-      fontWeight: '700', 
-      marginTop: 6,
-      color: '#222',
-    },
-
-    typeChip: {
-      alignSelf: 'center',
-      marginTop: 18,
-      backgroundColor:
-        '#173D8F',
-      borderRadius: 20,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-    },
-
-    typeText: {
-      color: '#FFF',
-      fontWeight: '600',
     },
 
     hiddenInput: {
       position: 'absolute',
       opacity: 0,
+      width: 1,
+      height: 1,
     },
 
     otpContainer: {
@@ -315,7 +317,7 @@ const styles =
     otpBox: {
       width: 50,
       height: 60,
-      borderRadius: 6,
+      borderRadius: 8,
       backgroundColor:
         '#FFF',
       borderWidth: 2,
@@ -329,6 +331,14 @@ const styles =
       fontSize: 24,
       fontWeight: '700',
       color: '#222',
+    },
+
+    cursor: {
+      width: 2,
+      height: 28,
+      backgroundColor:
+        '#173D8F',
+      borderRadius: 2,
     },
 
     timerContainer: {
@@ -349,32 +359,5 @@ const styles =
       fontSize: 15,
       fontWeight: '700',
       color: '#D96A27',
-    },
-
-    bottomBar: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0, 
-      padding: 20,
-      borderTopWidth: 1,
-      borderTopColor:
-        '#ECECEC',
-    },
-
-    verifyBtn: {
-      height: 48,
-      borderRadius: 8,
-      backgroundColor:
-        '#D96A27',
-      justifyContent:
-        'center',
-      alignItems: 'center',
-    },
-
-    verifyText: {
-      color: '#FFF',
-      fontSize: 18,
-      fontWeight: '700',
     },
   });

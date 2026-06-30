@@ -1,4 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, {
+  useRef, useState, forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   Alert,
   Image,
@@ -10,6 +13,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  NativeModules,
+
 } from "react-native";
 import RadioItem from "./RadioItem";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -19,16 +24,32 @@ import {
   Asset,
 } from "react-native-image-picker";
 import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
+import RNFS from "react-native-fs";
 
 
 
+const { DocumentScanner } = NativeModules;
 
+const launchScannerAsync = (options: any) => {
+  return new Promise<any>((resolve, reject) => {
+    if (!DocumentScanner) {
+      reject(new Error("DocumentScanner module not linked"));
+      return;
+    }
 
-const DLStepTwo = ({
-  navigation,
-}: any) => {
+    try {
+      DocumentScanner.launchScanner(options, (result: any) => {
+        resolve(result);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
-
+const DLStepTwo = forwardRef((props: any, ref) => {
+  const [cacheBuster, setCacheBuster] = useState(Date.now());
+  const [errors, setErrors] = useState<string[]>([]);
   const [showDatePicker, setShowDatePicker] =
     useState(false);
 
@@ -197,28 +218,88 @@ const DLStepTwo = ({
   };
   const [isAgreed, setIsAgreed] = useState(false);
 
-  const onSubmit = () => {
-    if (
-      !formData.documentId ||
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.dob ||
-      !formData.gender
-    ) {
-      Alert.alert(
-        "Validation",
-        "Please fill all mandatory fields"
+
+
+  const validateForm = () => {
+    const validationErrors: string[] = [];
+
+    const requiredFields = [
+      {
+        key: "documentId",
+        label: "Driving Licence Number",
+      },
+      {
+        key: "firstName",
+        label: "First Name",
+      },
+      {
+        key: "lastName",
+        label: "Last Name",
+      },
+      {
+        key: "dob",
+        label: "Date of Birth",
+      },
+      {
+        key: "gender",
+        label: "Gender",
+      },
+      {
+        key: "frontSidePhoto",
+        label: "Front Side Photo",
+      },
+      {
+        key: "backSidePhoto",
+        label: "Back Side Photo",
+      },
+      {
+        key: "address",
+        label: "Address",
+      },
+      {
+        key: "pinCode",
+        label: "Pin Code",
+      },
+      {
+        key: "state",
+        label: "State",
+      },
+      {
+        key: "district",
+        label: "District",
+      },
+    ];
+
+    requiredFields.forEach(field => {
+      const value = formData[field.key as keyof typeof formData];
+
+      if (
+        value === null ||
+        value === undefined ||
+        String(value).trim() === ""
+      ) {
+        validationErrors.push(`${field.label} is required.`);
+      }
+    });
+
+    if (!isAgreed) {
+      validationErrors.push(
+        "Please accept the Terms & Conditions."
       );
-      return;
     }
 
-    console.log(
-      "DL Payload =>",
-      formData
-    );
+    setErrors(validationErrors);
 
-    // navigation.navigate(...)
+    return {
+      isValid: validationErrors.length === 0,
+      errors: validationErrors,
+      data: formData,
+    };
   };
+
+  useImperativeHandle(ref, () => ({
+    validateForm,
+  }));
 
   return (
     <View style={styles.main}>
@@ -260,30 +341,35 @@ const DLStepTwo = ({
           </Text>
 
           <Input
-            label="Mobile Number"
+            label="Mobile number"
             value={
-              '8154877969'
+              '+91 8154877969'
             }
+            keyboardType='number-pad'
+            isDisabled={true}
           />
 
           <Input
-            label="Driving Licence number"
+            label="Driving licence number"
             value={
               formData.documentId
             }
+            subLabel={'*'}
             onChangeText={text =>
               updateField(
                 "documentId",
                 text
               )
             }
+            keyboardType='number-pad'
           />
 
           <Input
-            label="First Name"
+            label="First name"
             value={
               formData.firstName
             }
+            subLabel={'*'}
             onChangeText={text =>
               updateField(
                 "firstName",
@@ -293,7 +379,7 @@ const DLStepTwo = ({
           />
 
           <Input
-            label="Middle Name"
+            label="Middle name"
             value={
               formData.middleName
             }
@@ -306,7 +392,8 @@ const DLStepTwo = ({
           />
 
           <Input
-            label="Last Name"
+            label="Last name"
+            subLabel={'*'}
             value={
               formData.lastName
             }
@@ -329,7 +416,7 @@ const DLStepTwo = ({
             }
           /> */}
           <Text style={styles.fieldLabel}>
-            DOB (DD-MM-YYYY)
+            DOB (DD-MM-YYYY) <Text style={{ color: 'red' }}>*</Text>
           </Text>
 
           <TouchableOpacity
@@ -348,7 +435,7 @@ const DLStepTwo = ({
           </TouchableOpacity>
 
           <Text style={styles.fieldLabel}>
-            Gender
+            Gender <Text style={{ color: 'red' }}>*</Text>
           </Text>
 
           <View style={styles.genderContainer}>
@@ -420,45 +507,108 @@ const DLStepTwo = ({
           </Text>
 
           <UploadBox
-            title="Front Side Photo"
+            title="Front side photo"
             image={
               formData.frontSidePhoto
             }
-             onPress={async () => {
-    const hasPermission = await requestPermission("camera");
+            onPress={async () => {
+              const hasPermission = await requestPermission("camera");
 
-    if (!hasPermission) {
-      return;
-    }
+              if (!hasPermission) {
+                return;
+              }
+              const result = await launchScannerAsync({
+                quality: 0.8,
+                includeExif: true,
+                includeBase64: true,
+                includeLocationExif: false,
+              });
 
-    openImagePicker(asset => {
-      updateField(
-        "frontSidePhoto",
-        asset.base64 || ""
-      );
-    });
-  }}
+              if (result?.didCancel) {
+                return;
+              }
+
+              if (result?.error) {
+                Alert.alert("Error", result?.errorMessage || "Scan failed");
+                return;
+              }
+
+              if (result?.images?.length > 0) {
+                const processed = result.images.map((img: any) => ({
+                  ...img,
+                  base64: img.base64 || null,
+                }));
+
+                setCacheBuster(Date.now());
+                const base64Data = await RNFS.readFile(
+                  processed[0].uri,
+                  "base64",
+                );
+                setCacheBuster(Date.now());
+                updateField(
+                  "frontSidePhoto",
+                  base64Data
+                );
+
+              } else {
+              }
+
+
+            }}
+
           />
 
           <UploadBox
-            title="Back Side Photo"
+            title="Back side photo"
             image={
               formData.backSidePhoto
             }
-             onPress={async () => {
-    const hasPermission = await requestPermission("camera");
+            onPress={async () => {
+              const hasPermission = await requestPermission("camera");
 
-    if (!hasPermission) {
-      return;
-    }
+              if (!hasPermission) {
+                return;
+              }
+              const result = await launchScannerAsync({
+                quality: 0.8,
+                includeExif: true,
+                includeBase64: true,
+                includeLocationExif: false,
+              });
 
-    openImagePicker(asset => {
-      updateField(
-        "frontSidePhoto",
-        asset.base64 || ""
-      );
-    });
-  }}
+              if (result?.didCancel) {
+                return;
+              }
+
+              if (result?.error) {
+                Alert.alert("Error", result?.errorMessage || "Scan failed");
+                return;
+              }
+
+              if (result?.images?.length > 0) {
+                const processed = result.images.map((img: any) => ({
+                  ...img,
+                  base64: img.base64 || null,
+                }));
+
+
+                setCacheBuster(Date.now());
+                const base64Data = await RNFS.readFile(
+                  processed[0].uri,
+                  "base64",
+                );
+                setCacheBuster(Date.now());
+                updateField(
+                  "backSidePhoto",
+                  base64Data
+                );
+
+
+              } else {
+              }
+
+
+            }}
           />
         </View>
         <View style={styles.card}>
@@ -473,7 +623,7 @@ const DLStepTwo = ({
               styles.fieldLabel
             }
           >
-            Address
+            Address <Text style={{ color: 'red' }}>*</Text>
           </Text>
 
           <TextInput
@@ -490,25 +640,29 @@ const DLStepTwo = ({
             style={
               styles.addressInput
             }
+
           />
           <Input
-            label="Pin Code"
+            label="Pin code"
             value={
               formData.pinCode
             }
-            keyboardType="number-pad"
+            keyboardType='number-pad'
             onChangeText={text =>
               updateField(
                 "pinCode",
                 text
               )
             }
+            subLabel={'*'}
           />
           <Input
             label="State"
             value={
               formData.state
             }
+            subLabel={'*'}
+            isDisabled={true}
           />
 
           <Input
@@ -516,15 +670,11 @@ const DLStepTwo = ({
             value={
               formData.district
             }
+            subLabel={'*'}
+            isDisabled={true}
           />
 
-
         </View>
-        <RadioItem
-          title="I hereby declare that I have not created another ABHA number to the best of my knowledge"
-          selected=''
-          onPress={() => { }}
-        />
 
         <View style={styles.termsContainer}>
           <Text style={styles.termsTitle}>
@@ -532,13 +682,11 @@ const DLStepTwo = ({
           </Text>
 
           <View style={styles.termsCard}>
-            <Text style={styles.termsText}>
-              I hereby declare that I am voluntarily sharing my
-              Aadhaar Number and demographic information issued
-              by UIDAI with National Health Authority (NHA) for
-              the sole purpose of authentication and healthcare
-              services under ABDM.
+            <ScrollView>
+              <Text style={styles.termsText}>
+              I, hereby declare that I am voluntarily sharing my identity information with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM (Ayushman Bharat Digital Mission) from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under.
             </Text>
+            </ScrollView>
 
             <View style={styles.termsFooter}>
               <TouchableOpacity
@@ -657,19 +805,21 @@ const DLStepTwo = ({
       </Modal>
     </View>
   );
-};
+});
 
 const Input = ({
   label,
+  subLabel,
   value,
   onChangeText,
   keyboardType = "default",
+  isDisabled = false
 }: any) => (
   <>
     <Text
       style={styles.fieldLabel}
     >
-      {label}
+      {label} {subLabel && <Text style={{ color: 'red', fontWeight: '700' }}>*</Text>}
     </Text>
 
     <TextInput
@@ -680,10 +830,22 @@ const Input = ({
       placeholder={
         `Enter ${label}`
       }
-      onChangeText={
-        onChangeText
-      }
-      style={styles.input}
+      onChangeText={(text) => {
+        if (
+          keyboardType === "number-pad" ||
+          keyboardType === "numeric" ||
+          keyboardType === "decimal-pad"
+        ) {
+          // Sirf digits allow
+          const numbersOnly = text.replace(/[^0-9]/g, "");
+          onChangeText?.(numbersOnly);
+        } else {
+          onChangeText?.(text);
+        }
+      }}
+      style={[styles.input, isDisabled && {
+        backgroundColor: '#f0f0f0'
+      }]}
     />
   </>
 );
@@ -693,47 +855,67 @@ const UploadBox = ({
   image,
   onPress
 }: any) => (
-  <TouchableOpacity
-    onPress={onPress}
-    style={styles.uploadBox}
-  >
-    {image ? (
-      <Image
-        source={{
-          uri: `data:image/jpeg;base64,${image}`,
-        }}
-        style={styles.preview}
-      />
-    ) : (
-      <>
-        <Text
-          style={
-            styles.uploadIcon
-          }
-        >
-          📷
-        </Text>
+  <>
+    <Text
+      style={
+        styles.uploadTitle
+      }
+    >
+      {title}  <Text style={{ color: 'red', fontWeight: '700' }}>*</Text>
+    </Text>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.uploadBox, !image && {
+        height: 100
+      }]}
+    >
+      {image ? (
+        <>
+          <Image
 
-        <Text
-          style={
-            styles.uploadTitle
-          }
-        >
-          {title}
-        </Text>
+            source={{
+              uri: `data:image/jpeg;base64,${image}`,
+            }}
+            resizeMode='contain'
+            style={styles.preview}
 
-        <Text
-          style={
-            styles.uploadSubTitle
-          }
-        >
-          Tap to upload
-        </Text>
-      </>
-    )}
-  </TouchableOpacity>
+          />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onPress}
+            style={styles.editButton}
+          >
+            <Text style={styles.editIcon}>
+              ✏️
+            </Text>
+          </TouchableOpacity>
+        </>
+
+      ) : (
+        <>
+          <Text
+            style={
+              styles.uploadIcon
+            }
+          >
+            📷
+          </Text>
+
+
+
+          <Text
+            style={
+              styles.uploadSubTitle
+            }
+          >
+            Tap to upload
+          </Text>
+        </>
+      )}
+    </TouchableOpacity>
+  </>
+
 );
-
 export default DLStepTwo;
 
 const styles =
@@ -742,6 +924,28 @@ const styles =
       flex: 1,
       backgroundColor:
         "#F5F7FB",
+    },
+    editButton: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      width: 34,
+      height: 34,
+      borderRadius: 12,
+      backgroundColor: "#201f1f",
+      justifyContent: "center",
+      alignItems: "center",
+      elevation: 4,
+    },
+
+    editIcon: {
+      fontSize: 10,
+    },
+
+    preview: {
+      width: "100%",
+      height: 220,
+      borderRadius: 6,
     },
     agreeText: {
       marginLeft: 10,
@@ -866,8 +1070,7 @@ const styles =
     },
 
     card: {
-      backgroundColor:
-        "#FFF",
+      backgroundColor: "#FFF",
       borderRadius: 4,
       padding: 12,
       marginBottom: 16,
@@ -878,7 +1081,7 @@ const styles =
       fontSize: 17,
       fontWeight: "700",
       color: "#111827",
-      marginBottom: 15,
+      marginBottom: 4,
     },
 
     fieldLabel: {
@@ -940,7 +1143,7 @@ const styles =
     },
 
     uploadBox: {
-      height: 100,
+      height: 200,
       borderRadius: 6,
       borderWidth: 1.5,
       borderStyle: "dashed",
@@ -948,7 +1151,7 @@ const styles =
       justifyContent:
         "center",
       alignItems: "center",
-      marginBottom: 12,
+      marginBottom: 2,
     },
 
     uploadIcon: {
@@ -957,7 +1160,7 @@ const styles =
 
     uploadTitle: {
       fontWeight: "600",
-      marginTop: 8,
+      marginVertical: 8,
     },
 
     uploadSubTitle: {
@@ -999,7 +1202,7 @@ const styles =
       backgroundColor: "#FFF",
       borderWidth: 1,
       borderColor: "#E2E8F0",
-      borderRadius: 18,
+      borderRadius: 8,
       marginHorizontal: 4,
       justifyContent: "center",
       alignItems: "center",
@@ -1041,8 +1244,8 @@ const styles =
       backgroundColor: '#FFF',
       borderRadius: 8,
       borderColor: '#E5E5E5',
-      overflow: 'hidden',
-    },
+      maxHeight: 220
+      },
 
     termsText: {
       padding: 18,
@@ -1127,5 +1330,26 @@ const styles =
       fontSize: 15,
       fontWeight: "700",
       color: "#FFF",
+    },
+    errorContainer: {
+      backgroundColor: "#FFF3F3",
+      borderWidth: 1,
+      borderColor: "#F5B5B5",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 15,
+    },
+
+    errorTitle: {
+      color: "#B91C1C",
+      fontWeight: "700",
+      fontSize: 15,
+      marginBottom: 8,
+    },
+
+    errorText: {
+      color: "#DC2626",
+      fontSize: 14,
+      marginBottom: 4,
     },
   });

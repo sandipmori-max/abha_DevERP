@@ -16,7 +16,6 @@
 		DA769E872FEC0CD800659A9C /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E862FEC0CD800659A9C /* Vision.framework */; };
 		DA769E882FEC0CDE00659A9C /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E862FEC0CD800659A9C /* Vision.framework */; };
 		DA769E8A2FEC0CE400659A9C /* VisionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E892FEC0CE400659A9C /* VisionKit.framework */; };
-		DA769E8C2FEC0CEA00659A9C /* VisualIntelligence.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E8B2FEC0CEA00659A9C /* VisualIntelligence.framework */; };
 		DA769E8E2FEC0D1500659A9C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA769E8D2FEC0D1500659A9C /* UIKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -46,7 +45,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA769E8C2FEC0CEA00659A9C /* VisualIntelligence.framework in Frameworks */,
 				DA769E8E2FEC0D1500659A9C /* UIKit.framework in Frameworks */,
 				DA769E872FEC0CD800659A9C /* Vision.framework in Frameworks */,
 				DA769E882FEC0CDE00659A9C /* Vision.framework in Frameworks */,
@@ -218,13 +216,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -261,13 +255,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AbhaDevERP/Pods-AbhaDevERP-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

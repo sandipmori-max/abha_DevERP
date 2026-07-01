@@ -181,7 +181,7 @@ export default function IntroScreen() {
         'Mobile Number',
         'Aadhaar Number',
         'ABHA Number',
-        'ABHA Address'
+        // 'ABHA Address'
     ];
 
     const registerOptions = [

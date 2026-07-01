@@ -22,7 +22,7 @@ const ProfileScreen = ({ route }: any) => {
   );
 
   console.log('proReduxData', proReduxData)
-  const profile = proReduxData?.ABHAProfile || {};
+  const profile = proReduxData || {};
 
   const fullName = [
     profile?.firstName,

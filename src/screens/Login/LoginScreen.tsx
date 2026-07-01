@@ -708,9 +708,10 @@ const LoginScreen = () => {
 
                             if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
                               const responseProfile =
-                                await getProfileAccount();
+                                 await getProfileAccount();
                               console.log(responseProfile);
-                              navigation.navigate("Profile");
+                              dispatch(setActiveUser(responseProfile?.data))
+                              // navigation.replace("Main");
                             } else {
                               setCurrentStep(3)
                             }
@@ -789,9 +790,10 @@ const LoginScreen = () => {
 
                             console.log("responseProfile", responseProfile)
                             console.log(responseProfile);
-                            navigation.navigate("Profile", {
-                              profile: responseProfile.data,
-                            });
+                            dispatch(setActiveUser(responseProfile?.data))
+                            // navigation.replace("Main", {
+                            //   profile: responseProfile.data,
+                            // });
                           }
                         } catch (error) {
                           console.log("--------------------", error)
@@ -1106,7 +1108,7 @@ const LoginScreen = () => {
                           <View style={{
                             height: 1,
                             width: 4,
-                             marginHorizontal: 4,
+                            marginHorizontal: 4,
                             backgroundColor: '#ccc'
                           }}></View>
 
@@ -1657,10 +1659,16 @@ const LoginScreen = () => {
                       );
                       const result = await enrollmentRequestOtp(payloadPassed).unwrap();
                       console.log("result ------+++++++++++++-------- ", result)
-                      navigation.navigate('OtpVerification', {
-                        loginType,
-                        mobileNumber: loginValue,
-                      });
+                      showToast(
+                        "success",
+                        result?.message || "OTP sent successfully"
+                      );
+                      setTimeout(() => {
+                        navigation.replace('OtpVerification', {
+                          loginType,
+                          mobileNumber: loginValue,
+                        });
+                      }, 1000);
                     } else {
 
                       const encryptedValue =
@@ -1675,10 +1683,21 @@ const LoginScreen = () => {
                       );
                       const result = await requestOtp(payloadPassed).unwrap();
                       console.log("result -------------- ", result)
-                      navigation.navigate('OtpVerification', {
-                        loginType,
-                        mobileNumber: loginValue,
-                      });
+                      showToast(
+                        "success",
+                        result?.message || "OTP sent successfully"
+                      );
+                      setTimeout(() => {
+                        navigation.replace('OtpVerification', {
+                          loginType,
+                          mobileNumber: loginValue,
+                          loginValue: loginValue,
+                          txnId: txnId,
+                          validationMethod: validationMethod,
+                          result: result
+                        });
+                      }, 1000);
+
                     }
 
                   } catch (error) {

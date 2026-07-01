@@ -21,14 +21,43 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
+import { getLoginVerifyPayload, useLoginVerifyMutation } from '../../redux/api/loginVerifyApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { encryptData } from '../../utils/encrypt';
+import { getPayload, useRequestOtpMutation } from '../../redux/api/loginApi';
+import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
+import { showToast } from '../../utils/toast';
+import { getLoginVerifyUserPayload, useLoginVerifyUserMutation } from '../../redux/api/loginVerifyUserApi';
+import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
+import { setActiveUser } from '../../redux/slices/abhaSlice';
 
 const OtpVerificationScreen = () => {
   const navigation = useNavigation<any>();
+  const dispatch = useDispatch()
+
   const route = useRoute<any>();
+  const publicKey = useSelector(
+    (state: any) => state.auth.publicKey
+  );
+
+  const txnId = useSelector(
+    (state: any) => state.abha.txnId
+  );
+  const [loginVerify, { isLoading }] =
+    useLoginVerifyMutation();
+  const [requestOtp] = useRequestOtpMutation
+    ();
+  const [
+    loginVerifyUser,
+  ] = useLoginVerifyUserMutation();
+
+  const [getProfileAccount,] = useLazyProfileAccountQuery();
 
   const {
     loginType = '',
-    mobileNumber = '',
+    loginValue = '',
+    validationMethod = '',
+    result
   } = route.params || {};
 
   const [otp, setOtp] = useState('');
@@ -60,21 +89,132 @@ const OtpVerificationScreen = () => {
     return `******${number.slice(-4)}`;
   };
 
-  const handleResend = () => {
-    setTimer(60);
+  const handleResend = async () => {
+
+    try {
+      dispatch(showLoader());
+      setTimer(60);
+      const encryptedValue =
+        encryptData(
+          loginValue,
+          publicKey,
+        );
+      const payloadPassed = getPayload(
+        loginType === 'Forgot ABHA Number' ? validationMethod : loginType,
+        encryptedValue,
+        txnId,
+      );
+      const result = await requestOtp(payloadPassed).unwrap();
+      console.log("result -------------- ", result)
+      showToast(
+        "success",
+        result?.message || "OTP sent successfully"
+      );
+      const payload =
+        getLoginVerifyUserPayload(
+          result?.accounts[0]?.ABHANumber,
+          result?.txnId
+        );
+
+      const response =
+        await loginVerifyUser(
+          payload
+        ).unwrap();
+
+      console.log(response);
+
+      const responseProfile =
+        await getProfileAccount();
+      console.log('responseProfile ', responseProfile);
+      dispatch(setActiveUser(responseProfile?.data));
+      // navigation.replace("Main");
+
+    } catch (e) {
+      console.log("Error in resend otp", e)
+      dispatch(hideLoader());
+    } finally {
+      dispatch(hideLoader());
+    }
+
+
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (otp.length !== 6) {
+      showToast(
+        "error",
+        "Please enter a valid 6-digit OTP"
+      );
       return;
     }
-    console.log('OTP:', otp);
+    try {
+      dispatch(showLoader());
+      console.log('OTP:', otp);
+      const encryptedValue =
+        encryptData(
+          otp,
+          publicKey,
+        );
+
+      const payload =
+        getLoginVerifyPayload(
+          loginType,
+          txnId,
+          encryptedValue
+        );
+
+      console.log("payload + ++ + + ++ + ", payload)
+
+      const response =
+        await loginVerify(payload).unwrap();
+
+      console.log("response + + ++ + + + + ++ ", response)
+      if (response?.authResult === 'success') {
+        showToast(
+          "success",
+          response?.message || "Verification successful"
+        );
+
+        const payload =
+          getLoginVerifyUserPayload(
+            response?.accounts[0]?.ABHANumber,
+            response?.txnId
+          );
+
+        const response1 =
+          await loginVerifyUser(
+            payload
+          ).unwrap();
+
+        console.log('response1+++++++++++++', response1);
+
+        const responseProfile =
+          await getProfileAccount();
+        console.log('responseProfile ', responseProfile?.data);
+         dispatch(setActiveUser(responseProfile?.data))
+        // navigation.replace("Main");
+
+        // navigation.navigate('Home');
+      } else {
+        showToast(
+          "error",
+          response?.message || "Invalid OTP"
+        );
+      }
+    }
+    catch (e) {
+      console.log("Error in handleVerify", e)
+      dispatch(hideLoader());
+    } finally {
+      dispatch(hideLoader());
+    }
+
   };
- const blinkAnim =
+  const blinkAnim =
     useRef(
       new Animated.Value(1),
     ).current;
-    
+
   useEffect(() => {
     const showListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -95,7 +235,7 @@ const OtpVerificationScreen = () => {
       hideListener.remove();
     };
   }, []);
- const handleChangeOtp = (
+  const handleChangeOtp = (
     text: string,
   ) => {
     const numeric =
@@ -107,35 +247,35 @@ const OtpVerificationScreen = () => {
     const value =
       numeric.slice(0, 6);
 
-    setOtp(value); 
+    setOtp(value);
   };
 
-   useEffect(() => {
-      if (otp.length >= 6) {
-        return;
-      }
-  
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(
-            blinkAnim,
-            {
-              toValue: 0,
-              duration: 500,
-              useNativeDriver: true,
-            },
-          ),
-          Animated.timing(
-            blinkAnim,
-            {
-              toValue: 1,
-              duration: 500,
-              useNativeDriver: true,
-            },
-          ),
-        ]),
-      ).start();
-    }, [otp.length]);
+  useEffect(() => {
+    if (otp.length >= 6) {
+      return;
+    }
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(
+          blinkAnim,
+          {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          },
+        ),
+        Animated.timing(
+          blinkAnim,
+          {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          },
+        ),
+      ]),
+    ).start();
+  }, [otp.length]);
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -155,12 +295,12 @@ const OtpVerificationScreen = () => {
             }
             style={styles.backButton}
           >
-             <MaterialIcons 
+            <MaterialIcons
               name="arrow-back"
               style={styles.backIcon}
               size={20}
               color="#173D8F"
-             />
+            />
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>
@@ -198,101 +338,95 @@ const OtpVerificationScreen = () => {
           <Text
             style={styles.subtitle}
           >
-            OTP sent to mobile number
+            {result?.message || 'Please enter the OTP sent to your registered mobile number.'}
           </Text>
 
-          <Text
-            style={styles.mobile}
-          >
-            {maskNumber(
-              mobileNumber,
-            )}
-          </Text>
+
 
 
 
           {/* Hidden Input */}
 
-           <TextInput
-                  ref={inputRef}
-                  value={otp}
-                  onChangeText={
-                    handleChangeOtp
-                  }
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  autoFocus
-                  caretHidden
-                  contextMenuHidden={
-                    false
-                  }
-                  style={
-                    styles.hiddenInput
-                  }
-                />
+          <TextInput
+            ref={inputRef}
+            value={otp}
+            onChangeText={
+              handleChangeOtp
+            }
+            keyboardType="number-pad"
+            maxLength={6}
+            autoFocus
+            caretHidden
+            contextMenuHidden={
+              false
+            }
+            style={
+              styles.hiddenInput
+            }
+          />
 
           {/* OTP Boxes */}
 
           <TouchableOpacity
-                 activeOpacity={1}
-                 onPress={() =>
-                   inputRef.current?.focus()
-                 }
-               >
-                 <View
-                   style={
-                     styles.otpContainer
-                   }
-                 >
-                   {[0, 1, 2, 3, 4, 5].map(
-                     index => {
-                       const isActive =
-                         otp.length ===
-                         index;
-         
-                       return (
-                         <View
-                           key={index}
-                           style={[
-                             styles.otpBox,
-                             isActive && {
-                               borderColor:
-                                 '#D96A27',
-                             },
-                           ]}
-                         >
-                           {otp[index] ? (
-                             <Text
-                               style={
-                                 styles.otpText
-                               }
-                             >
-                               {
-                                 otp[
-                                   index
-                                 ]
-                               }
-                             </Text>
-                           ) : isActive &&
-                             otp.length <
-                               6 ? (
-                             <Animated.View
-                               style={[
-                                 styles.cursor,
-                                 {
-                                   opacity:
-                                     blinkAnim,
-                                 },
-                               ]}
-                             />
-                           ) : null}
-                         </View>
-                       );
-                     },
-                   )}
-                 </View>
+            activeOpacity={1}
+            onPress={() =>
+              inputRef.current?.focus()
+            }
+          >
+            <View
+              style={
+                styles.otpContainer
+              }
+            >
+              {[0, 1, 2, 3, 4, 5].map(
+                index => {
+                  const isActive =
+                    otp.length ===
+                    index;
+
+                  return (
+                    <View
+                      key={index}
+                      style={[
+                        styles.otpBox,
+                        isActive && {
+                          borderColor:
+                            '#D96A27',
+                        },
+                      ]}
+                    >
+                      {otp[index] ? (
+                        <Text
+                          style={
+                            styles.otpText
+                          }
+                        >
+                          {
+                            otp[
+                            index
+                            ]
+                          }
+                        </Text>
+                      ) : isActive &&
+                        otp.length <
+                        6 ? (
+                        <Animated.View
+                          style={[
+                            styles.cursor,
+                            {
+                              opacity:
+                                blinkAnim,
+                            },
+                          ]}
+                        />
+                      ) : null}
+                    </View>
+                  );
+                },
+              )}
+            </View>
           </TouchableOpacity>
-         
+
           {/* Timer */}
 
           <View
@@ -384,12 +518,12 @@ const styles =
       borderRadius: 2,
     },
     header: {
-      height: 65, 
+      height: 65,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent:
         'space-between',
-      paddingHorizontal: 15, 
+      paddingHorizontal: 15,
     },
 
     backButton: {
@@ -399,8 +533,8 @@ const styles =
     },
 
     backIcon: {
-       color: '#173D8F',
-     },
+      color: '#173D8F',
+    },
 
     headerTitle: {
       fontSize: 22,

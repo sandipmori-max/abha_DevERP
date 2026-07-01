@@ -95,6 +95,7 @@ const RootNavigator = () => {
             name="OtpVerification"
             component={OtpVerificationScreen}
           />
+          
         </>
       )}
     </Stack.Navigator>

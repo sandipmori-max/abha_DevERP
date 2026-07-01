@@ -4,7 +4,7 @@ export const END_POINTS = {
   requestOtp:
     "profile/login/request/otp",
   verifyOtp:
-    "profile/login/verify",
+    "profile/login/verify", 
   enrollmentRequestOtp:
     "enrollment/request/otp",
   enrolByAadhaar:
@@ -20,4 +20,5 @@ export const END_POINTS = {
   profileAccount: "profile/account",
   dlEnrollmentRequestOtp:
     "enrollment/request/otp",
+  loginVerifyUser: 'profile/login/verify/user'
 }

@@ -7,6 +7,7 @@ import IntroScreen from "../screens/Intro/IntroScreen";
 import LoginScreen from "../screens/Login/LoginScreen";
 import OtpVerificationScreen from "../screens/Login/OtpVerificationScreen";
 import DrawerNavigator from "./DrawerNavigator";
+import DrLogin from "../screens/DrLogin/DrLogin";
 
 const Stack = createNativeStackNavigator();
 
@@ -77,10 +78,20 @@ const RootNavigator = () => {
       }}
     >
       {isLoggedIn ? (
+       <>
         <Stack.Screen
           name="Main"
           component={DrawerNavigator}
         />
+         <Stack.Screen
+            name="RegistrationAbha"
+            component={LoginScreen}
+          />
+          <Stack.Screen
+            name="OtpVerification"
+            component={OtpVerificationScreen}
+          />
+       </>
       ) : (
         <>
           <Stack.Screen
@@ -88,13 +99,10 @@ const RootNavigator = () => {
             component={IntroScreen}
           />
           <Stack.Screen
-            name="Login"
-            component={LoginScreen}
+            name="DrLogin"
+            component={DrLogin}
           />
-          <Stack.Screen
-            name="OtpVerification"
-            component={OtpVerificationScreen}
-          />
+         
           
         </>
       )}

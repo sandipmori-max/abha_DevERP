@@ -6,7 +6,8 @@ const initialState = {
   abhaNumber: null,
   tToken: null,
   txnId: null,
-  activeUser: null
+  activeUser: null,
+  devERPBaseUrl: "",
 };
 
 const abhaSlice = createSlice({
@@ -28,6 +29,14 @@ const abhaSlice = createSlice({
       action
     ) => {
       state.activeUser =
+        action.payload;
+    },
+
+     setDevERPBaseUrl: (
+      state,
+      action
+    ) => {
+      state.devERPBaseUrl =
         action.payload;
     },
 
@@ -84,7 +93,8 @@ export const {
   clearFlow,
   setTxnId,
   clearTxnId,
-  setActiveUser
+  setActiveUser,
+  setDevERPBaseUrl
 } = abhaSlice.actions;
 
 export default abhaSlice.reducer;

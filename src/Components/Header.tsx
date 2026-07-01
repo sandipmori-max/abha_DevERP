@@ -30,21 +30,24 @@ const [open, setOpen] = useState(false);
   </TouchableOpacity>
 
   {/* Right Icons */}
+    <Text style={{color: '#FFF', fontSize: 18, fontWeight: '700'}}>{title}</Text>
+
+
   <View style={styles.rightContainer}>
     <TouchableOpacity 
     
     onPress={()=>{
-        setOpen(true)
+        // setOpen(true)
     }}
     style={styles.iconBtn}>
       <MaterialIcons
-        name='qr-code'
+        name='search'
         size={24}
         color="#FFF"
       />
     </TouchableOpacity>
 
-    <TouchableOpacity style={styles.iconBtn}>
+    {/* <TouchableOpacity style={styles.iconBtn}>
       <MaterialIcons
         name="notifications-none"
         size={24}
@@ -58,7 +61,7 @@ const [open, setOpen] = useState(false);
         size={24}
         color="#FFF"
       />
-    </TouchableOpacity>
+    </TouchableOpacity> */}
   </View>
 
   {

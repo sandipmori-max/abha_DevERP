@@ -1,25 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import Header from '../Components/Header';
 
 const DetailsScreen = ({ navigation, route }: any) => {
   const { userId, name } = route.params || {};
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Details Screen</Text>
-
-      <Text>User ID: {userId}</Text>
-      <Text>Name: {name}</Text>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.goBack()}
+   <SafeAreaView style={styles.container}>
+      <ScrollView
+        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 30,
+        }}
       >
-        <Text style={styles.buttonText}>
-          Go Back
-        </Text>
-      </TouchableOpacity>
-    </View>
+        <Header title="Settings" />
+         
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -28,8 +26,6 @@ export default DetailsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center', 
   },
 
   title: {

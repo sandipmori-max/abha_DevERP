@@ -134,7 +134,8 @@ export default function IntroScreen() {
     const [showLoginSheet, setShowLoginSheet] = useState(false);
     const [selectedLoginType, setSelectedLoginType] = useState();
 
-    const sheetAnim = useRef(new Animated.Value(400)).current;
+   
+     const sheetAnim = useRef(new Animated.Value(400)).current;
 
     const sheetProgress = useRef(
         new Animated.Value(0),
@@ -381,44 +382,17 @@ export default function IntroScreen() {
                     <TouchableOpacity
                         style={styles.registerBtn}
                         onPress={async () => {
-                            //  const encryptedValue =
-                            //                       encryptData(
-                            //                         '761987140371',
-                            //                         publicKey,
-                            //                       );
-
-                            //                       console.log("encryptedValue", encryptedValue)
-                            setBottomSheetType('Register')
-                            openSheet()
-
+                            navigation.replace("DrLogin")
                         }
                         }
                     >
                         <Text style={styles.registerText}>
-                            Register
+                            Get Started
                         </Text>
                     </TouchableOpacity>
                 </Animated.View>
 
-                <Animated.View
-                    style={{
-                        flex: 1,
-                        opacity: loginOpacity,
-                        transform: [{ scale: loginScale }],
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => {
-                            setBottomSheetType('Login')
-                            openSheet()
-                        }}
-                        style={styles.loginBtn}
-                    >
-                        <Text style={styles.loginText}>
-                            Login
-                        </Text>
-                    </TouchableOpacity>
-                </Animated.View>
+                
             </View>
 
             {showLoginSheet && (

@@ -704,13 +704,13 @@ const LoginScreen = () => {
                             );
                             const result = await enrolByAadhaar(payloadPassed).unwrap();
                             console.log("result ------+++++++++++++-------- ", result)
-                            dispatch(setActiveUser(result))
+                            // dispatch(setActiveUser(result))
 
                             if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
                               const responseProfile =
                                  await getProfileAccount();
                               console.log(responseProfile);
-                              dispatch(setActiveUser(responseProfile?.data))
+                              // dispatch(setActiveUser(responseProfile?.data))
                               // navigation.replace("Main");
                             } else {
                               setCurrentStep(3)
@@ -790,7 +790,7 @@ const LoginScreen = () => {
 
                             console.log("responseProfile", responseProfile)
                             console.log(responseProfile);
-                            dispatch(setActiveUser(responseProfile?.data))
+                            // dispatch(setActiveUser(responseProfile?.data))
                             // navigation.replace("Main", {
                             //   profile: responseProfile.data,
                             // });

@@ -131,6 +131,42 @@ const LoginScreen = () => {
   const [otpMethod, setOtpMethod] = useState('');
   const [isAgreed, setIsAgreed] = useState(false);
 
+  const input1Ref = useRef<TextInput>(null);
+  const input2Ref = useRef<TextInput>(null);
+  const input3Ref = useRef<TextInput>(null);
+  const [focusedInput, setFocusedInput] = useState<
+    "part1" | "part2" | "part3" | null
+  >(null);
+
+  const getBorderColor = (
+    key: "part1" | "part2" | "part3"
+  ) => {
+    if (aadhaar[key].length === 4) {
+      return "#22C55E"; // Green
+    }
+
+    if (focusedInput === key) {
+      return "#2563EB"; // Blue
+    }
+
+    return "#D1D5DB"; // Gray
+  };
+
+  const [aadhaar, setAadhaar] = useState({
+    part1: "",
+    part2: "",
+    part3: "",
+  });
+
+  const updateAadhaar = (
+    part1: string,
+    part2: string,
+    part3: string,
+  ) => {
+    const aadhaarNumber = part1 + part2 + part3;
+    setLoginValue(aadhaarNumber);
+  };
+
   const placeholder = useMemo(() => {
     switch (loginType) {
       case 'Mobile Number':
@@ -420,7 +456,7 @@ const LoginScreen = () => {
             publicKey={publicKey}
             txnId={txnId}
             enrollmentRequestOtp={enrollmentRequestOtp}
-            getEmailVerificationLinkPayload={getEmailVerificationLinkPayload } 
+            getEmailVerificationLinkPayload={getEmailVerificationLinkPayload}
             mobileNumer={stepTwo?.stepTwoMobileNumber}
           />
         </>
@@ -679,7 +715,7 @@ const LoginScreen = () => {
                               setCurrentStep(3)
                             }
                           } else if (currentStep === 3) {
-                             
+
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
                               if (stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6) {
                                 showToast('error', "Please enter a valid OTP.")
@@ -966,55 +1002,195 @@ const LoginScreen = () => {
               </View>
               {
                 !isFromForgotAbhaNumber && <View style={styles.card}>
-                  <Text style={styles.cardTitle}>
-                    Enter Details <Text style={{ color: 'red' }}>*</Text>
-                  </Text>
+                  {
+                    loginType !== 'Aadhaar Number' ? <Text style={styles.cardTitle}>
+                      Enter Details <Text style={{ color: 'red' }}>*</Text>
+                    </Text> : <Text style={styles.cardTitle}>
+                      Enter Aadhaar number <Text style={{ color: 'red' }}>*</Text>
+                    </Text>
+                  }
 
-                  <View style={styles.inputContainer}>
+
+                  <View style={[styles.inputContainer, loginType === 'Aadhaar Number' && {
+                    backgroundColor: '#fff',
+                    borderColor: '#fff'
+                  }]}>
                     {(loginType === 'Mobile Number' ||
                       loginType === 'Register with Mobile Number') && (
                         <Text style={styles.prefix}>+91</Text>
                       )}
-                    <TextInput
-                      value={loginValue}
-                      onChangeText={text => {
-                        let value = text;
+                    {
+                      loginType === 'Aadhaar Number' ? <>
 
-                        switch (loginType) {
-                          case 'Mobile Number':
-                          case 'Register with Mobile Number':
-                            value = text.replace(/\D/g, '').slice(0, 10);
-                            break;
+                        <View style={styles.aadhaarContainer}>
+                          <TextInput
+                            ref={input1Ref}
+                            style={[
+                              styles.box,
+                              {
+                                borderColor: getBorderColor("part1"),
+                              },
+                            ]}
+                            onFocus={() => setFocusedInput("part1")}
+                            onBlur={() => setFocusedInput(null)}
+                            keyboardType="number-pad"
+                            placeholder='0000'
+                            maxLength={4}
+                            value={aadhaar.part1}
+                            onChangeText={(text) => {
+                              const value = text.replace(/\D/g, "");
+                              setAadhaar(prev => {
+                                const updated = { ...prev, part1: value };
 
-                          case 'Aadhaar Number':
-                            value = formatAadhaar(text);
-                            break;
+                                updateAadhaar(
+                                  updated.part1,
+                                  updated.part2,
+                                  updated.part3,
+                                );
 
-                          case 'ABHA Number':
-                          case 'Create ABHA Number':
-                            value = formatAbhaNumber(text);
-                            break;
+                                return updated;
+                              });
 
-                          default:
-                            break;
+                              if (value.length === 4) {
+                                input2Ref.current?.focus();
+                              }
+                            }}
+                          />
+                          <View style={{
+                            height: 1,
+                            width: 4,
+                            marginHorizontal: 4,
+                            backgroundColor: '#ccc'
+                          }}></View>
+                          <TextInput
+                            ref={input2Ref}
+                            style={[
+                              styles.box,
+                              {
+                                borderColor: getBorderColor("part2"),
+                              },
+                            ]}
+                            onFocus={() => setFocusedInput("part2")}
+                            onBlur={() => setFocusedInput(null)}
+                            keyboardType="number-pad"
+                            placeholder='0000'
+                            maxLength={4}
+                            value={aadhaar.part2}
+                            onKeyPress={({ nativeEvent }) => {
+                              if (
+                                nativeEvent.key === "Backspace" &&
+                                aadhaar.part2.length === 0
+                              ) {
+                                input1Ref.current?.focus();
+                              }
+                            }}
+                            onChangeText={(text) => {
+                              const value = text.replace(/\D/g, "");
+                              setAadhaar(prev => {
+                                const updated = { ...prev, part2: value };
+
+                                updateAadhaar(
+                                  updated.part1,
+                                  updated.part2,
+                                  updated.part3,
+                                );
+
+                                return updated;
+                              });
+
+                              if (value.length === 4) {
+                                input3Ref.current?.focus();
+                              }
+                            }}
+                          />
+                          <View style={{
+                            height: 1,
+                            width: 4,
+                             marginHorizontal: 4,
+                            backgroundColor: '#ccc'
+                          }}></View>
+
+                          <TextInput
+                            ref={input3Ref}
+                            style={[
+                              styles.box,
+                              {
+                                borderColor: getBorderColor("part3"),
+                              },
+                            ]}
+                            onFocus={() => setFocusedInput("part3")}
+                            onBlur={() => setFocusedInput(null)}
+                            keyboardType="number-pad"
+                            maxLength={4}
+                            placeholder='0000'
+                            value={aadhaar.part3}
+                            onKeyPress={({ nativeEvent }) => {
+                              if (
+                                nativeEvent.key === "Backspace" &&
+                                aadhaar.part3.length === 0
+                              ) {
+                                input2Ref.current?.focus();
+                              }
+                            }}
+                            onChangeText={(text) => {
+                              const value = text.replace(/\D/g, "");
+                              setAadhaar(prev => {
+                                const updated = { ...prev, part3: value };
+
+                                updateAadhaar(
+                                  updated.part1,
+                                  updated.part2,
+                                  updated.part3,
+                                );
+
+                                return updated;
+                              });
+
+                            }}
+                          />
+                        </View>
+                      </> : <>  <TextInput
+                        value={loginValue}
+                        onChangeText={text => {
+                          let value = text;
+
+                          switch (loginType) {
+                            case 'Mobile Number':
+                            case 'Register with Mobile Number':
+                              value = text.replace(/\D/g, '').slice(0, 10);
+                              break;
+
+                            case 'Aadhaar Number':
+                              value = formatAadhaar(text);
+                              break;
+
+                            case 'ABHA Number':
+                            case 'Create ABHA Number':
+                              value = formatAbhaNumber(text);
+                              break;
+
+                            default:
+                              break;
+                          }
+                          setLoginValue(value);
+                        }}
+                        placeholder={placeholder}
+                        maxLength={maxLength}
+                        keyboardType={
+                          [
+                            'Mobile Number',
+                            'Register with Mobile Number',
+                            'Aadhaar Number',
+                            'ABHA Number',
+                            'Create ABHA Number',
+                          ].includes(loginType)
+                            ? 'number-pad'
+                            : 'default'
                         }
-                        setLoginValue(value);
-                      }}
-                      placeholder={placeholder}
-                      maxLength={maxLength}
-                      keyboardType={
-                        [
-                          'Mobile Number',
-                          'Register with Mobile Number',
-                          'Aadhaar Number',
-                          'ABHA Number',
-                          'Create ABHA Number',
-                        ].includes(loginType)
-                          ? 'number-pad'
-                          : 'default'
-                      }
-                      style={styles.input}
-                    />
+                        style={styles.input}
+                      /> </>
+                    }
+
                     {
                       loginType === 'ABHA Address' && <Text style={styles.hintText}>
                         @abdm

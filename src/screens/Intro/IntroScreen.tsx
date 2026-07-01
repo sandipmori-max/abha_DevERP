@@ -180,7 +180,8 @@ export default function IntroScreen() {
     const loginOptions = [
         'Mobile Number',
         'Aadhaar Number',
-        'ABHA Number'
+        'ABHA Number',
+        'ABHA Address'
     ];
 
     const registerOptions = [
@@ -723,7 +724,8 @@ const styles = StyleSheet.create({
     bottomSheet: {
         position: 'absolute',
         bottom: 0,
-         height: '42%',
+         height: '46%',
+         width: '94%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,

@@ -14,11 +14,13 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Animated,
 } from 'react-native';
 import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 
 const OtpVerificationScreen = () => {
   const navigation = useNavigation<any>();
@@ -26,7 +28,7 @@ const OtpVerificationScreen = () => {
 
   const {
     loginType = '',
-    mobileNumber = '9876547969',
+    mobileNumber = '',
   } = route.params || {};
 
   const [otp, setOtp] = useState('');
@@ -60,20 +62,19 @@ const OtpVerificationScreen = () => {
 
   const handleResend = () => {
     setTimer(60);
-
-    // Resend OTP API Call
   };
 
   const handleVerify = () => {
     if (otp.length !== 6) {
       return;
     }
-
     console.log('OTP:', otp);
-
-    // Verify OTP API
   };
-
+ const blinkAnim =
+    useRef(
+      new Animated.Value(1),
+    ).current;
+    
   useEffect(() => {
     const showListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -94,7 +95,47 @@ const OtpVerificationScreen = () => {
       hideListener.remove();
     };
   }, []);
+ const handleChangeOtp = (
+    text: string,
+  ) => {
+    const numeric =
+      text.replace(
+        /[^0-9]/g,
+        '',
+      );
 
+    const value =
+      numeric.slice(0, 6);
+
+    setOtp(value); 
+  };
+
+   useEffect(() => {
+      if (otp.length >= 6) {
+        return;
+      }
+  
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(
+            blinkAnim,
+            {
+              toValue: 0,
+              duration: 500,
+              useNativeDriver: true,
+            },
+          ),
+          Animated.timing(
+            blinkAnim,
+            {
+              toValue: 1,
+              duration: 500,
+              useNativeDriver: true,
+            },
+          ),
+        ]),
+      ).start();
+    }, [otp.length]);
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -114,9 +155,12 @@ const OtpVerificationScreen = () => {
             }
             style={styles.backButton}
           >
-            <Text style={styles.backIcon}>
-              ←
-            </Text>
+             <MaterialIcons 
+              name="arrow-back"
+              style={styles.backIcon}
+              size={20}
+              color="#173D8F"
+             />
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>
@@ -169,64 +213,86 @@ const OtpVerificationScreen = () => {
 
           {/* Hidden Input */}
 
-          <TextInput
-            ref={inputRef}
-            value={otp}
-            onChangeText={text => {
-              const numeric =
-                text.replace(
-                  /[^0-9]/g,
-                  '',
-                );
-
-              if (
-                numeric.length <= 6
-              ) {
-                setOtp(numeric);
-              }
-            }}
-            keyboardType="number-pad"
-            maxLength={6}
-
-          />
+           <TextInput
+                  ref={inputRef}
+                  value={otp}
+                  onChangeText={
+                    handleChangeOtp
+                  }
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  autoFocus
+                  caretHidden
+                  contextMenuHidden={
+                    false
+                  }
+                  style={
+                    styles.hiddenInput
+                  }
+                />
 
           {/* OTP Boxes */}
 
           <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => {
-              setTimeout(() => {
-                inputRef.current?.focus();
-              }, 100);
-            }}
-          >
-            <View
-              style={
-                styles.otpContainer
-              }
-            >
-              {[0, 1, 2, 3, 4, 5].map(
-                index => (
-                  <View
-                    key={index}
-                    style={
-                      styles.otpBox
-                    }
-                  >
-                    <Text
-                      style={
-                        styles.otpText
-                      }
-                    >
-                      {otp[index] ||
-                        ''}
-                    </Text>
-                  </View>
-                ),
-              )}
-            </View>
+                 activeOpacity={1}
+                 onPress={() =>
+                   inputRef.current?.focus()
+                 }
+               >
+                 <View
+                   style={
+                     styles.otpContainer
+                   }
+                 >
+                   {[0, 1, 2, 3, 4, 5].map(
+                     index => {
+                       const isActive =
+                         otp.length ===
+                         index;
+         
+                       return (
+                         <View
+                           key={index}
+                           style={[
+                             styles.otpBox,
+                             isActive && {
+                               borderColor:
+                                 '#D96A27',
+                             },
+                           ]}
+                         >
+                           {otp[index] ? (
+                             <Text
+                               style={
+                                 styles.otpText
+                               }
+                             >
+                               {
+                                 otp[
+                                   index
+                                 ]
+                               }
+                             </Text>
+                           ) : isActive &&
+                             otp.length <
+                               6 ? (
+                             <Animated.View
+                               style={[
+                                 styles.cursor,
+                                 {
+                                   opacity:
+                                     blinkAnim,
+                                 },
+                               ]}
+                             />
+                           ) : null}
+                         </View>
+                       );
+                     },
+                   )}
+                 </View>
           </TouchableOpacity>
-
+         
           {/* Timer */}
 
           <View
@@ -310,18 +376,20 @@ const styles =
         '#F7F8FC',
     },
 
-    header: {
-      height: 65,
+    cursor: {
+      width: 2,
+      height: 28,
       backgroundColor:
-        '#FFFFFF',
+        '#173D8F',
+      borderRadius: 2,
+    },
+    header: {
+      height: 65, 
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent:
         'space-between',
-      paddingHorizontal: 15,
-      borderBottomWidth: 1,
-      borderBottomColor:
-        '#ECECEC',
+      paddingHorizontal: 15, 
     },
 
     backButton: {
@@ -331,10 +399,8 @@ const styles =
     },
 
     backIcon: {
-      fontSize: 30,
-      color: '#173D8F',
-      fontWeight: '700',
-    },
+       color: '#173D8F',
+     },
 
     headerTitle: {
       fontSize: 22,

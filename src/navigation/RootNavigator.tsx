@@ -47,7 +47,7 @@ const RootNavigator = () => {
       <View style={styles.loaderSection}>
         <ActivityIndicator
           size="large"
-          color="#0F6CBD"
+          color="#D96A27"
         />
 
         <Text style={styles.loadingText}>
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 15,
     fontWeight: "600",
-    color: "#0F6CBD",
+    color: "#D96A27",
   },
 });
 

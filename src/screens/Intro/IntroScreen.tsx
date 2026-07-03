@@ -1,25 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
     View,
     Text,
     StyleSheet,
-    FlatList,
     Dimensions,
     Animated,
-    Image,
     SafeAreaView,
     TouchableOpacity,
     StatusBar,
-    PanResponder,
-    Modal,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { useCreateSessionMutation } from '../../redux/api/sessionApi';
-import { useDispatch, useSelector } from 'react-redux';
-import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
-import { ABHA_ICON } from '../../assets';
-import { encryptData } from '../../utils/encrypt';
-import EnrollmentInfoModal from '../Login/EnrollmentInfoModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -115,105 +105,17 @@ const Slide = ({ item, index, scrollX }: any) => {
 
 export default function IntroScreen() {
     const navigation = useNavigation();
-    const dispatch = useDispatch()
-    const publicKey = useSelector(
-        (state: any) => state.auth.publicKey
-    );
-    const [bottomSheetType, setBottomSheetType] = useState('');
     const scrollX = useRef(new Animated.Value(0)).current;
-    const [showInfoModal, setShowInfoModal] = useState(false);
-
     const registerAnim = useRef(
         new Animated.Value(250),
     ).current;
-
     const loginAnim = useRef(
         new Animated.Value(-250),
     ).current;
-
-    const [showLoginSheet, setShowLoginSheet] = useState(false);
-    const [selectedLoginType, setSelectedLoginType] = useState();
-
-   
-     const sheetAnim = useRef(new Animated.Value(400)).current;
-
     const sheetProgress = useRef(
         new Animated.Value(0),
     ).current;
 
-    const loginScale =
-        sheetProgress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, 0.85],
-        });
-
-    const loginOpacity =
-        sheetProgress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, 0],
-        });
-
-    const sheetTranslateY =
-        sheetProgress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [400, 0],
-        });
-
-    const openSheet = () => {
-        setShowLoginSheet(true);
-        setSelectedLoginType("");
-        Animated.spring(sheetProgress, {
-            toValue: 1,
-            useNativeDriver: false,
-        }).start();
-    };
-
-    const closeSheet = () => {
-        Animated.timing(sheetProgress, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: false,
-        }).start(() => {
-            setSelectedLoginType("");
-            setShowLoginSheet(false);
-        });
-    };
-    const loginOptions = [
-        'Mobile Number',
-        'Aadhaar Number',
-        'ABHA Number',
-        // 'ABHA Address'
-    ];
-
-    const registerOptions = [
-        'Aadhaar Number',
-        'Driving Licence',
-    ];
-
-    const optionList = bottomSheetType === 'Login' ? loginOptions : registerOptions;
-    const panResponder = useRef(
-        PanResponder.create({
-            onMoveShouldSetPanResponder: (_, gesture) =>
-                gesture.dy > 5,
-
-            onPanResponderMove: (_, gesture) => {
-                if (gesture.dy > 0) {
-                    sheetAnim.setValue(gesture.dy);
-                }
-            },
-
-            onPanResponderRelease: (_, gesture) => {
-                if (gesture.dy > 120) {
-                    closeSheet();
-                } else {
-                    Animated.spring(sheetAnim, {
-                        toValue: 0,
-                        useNativeDriver: true,
-                    }).start();
-                }
-            },
-        }),
-    ).current;
     useFocusEffect(
         React.useCallback(() => {
 
@@ -240,43 +142,6 @@ export default function IntroScreen() {
 
         }, [])
     );
-
-    const [
-        createSession
-    ] = useCreateSessionMutation();
-
-    const handleSession = async () => {
-        try {
-            const response =
-                await createSession()
-                    .unwrap();
-            console.log(
-                "Session Response",
-                response
-            );
-        } catch (err) {
-            console.log(
-                "Session Error",
-                err
-            );
-        }
-    };
-
-    useEffect(() => {
-        const init = async () => {
-            try {
-                dispatch(showLoader());
-
-                await handleSession();
-            } catch (error) {
-                console.log(error);
-            } finally {
-                dispatch(hideLoader());
-            }
-        };
-
-        init();
-    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -395,175 +260,6 @@ export default function IntroScreen() {
                 
             </View>
 
-            {showLoginSheet && (
-                <Modal
-                    transparent
-                    visible={showLoginSheet}
-                    animationType="none"
-                >
-                    <TouchableOpacity
-                        activeOpacity={1}
-                        style={styles.backdrop}
-                        onPress={closeSheet}
-                    />
-
-                    <Animated.View
-                        {...panResponder.panHandlers}
-                        style={[
-                            styles.bottomSheet,
-                            {
-                                transform: [
-                                    {
-                                        translateY: sheetTranslateY,
-                                    },
-                                ],
-                            },
-                            bottomSheetType !== 'Login' && {
-                                height: '40%'
-                            }
-                        ]}
-                    >
-
-                        <View style={styles.logo}>
-                            <Image
-                                source={ABHA_ICON.ABHA_LOGO}
-                                style={{ height: 60, width: 80, alignSelf: 'center' }}
-                                resizeMode="contain"
-                            />
-                        </View>
-                        <View style={{ height: 14 }} />
-                        <Text style={styles.sheetTitle}>
-                            {bottomSheetType === 'Login' ? 'Login To Your ABHA' : 'Create your ABHA number using'}
-                        </Text>
-
-                        <Text style={{
-                            color: 'gray',
-                            marginBottom: 12
-                        }}>
-                            {
-                                bottomSheetType === 'Login' ? 'Select a login method to access your ABHA account.' : 'Please choose one of the below option to start with the creation of your ABHA'
-                            }
-                        </Text>
-
-                        {optionList.map(item => {
-                            const selected =
-                                selectedLoginType === item;
-
-                            return (
-                                <TouchableOpacity
-                                    key={item}
-                                    style={[
-                                        styles.optionRow,
-                                        selected &&
-                                        styles.selectedOption,
-                                    ]}
-                                    onPress={() => {
-                                        setSelectedLoginType(item)
-                                        if (item === 'Driving Licence') {
-                                            setShowLoginSheet(false)
-                                            setShowInfoModal(true)
-                                            return;
-                                        }
-                                        setTimeout(() => {
-                                            setShowLoginSheet(false)
-                                            navigation.navigate("Login", {
-                                                loginType: item,
-                                                isFromRegister: bottomSheetType === 'Login' ? false : true
-                                            })
-                                        })
-                                    }}
-                                >
-                                    <View
-                                        style={[
-                                            styles.radioOuter,
-                                            selected &&
-                                            styles.radioOuterActive,
-                                        ]}
-                                    >
-                                        {selected && (
-                                            <View
-                                                style={styles.radioInner}
-                                            />
-                                        )}
-                                    </View>
-
-                                    <Text
-                                        style={styles.optionText}
-                                    >
-                                        {item}
-                                    </Text>
-                                </TouchableOpacity>
-                            );
-                        })}
-
-                        <View style={styles.bottomInfo}>
-                            <Text style={styles.infoText}>
-                                {
-                                    bottomSheetType === 'Login' ? `Don't have an ABHA number? ` : `Already have ABHA number?`
-                                }
-
-                            </Text>
-
-                            {
-                                bottomSheetType !== 'Login' ? <>
-                                    <TouchableOpacity
-                                        style={styles.loginBtnText}
-                                        onPress={() => {
-                                            setBottomSheetType('Login')
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: '#D96A27',
-                                                borderBottomWidth: 1,
-                                                borderBottomColor: '#D96A27',
-                                                alignSelf: 'center',
-                                            }}
-                                        >
-                                            Login
-                                        </Text>
-                                    </TouchableOpacity>
-                                </> :
-                                    <TouchableOpacity
-                                        style={styles.loginBtnText}
-                                        onPress={() => {
-                                            setBottomSheetType('Register')
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: '#D96A27',
-                                                borderBottomWidth: 1,
-                                                borderBottomColor: '#D96A27',
-                                                alignSelf: 'center',
-                                            }}
-                                        >
-                                            Create Now
-                                        </Text>
-                                    </TouchableOpacity>
-                            }
-
-
-                        </View>
-                    </Animated.View>
-                </Modal>
-            )}
-
-            <EnrollmentInfoModal
-                visible={showInfoModal}
-                onClose={() => {
-                    setShowInfoModal(false)
-                    setTimeout(() => {
-                        setShowLoginSheet(false)
-                        navigation.navigate("Login", {
-                            loginType: 'Driving Licence',
-                            isFromRegister: true
-                        })
-                    })
-                }
-
-                }
-            />
 
         </SafeAreaView>
     );

@@ -15,7 +15,7 @@ import MaterialIcons from "@react-native-vector-icons/material-icons";
 
 import ProfileScreen from "../screens/Profile/ProfileScreen";
 import DetailsScreen from "../screens/DetailsScreen";
- import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { ABHA_ICON } from "../assets";
 import EnrollmentInfoModal from "../screens/Login/EnrollmentInfoModal";
 
@@ -62,7 +62,7 @@ const BottomTabNavigator = () => {
 
     const registerOptions = [
         'Aadhaar Number',
-        'Driving Licence',
+        // 'Driving Licence',
     ];
     const sheetAnim = useRef(new Animated.Value(400)).current;
     const optionList = bottomSheetType === 'Login' ? loginOptions : registerOptions;
@@ -190,7 +190,7 @@ const BottomTabNavigator = () => {
                                 ],
                             },
                             bottomSheetType !== 'Login' && {
-                                height: '40%'
+                                height: '26%'
                             }
                         ]}
                     >
@@ -204,7 +204,7 @@ const BottomTabNavigator = () => {
                         </View>
                         <View style={{ height: 14 }} />
                         <Text style={styles.sheetTitle}>
-                            {bottomSheetType === 'Login' ? 'Login To Your ABHA' : 'Create your ABHA number using'}
+                            {bottomSheetType === 'Login' ? 'Login To Your ABHA' : 'Create ABHA number using'}
                         </Text>
 
                         <Text style={{
@@ -273,21 +273,21 @@ const BottomTabNavigator = () => {
             )}
 
             {
-              showInfoModal &&  <EnrollmentInfoModal
-                visible={showInfoModal}
-                onClose={() => {
-                    setShowInfoModal(false)
-                    setTimeout(() => {
-                        setShowLoginSheet(false)
-                        navigation.navigate("RegistrationAbha", {
-                            loginType: 'Driving Licence',
-                            isFromRegister: true
+                showInfoModal && <EnrollmentInfoModal
+                    visible={showInfoModal}
+                    onClose={() => {
+                        setShowInfoModal(false)
+                        setTimeout(() => {
+                            setShowLoginSheet(false)
+                            navigation.navigate("RegistrationAbha", {
+                                loginType: 'Driving Licence',
+                                isFromRegister: true
+                            })
                         })
-                    })
-                }
+                    }
 
-                }
-            />
+                    }
+                />
             }
         </>
 
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     bottomSheet: {
         position: 'absolute',
         bottom: 0,
-        height: '46%',
+        height: '36%',
         width: '94%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,

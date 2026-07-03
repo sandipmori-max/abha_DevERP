@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { View, ActivityIndicator, Text , StyleSheet, Image} from "react-native";
 
 import IntroScreen from "../screens/Intro/IntroScreen";
@@ -8,15 +8,57 @@ import LoginScreen from "../screens/Login/LoginScreen";
 import OtpVerificationScreen from "../screens/Login/OtpVerificationScreen";
 import DrawerNavigator from "./DrawerNavigator";
 import DrLogin from "../screens/DrLogin/DrLogin";
+import { useCreateSessionMutation } from "../redux/api/sessionApi";
+import { hideLoader, showLoader } from "../redux/slices/loaderSlice";
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
+
+  const dispatch = useDispatch();
   const proReduxData = useSelector(
     (state: any) => state.abha.activeUser
   );
 
   const [ready, setReady] = useState(false);
+
+
+   const [
+          createSession
+      ] = useCreateSessionMutation();
+  
+      const handleSession = async () => {
+          try {
+              const response =
+                  await createSession()
+                      .unwrap();
+              console.log(
+                  "Session Response",
+                  response
+              );
+          } catch (err) {
+              console.log(
+                  "Session Error",
+                  err
+              );
+          }
+      };
+  
+      useEffect(() => {
+          const init = async () => {
+              try {
+                  dispatch(showLoader());
+  
+                  await handleSession();
+              } catch (error) {
+                  console.log(error);
+              } finally {
+                  dispatch(hideLoader());
+              }
+          };
+  
+          init();
+      }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {

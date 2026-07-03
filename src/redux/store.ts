@@ -13,7 +13,7 @@ import { baseApi } from "../redux/api/baseApi";
 const authPersistConfig = {
   key: "auth",
   storage: AsyncStorage,
-  whitelist: [],
+  whitelist: ['publicKey'],
 };
 
 const abhaPersistConfig = {

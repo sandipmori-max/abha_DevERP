@@ -659,16 +659,22 @@ const LoginScreen = () => {
                               ...stepOne,
                               passedForVarification: !stepOne.passedForVarification,
                             });
+                            if(!publicKey){
+                              return showToast('error', "Public key not found. Please try again later.")
+                            }
                             const encryptedValue =
                               encryptData(
                                 loginValue,
                                 publicKey,
                               );
+
                             const payloadPassed = getEnrollmentPayload(
                               loginType,
                               encryptedValue,
-                              txnId,
+                              '',
                             );
+
+                            console.log("payloadPassed ------+++++++++++++-------- ", payloadPassed)
                             const result = await enrollmentRequestOtp(payloadPassed).unwrap();
                             console.log("result ------+++++++++++++-------- ", result)
                             setStepTwo({

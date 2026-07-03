@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { getErrorMessage } from "../../utils/helpers";
 import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
@@ -50,10 +51,10 @@ export const getLinkApi = baseApi.injectEndpoints({
             },
           };
         }
+        let url = Platform.OS === "android" ? "http://support.deverp.net/devws/appcode.aspx/getLink"  : "https://support.deverp.net/devws/appcode.aspx/getLink";
 
-        // ACTUAL API
         return await baseQuery({
-          url: "https://support.deverp.net/devws/appcode.aspx/getLink",
+          url,
           method: "POST",
           body,
         });

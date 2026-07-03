@@ -109,7 +109,3 @@ To learn more about React Native, take a look at the following resources:
 // ./gradlew clean
 // ./gradlew generateCodegenArtifactsFromSchema 
 // cmd - gradlew assemble[BRAND_NAME]Release
-
-- auto foucus on input - opt 
-- DL - mobile - number keypad
-- 

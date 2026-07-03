@@ -87,9 +87,16 @@ const DrLogin = ({ navigation }: any) => {
             const appData = JSON.parse(response.d);
             console.log("Response =>", appData);
             console.log("URL =>", appData.link);
-            dispatch(setDevERPBaseUrl(`${appData.link}msp_api.aspx`));
+            let updatedLink = "";
 
-            const response1 = await setAppId(
+            if (Platform.OS === "android") {
+                updatedLink = appData.link.replace(/^https:/, "http:")
+            } else {
+                updatedLink = appData.link
+            }
+            dispatch(setDevERPBaseUrl(`${updatedLink}msp_api.aspx`));
+
+            const res = await setAppId(
                 getSetAppIdPayload(
                     username,
                     password,
@@ -99,17 +106,17 @@ const DrLogin = ({ navigation }: any) => {
                 )
             ).unwrap();
 
-            console.log("Response =>+++++++++++++++++++", response1);
-            if(response1?.success == 1) {
+            console.log("Response =>+++++++++++++++++++", res);
+            if (res?.success == 1) {
                 showToast('success', 'Login successfully.');
-                dispatch(setActiveUser(response1))
-            }else {
-                showToast('error', response1?.message || 'Something went wrong. Please try again later.');
+                dispatch(setActiveUser(res))
+            } else {
+                showToast('error', res?.message || 'Something went wrong. Please try again later.');
             }
             dispatch(hideLoader());
 
         } catch (e) {
-            dispatch(hideLoader()); 
+            dispatch(hideLoader());
         } finally {
             dispatch(hideLoader());
             setLoading(false);

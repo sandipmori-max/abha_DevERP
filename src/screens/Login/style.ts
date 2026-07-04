@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
   },
 
   activeCircle: {
-    backgroundColor: '#4F6EDB',
+    backgroundColor: '#d67031',
   },
 
   stepNumber: {

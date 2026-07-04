@@ -8,6 +8,7 @@ const initialState = {
   txnId: null,
   activeUser: null,
   devERPBaseUrl: "",
+  abhaDrProfile: ""
 };
 
 const abhaSlice = createSlice({
@@ -29,6 +30,13 @@ const abhaSlice = createSlice({
       action
     ) => {
       state.activeUser =
+        action.payload;
+    },
+     setAbhaDrProfile: (
+      state,
+      action
+    ) => {
+      state.abhaDrProfile =
         action.payload;
     },
 
@@ -94,7 +102,8 @@ export const {
   setTxnId,
   clearTxnId,
   setActiveUser,
-  setDevERPBaseUrl
+  setDevERPBaseUrl,
+  setAbhaDrProfile
 } = abhaSlice.actions;
 
 export default abhaSlice.reducer;

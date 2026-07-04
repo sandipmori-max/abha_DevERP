@@ -7,20 +7,30 @@ import GlobalLoader from './GlobalLoader';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './ToastConfig';
 import { PersistGate } from 'redux-persist/integration/react';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "react-native";
 
 const App = () => {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <RootNavigator />
-          <GlobalLoader />
-          <Toast config={toastConfig} topOffset={80} />
-        </NavigationContainer>
-      </PersistGate>
-    </Provider>
+    <>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <NavigationContainer>
+            <StatusBar barStyle="light-content" backgroundColor={"#D96A27"} />
+            <SafeAreaView
+              edges={["top"]}
+              style={{ flex: 0, backgroundColor: "#D96A27" }}
+            />
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#D96A27"    }}>
+              <RootNavigator />
+              <GlobalLoader />
+              <Toast config={toastConfig} />
+            </SafeAreaView>
+          </NavigationContainer>
+        </PersistGate>
+      </Provider>
+    </>
   );
 };
 
 export default App;
- 

@@ -18,6 +18,7 @@ import DetailsScreen from "../screens/DetailsScreen";
 import { useNavigation } from "@react-navigation/native";
 import { ABHA_ICON } from "../assets";
 import EnrollmentInfoModal from "../screens/Login/EnrollmentInfoModal";
+import SettingsScreen from "../screens/settings/SettingsScreen";
 
 const { width, height } = Dimensions.get('window');
 
@@ -98,7 +99,7 @@ const BottomTabNavigator = () => {
                 icon = "person";
                 break;
 
-            case "Details":
+            case "Settings":
                 icon = "settings";
                 break;
         }
@@ -109,21 +110,20 @@ const BottomTabNavigator = () => {
                 size={28}
                 color={
                     selectedTab === routeName
-                        ? "#D96A27"
-                        : "#94A3B8"
+                        ? "#fff"
+                        : "#ccc"
                 }
             />
         );
     };
 
     return (
-
         <>
             <CurvedBottomBar.Navigator
                 type="DOWN"
                 height={60}
                 circleWidth={60}
-                bgColor="#ccc"
+                bgColor="#D96A27"
                 initialRouteName="Profile"
                 borderTopLeftRight
                 screenOptions={{
@@ -161,10 +161,11 @@ const BottomTabNavigator = () => {
                 />
 
                 <CurvedBottomBar.Screen
-                    name="Details"
+                    name="Settings"
                     position="RIGHT"
-                    component={DetailsScreen}
+                    component={SettingsScreen}
                 />
+                
             </CurvedBottomBar.Navigator>
             {showLoginSheet && (
                 <Modal
@@ -290,7 +291,6 @@ const BottomTabNavigator = () => {
                 />
             }
         </>
-
     );
 };
 
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: "#D96A27",
+        backgroundColor: "#000",
         justifyContent: "center",
         alignItems: "center",
     },

@@ -110,6 +110,7 @@ const DrLogin = ({ navigation }: any) => {
             if (res?.success == 1) {
                 showToast('success', 'Login successfully.');
                 dispatch(setActiveUser(res))
+                
             } else {
                 showToast('error', res?.message || 'Something went wrong. Please try again later.');
             }
@@ -142,8 +143,7 @@ const DrLogin = ({ navigation }: any) => {
         !loading;
 
     return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
+        <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={
                     Platform.OS === "ios"
@@ -322,7 +322,6 @@ const DrLogin = ({ navigation }: any) => {
 
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
     );
 };
 

@@ -12,7 +12,7 @@ const COLORS = {
   text: "#0F172A",
   secondaryText: "#64748B",
   border: "#CBD5E1",
-  disabled: "#efccb6",
+  disabled: "#ccc",
   shadow: "#000000",
 };
 

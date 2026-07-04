@@ -19,7 +19,7 @@ const authPersistConfig = {
 const abhaPersistConfig = {
   key: "abha",
   storage: AsyncStorage,
-  whitelist: ["activeUser", "txnId", "tToken"],
+  whitelist: ["activeUser", "txnId", "tToken", "abhaDrProfile"],
 };
 
 /* ---------------- Persisted Reducers ---------------- */

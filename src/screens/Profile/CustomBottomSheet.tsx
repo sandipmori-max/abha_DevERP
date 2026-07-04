@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     backgroundColor: "#fff",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
     paddingBottom: 25,
     minHeight: 250,
     maxHeight: "90%",
@@ -128,6 +128,6 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: 20,
+    padding: 10,
   },
 });

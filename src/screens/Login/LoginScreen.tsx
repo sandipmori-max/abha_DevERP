@@ -65,6 +65,8 @@ const LoginScreen = () => {
 
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const stepTwoRef = useRef<any>(null);
+  const [abhaResult, setAbhaResult] = useState<any>();
+
   const [stepOne, setStepOne] = useState<any>({
     aadhaarNumber: '',
     termsAgree: false,
@@ -72,14 +74,14 @@ const LoginScreen = () => {
     captchaValid: false,
     passedForVarification: false,
     setOneDone: false,
-  })
+  });
 
   const [stepTwo, setStepTwo] = useState<any>({
     stepTwoTitle: "",
     stepTwoOTP: '',
     stepTwoMobileNumber: "",
     setTwoDone: false,
-  })
+  });
 
   const [stepThree, setStepThree] = useState<any>({
     stepThreeMobile: '',
@@ -92,12 +94,12 @@ const LoginScreen = () => {
     stepThreeEmailVarifying: false,
     stepThreeEmailOPTVerify: false,
     stepThreeEmailVarifyDone: false
-  })
+  });
 
 
   const [stepFour, setStepFour] = useState<any>({
     userName: ""
-  })
+  });
 
   const [stepOneDL, setStepOneDL] = useState<any>({
     stepOneDLTitle: "",
@@ -121,7 +123,6 @@ const LoginScreen = () => {
   const [enrolAbhaAddress,] = useEnrolAbhaAddressMutation();
   const [getProfileAccount,] = useLazyProfileAccountQuery();
   const [dlEnrollmentRequestOtp,] = useDlEnrollmentRequestOtpMutation();
-
 
   const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
   const [loginValue, setLoginValue] = useState('');
@@ -626,7 +627,7 @@ const LoginScreen = () => {
                   }]}>
                     <View style={[
                       {
-                        backgroundColor: '#173D8F',
+                        backgroundColor: '#f18b4c',
                         borderRadius: 4,
                         alignContent: 'center',
                         alignItems: 'center',
@@ -659,7 +660,7 @@ const LoginScreen = () => {
                               ...stepOne,
                               passedForVarification: !stepOne.passedForVarification,
                             });
-                            if(!publicKey){
+                            if (!publicKey) {
                               return showToast('error', "Public key not found. Please try again later.")
                             }
                             const encryptedValue =
@@ -711,10 +712,11 @@ const LoginScreen = () => {
                             const result = await enrolByAadhaar(payloadPassed).unwrap();
                             console.log("result ------+++++++++++++-------- ", result)
                             // dispatch(setActiveUser(result))
+                            setAbhaResult(result);
 
                             if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
                               const responseProfile =
-                                 await getProfileAccount();
+                                await getProfileAccount();
                               console.log(responseProfile);
                               // dispatch(setActiveUser(responseProfile?.data))
                               // navigation.replace("Main");
@@ -796,10 +798,41 @@ const LoginScreen = () => {
 
                             console.log("responseProfile", responseProfile)
                             console.log(responseProfile);
+
+                            console.log(" Full data ----- - - - - - stepOne ======", stepOne)
+                            console.log(" Full data ----- - - - - - stepTwo ======", stepTwo)
+                            console.log(" Full data ----- - - - - - stepThree ====", stepThree)
+                            console.log(" Full data ----- - - - - - stepFour =====", stepFour)
+                            console.log(" Full data ----- - - - - - abhaResult ===", abhaResult)
+                            const { status, ...restData } = responseProfile?.data || {};
+                            const { name, ...restNameData } = responseProfile?.data || {};
+                            const payload = {
+                              aadharNumber: stepOne?.aadhaarNumber,
+                              communicationMobile: stepTwo?.stepTwoMobileNumber,
+                              communicationEmail: stepThree?.stepThreeEmail,
+                              ...responseProfile,
+                              data: {
+                                ...restData,
+                                ...restNameData,
+                                abhaName: name,
+                                profileStatus: status,
+                              },
+                              isNew: abhaResult?.isNew,
+                              expiresIn: abhaResult?.tokens?.expiresIn,
+                              refreshExpiresIn: abhaResult?.tokens?.refreshExpiresIn,
+                              refreshToken: abhaResult?.tokens?.refreshToken,
+                              tokens: abhaResult?.tokens?.token,
+                              txnId: txnId
+                            };
+
+                            console.log(" Full data ----- - - - - +++++++++++++++++- payload ======", payload)
+
                             // dispatch(setActiveUser(responseProfile?.data))
                             // navigation.replace("Main", {
                             //   profile: responseProfile.data,
                             // });
+                            showToast('success', 'Record inserted successfully...')
+                            navigation.goBack()
                           }
                         } catch (error) {
                           console.log("--------------------", error)
@@ -817,7 +850,8 @@ const LoginScreen = () => {
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </> : <>
+                </> :
+                <>
                   <View style={styles.stepContainer}>
                     {stepsDL.map((item, index) => {
                       const stepNumber = index + 1;

@@ -117,6 +117,7 @@ const RootNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+         animation: 'fade',
       }}
     >
       {isLoggedIn ? (

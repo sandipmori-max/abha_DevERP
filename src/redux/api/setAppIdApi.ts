@@ -1,5 +1,6 @@
 import { getErrorMessage } from "../../utils/helpers";
 import { showToast } from "../../utils/toast";
+import { setAbhaDrProfile } from "../slices/abhaSlice";
 import { RootState } from "../store";
 import { baseApi } from "./baseApi";
 
@@ -82,7 +83,8 @@ export const setAppIdApi = baseApi.injectEndpoints({
 
             async onQueryStarted(
                 arg,
-                { queryFulfilled }
+                { dispatch,
+                    queryFulfilled }
             ) {
                 console.log(
                     "========== SET APP ID onQueryStarted =========="
@@ -103,19 +105,15 @@ export const setAppIdApi = baseApi.injectEndpoints({
                     );
 
                     console.log(
-                        "Response Data =>",
+                        "Response Data =>-----",
                         JSON.stringify(result.data, null, 2)
                     );
+                    
 
-                    if (result.data?.success === 1) {
-                        showToast(
-                            "success", 
-                            "Login successfully."
-                        );
-                    }
+                     
                 } catch (error: any) {
                     showToast(
-                        "error", 
+                        "error",
                         'Something went wrong. Please try again later.'
                     );
 

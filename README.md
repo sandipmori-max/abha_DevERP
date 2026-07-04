@@ -108,4 +108,4 @@ To learn more about React Native, take a look at the following resources:
 // ./gradlew --stop
 // ./gradlew clean
 // ./gradlew generateCodegenArtifactsFromSchema 
-// cmd - gradlew assemble[BRAND_NAME]Release
+// cmd - gradlew assemble[BRAND_NAME]Release76

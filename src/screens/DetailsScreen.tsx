@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#D96A27",
+    color: "#251d50",
   },
 
   row: {

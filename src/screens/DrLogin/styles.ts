@@ -3,8 +3,8 @@ import { StyleSheet, Dimensions } from "react-native";
 const { width } = Dimensions.get("window");
 
 const COLORS = {
-  primary: "#D96A27",
-  primaryDark: "#D96A27",
+  primary: "#251d50",
+  primaryDark: "#251d50",
   success: "#16A34A",
   danger: "#DC2626",
   background: "#F8FAFC",

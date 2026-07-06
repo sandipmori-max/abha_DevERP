@@ -20,7 +20,9 @@ import { setActiveUser, setDevERPBaseUrl } from "../../redux/slices/abhaSlice";
 import { hideLoader, showLoader } from "../../redux/slices/loaderSlice";
 import { getSetAppIdPayload, useSetAppIdMutation } from "../../redux/api/setAppIdApi";
 import { showToast } from "../../utils/toast";
-
+import { generateGUID } from "../../utils/helpers";
+import { setDeviceAppId, setDeviceName } from "../../redux/slices/authSlice";
+import DeviceInfo from "react-native-device-info";
 
 const DrLogin = ({ navigation }: any) => {
 
@@ -79,43 +81,45 @@ const DrLogin = ({ navigation }: any) => {
 
         try {
             setLoading(true);
-
             const response = await getLink(
                 getLinkPayload(companyCode)
             ).unwrap();
-
             const appData = JSON.parse(response.d);
             console.log("Response =>", appData);
             console.log("URL =>", appData.link);
             let updatedLink = "";
-
             if (Platform.OS === "android") {
                 updatedLink = appData.link.replace(/^https:/, "http:")
             } else {
                 updatedLink = appData.link
             }
             dispatch(setDevERPBaseUrl(`${updatedLink}msp_api.aspx`));
+            const appID = generateGUID();
+            const name =
+                Platform.OS === "ios"
+                    ? DeviceInfo.getModel() + " " + (await DeviceInfo.getUniqueId())
+                    : await DeviceInfo.getDeviceName();
 
+            console.log("name", name);
             const res = await setAppId(
                 getSetAppIdPayload(
                     username,
                     password,
-                    "",
-                    "",
-                    ""
+                    appID,
+                    "firebaseId",
+                    name
                 )
             ).unwrap();
-
             console.log("Response =>+++++++++++++++++++", res);
             if (res?.success == 1) {
                 showToast('success', 'Login successfully.');
                 dispatch(setActiveUser(res))
-                
+                dispatch(setDeviceAppId(appID))
+                dispatch(setDeviceName(name))
             } else {
                 showToast('error', res?.message || 'Something went wrong. Please try again later.');
             }
             dispatch(hideLoader());
-
         } catch (e) {
             dispatch(hideLoader());
         } finally {
@@ -144,184 +148,182 @@ const DrLogin = ({ navigation }: any) => {
 
     return (
         <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={
-                    Platform.OS === "ios"
-                        ? "padding"
-                        : undefined
-                }
+            style={{ flex: 1 }}
+            behavior={
+                Platform.OS === "ios"
+                    ? "padding"
+                    : undefined
+            }
+        >
+            <ScrollView
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={styles.scroll}
             >
-                <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                    contentContainerStyle={styles.scroll}
-                >
-                    <View style={styles.logoContainer}>
-                        <Text style={styles.logo}>🏥</Text>
+                <View style={styles.logoContainer}>
+                    <Text style={styles.logo}>🏥</Text>
 
-                        <Text style={styles.title}>
-                            Welcome Back
-                        </Text>
+                    <Text style={styles.title}>
+                        Welcome Back
+                    </Text>
 
-                        <Text style={styles.subtitle}>
-                            Login to continue
-                        </Text>
-                    </View>
+                    <Text style={styles.subtitle}>
+                        Login to continue
+                    </Text>
+                </View>
 
-                    <View style={styles.card}>
-                        <CustomInput
-                            label="Company Code"
-                            placeholder="Enter Company Code"
-                            value={companyCode}
-                            autoCapitalize="characters"
-                            maxLength={15}
-                            returnKeyType="next"
-                            onChangeText={(text) => {
-                                setCompanyCode(
-                                    text
-                                        .toUpperCase()
-                                        .replace(/\s/g, "")
-                                );
+                <View style={styles.card}>
+                    <CustomInput
+                        label="Company Code"
+                        placeholder="Enter Company Code"
+                        value={companyCode}
+                        autoCapitalize="characters"
+                        maxLength={15}
+                        returnKeyType="next"
+                        onChangeText={(text) => {
+                            setCompanyCode(
+                                text
+                                    .toUpperCase()
+                                    .replace(/\s/g, "")
+                            );
 
-                                if (touched.companyCode)
-                                    setErrors({
-                                        ...errors,
-                                        companyCode:
-                                            validateCompanyCode(text),
-                                    });
-                            }}
-                            onBlur={() => {
-                                setTouched({
-                                    ...touched,
-                                    companyCode: true,
-                                });
-
+                            if (touched.companyCode)
                                 setErrors({
                                     ...errors,
                                     companyCode:
-                                        validateCompanyCode(
-                                            companyCode
-                                        ),
+                                        validateCompanyCode(text),
                                 });
-                            }}
-                            onSubmitEditing={() =>
-                                usernameRef.current.focus()
-                            }
-                            error={
-                                touched.companyCode
-                                    ? errors.companyCode
-                                    : ""
-                            }
-                            success={isValidCompany}
-                        />
+                        }}
+                        onBlur={() => {
+                            setTouched({
+                                ...touched,
+                                companyCode: true,
+                            });
 
-                        <CustomInput
-                            ref={usernameRef}
-                            label="Username"
-                            placeholder="Enter Username"
-                            value={username}
-                            returnKeyType="next"
-                            onChangeText={(text) => {
-                                setUsername(text);
+                            setErrors({
+                                ...errors,
+                                companyCode:
+                                    validateCompanyCode(
+                                        companyCode
+                                    ),
+                            });
+                        }}
+                        onSubmitEditing={() =>
+                            usernameRef.current.focus()
+                        }
+                        error={
+                            touched.companyCode
+                                ? errors.companyCode
+                                : ""
+                        }
+                        success={isValidCompany}
+                    />
 
-                                if (touched.username)
-                                    setErrors({
-                                        ...errors,
-                                        username:
-                                            validateUsername(text),
-                                    });
-                            }}
-                            onBlur={() => {
-                                setTouched({
-                                    ...touched,
-                                    username: true,
-                                });
+                    <CustomInput
+                        ref={usernameRef}
+                        label="Username"
+                        placeholder="Enter Username"
+                        value={username}
+                        returnKeyType="next"
+                        onChangeText={(text) => {
+                            setUsername(text);
 
+                            if (touched.username)
                                 setErrors({
                                     ...errors,
                                     username:
-                                        validateUsername(
-                                            username
-                                        ),
+                                        validateUsername(text),
                                 });
-                            }}
-                            onSubmitEditing={() =>
-                                passwordRef.current.focus()
-                            }
-                            error={
-                                touched.username
-                                    ? errors.username
-                                    : ""
-                            }
-                            success={isValidUsername}
-                        />
+                        }}
+                        onBlur={() => {
+                            setTouched({
+                                ...touched,
+                                username: true,
+                            });
 
-                        <CustomInput
-                            ref={passwordRef}
-                            label="Password"
-                            placeholder="Enter Password"
-                            value={password}
-                            secure
-                            returnKeyType="done"
-                            onSubmitEditing={handleLogin}
-                            onChangeText={(text) => {
-                                setPassword(text);
+                            setErrors({
+                                ...errors,
+                                username:
+                                    validateUsername(
+                                        username
+                                    ),
+                            });
+                        }}
+                        onSubmitEditing={() =>
+                            passwordRef.current.focus()
+                        }
+                        error={
+                            touched.username
+                                ? errors.username
+                                : ""
+                        }
+                        success={isValidUsername}
+                    />
 
-                                if (touched.password)
-                                    setErrors({
-                                        ...errors,
-                                        password:
-                                            validatePassword(text),
-                                    });
-                            }}
-                            onBlur={() => {
-                                setTouched({
-                                    ...touched,
-                                    password: true,
-                                });
+                    <CustomInput
+                        ref={passwordRef}
+                        label="Password"
+                        placeholder="Enter Password"
+                        value={password}
+                        secure
+                        returnKeyType="done"
+                        onSubmitEditing={handleLogin}
+                        onChangeText={(text) => {
+                            setPassword(text);
 
+                            if (touched.password)
                                 setErrors({
                                     ...errors,
                                     password:
-                                        validatePassword(
-                                            password
-                                        ),
+                                        validatePassword(text),
                                 });
-                            }}
-                            error={
-                                touched.password
-                                    ? errors.password
-                                    : ""
-                            }
-                            success={isValidPassword}
+                        }}
+                        onBlur={() => {
+                            setTouched({
+                                ...touched,
+                                password: true,
+                            });
+
+                            setErrors({
+                                ...errors,
+                                password:
+                                    validatePassword(
+                                        password
+                                    ),
+                            });
+                        }}
+                        error={
+                            touched.password
+                                ? errors.password
+                                : ""
+                        }
+                        success={isValidPassword}
+                    />
+                </View>
+
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    disabled={!loginEnabled}
+                    style={[
+                        styles.loginButton,
+                        !loginEnabled &&
+                        styles.loginDisabled,
+                    ]}
+                    onPress={handleLogin}
+                >
+                    {loading ? (
+                        <ActivityIndicator
+                            color="#fff"
                         />
-                    </View>
-
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        disabled={!loginEnabled}
-                        style={[
-                            styles.loginButton,
-                            !loginEnabled &&
-                            styles.loginDisabled,
-                        ]}
-                        onPress={handleLogin}
-                    >
-                        {loading ? (
-                            <ActivityIndicator
-                                color="#fff"
-                            />
-                        ) : (
-                            <Text
-                                style={styles.loginText}
-                            >
-                                LOGIN
-                            </Text>
-                        )}
-                    </TouchableOpacity>
-
-
-                </ScrollView>
-            </KeyboardAvoidingView>
+                    ) : (
+                        <Text
+                            style={styles.loginText}
+                        >
+                            LOGIN
+                        </Text>
+                    )}
+                </TouchableOpacity>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 

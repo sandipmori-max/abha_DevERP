@@ -16,12 +16,12 @@ const App = () => {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <NavigationContainer>
-            <StatusBar barStyle="light-content" backgroundColor={"#D96A27"} />
+            <StatusBar barStyle="light-content" backgroundColor={"#251d50"} />
             <SafeAreaView
               edges={["top"]}
-              style={{ flex: 0, backgroundColor: "#D96A27" }}
+              style={{ flex: 0, backgroundColor: "#251d50" }}
             />
-            <SafeAreaView style={{ flex: 1, backgroundColor: "#D96A27"    }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#251d50"    }}>
               <RootNavigator />
               <GlobalLoader />
               <Toast config={toastConfig} />

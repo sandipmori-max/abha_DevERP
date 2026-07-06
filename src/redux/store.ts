@@ -13,13 +13,13 @@ import { baseApi } from "../redux/api/baseApi";
 const authPersistConfig = {
   key: "auth",
   storage: AsyncStorage,
-  whitelist: ['publicKey'],
+  whitelist: ['publicKey', 'appId', 'deviceName'],
 };
 
 const abhaPersistConfig = {
   key: "abha",
   storage: AsyncStorage,
-  whitelist: ["activeUser", "txnId", "tToken", "abhaDrProfile"],
+  whitelist: ["activeUser", "txnId", "tToken", "abhaDrProfile", "devERPBaseUrl"],
 };
 
 /* ---------------- Persisted Reducers ---------------- */

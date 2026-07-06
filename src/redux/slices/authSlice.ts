@@ -4,10 +4,10 @@ const initialState = {
   accessToken: null,
   refreshToken: null,
   expiresIn: null,
-
   publicKey: null,
   encryptionAlgorithm: null,
-
+  appId: null,
+  deviceName: null
 
 };
 
@@ -27,7 +27,20 @@ const authSlice = createSlice({
       state.expiresIn =
         action.payload.expiresIn;
     },
-
+    setDeviceAppId: (
+      state,
+      action
+    ) => {
+      state.appId =
+        action.payload;
+    },
+    setDeviceName: (
+      state,
+      action
+    ) => {
+      state.deviceName =
+        action.payload;
+    },
     setCertificate: (
       state,
       action
@@ -39,7 +52,7 @@ const authSlice = createSlice({
         action.payload.encryptionAlgorithm;
     },
 
-   
+
 
     logout: (state) => {
       state.accessToken = null;
@@ -48,15 +61,17 @@ const authSlice = createSlice({
 
       state.publicKey = null;
       state.encryptionAlgorithm = null;
- 
+
     },
   },
 });
 
 export const {
   setSession,
-  setCertificate, 
+  setCertificate,
   logout,
+  setDeviceName,
+  setDeviceAppId
 } = authSlice.actions;
 
 export default authSlice.reducer;

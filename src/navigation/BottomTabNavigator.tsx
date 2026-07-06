@@ -123,7 +123,7 @@ const BottomTabNavigator = () => {
                 type="DOWN"
                 height={60}
                 circleWidth={60}
-                bgColor="#D96A27"
+                bgColor="#251d50"
                 initialRouteName="Profile"
                 borderTopLeftRight
                 screenOptions={{
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: "#000",
+        backgroundColor: "#D96A27",
         justifyContent: "center",
         alignItems: "center",
     },
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     registerBtn: {
         height: 48,
         borderWidth: 2,
-        borderColor: '#D96A27',
+        borderColor: '#251d50',
         borderRadius: 4,
         justifyContent: 'center',
         alignItems: 'center',
@@ -421,14 +421,14 @@ const styles = StyleSheet.create({
 
     loginBtn: {
         height: 48,
-        backgroundColor: '#D96A27',
+        backgroundColor: '#251d50',
         borderRadius: 4,
         justifyContent: 'center',
         alignItems: 'center',
     },
 
     registerText: {
-        color: '#D96A27',
+        color: '#251d50',
         fontSize: 18,
         fontWeight: '600',
     },
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     },
 
     selectedOption: {
-        borderColor: '#D96A27',
+        borderColor: '#251d50',
         backgroundColor: '#FFF7F2',
     },
 
@@ -499,14 +499,14 @@ const styles = StyleSheet.create({
     },
 
     radioOuterActive: {
-        borderColor: '#D96A27',
+        borderColor: '#251d50',
     },
 
     radioInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: '#D96A27',
+        backgroundColor: '#251d50',
     },
 
     optionText: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
     createBtn: {
         marginTop: 4,
         height: 48,
-        backgroundColor: '#D96A27',
+        backgroundColor: '#251d50',
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',

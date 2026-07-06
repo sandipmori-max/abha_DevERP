@@ -40,6 +40,18 @@ const abhaSlice = createSlice({
         action.payload;
     },
 
+    updateAuthToken: (state, action) => {
+      const payload =
+        typeof action.payload === "string"
+          ? JSON.parse(action.payload)
+          : action.payload;
+
+      state.activeUser = {
+        ...state.activeUser,
+        token: payload.token,
+        validtill: payload.validTill,
+      };
+    },
      setDevERPBaseUrl: (
       state,
       action
@@ -103,7 +115,8 @@ export const {
   clearTxnId,
   setActiveUser,
   setDevERPBaseUrl,
-  setAbhaDrProfile
+  setAbhaDrProfile,
+  updateAuthToken
 } = abhaSlice.actions;
 
 export default abhaSlice.reducer;

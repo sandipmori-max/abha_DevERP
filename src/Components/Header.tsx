@@ -109,7 +109,7 @@ const Header = ({ title, isSearch = true, isMenu = true, isShare = false, handle
 const styles = StyleSheet.create({
   header: {
     height: 60,
-    backgroundColor: "#D96A27",
+    backgroundColor: "#251d50",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

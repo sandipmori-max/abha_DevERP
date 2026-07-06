@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
-import { View, ActivityIndicator, Text , StyleSheet, Image} from "react-native";
+import { View, ActivityIndicator, Text, StyleSheet, Image } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import IntroScreen from "../screens/Intro/IntroScreen";
 import LoginScreen from "../screens/Login/LoginScreen";
@@ -10,6 +11,7 @@ import DrawerNavigator from "./DrawerNavigator";
 import DrLogin from "../screens/DrLogin/DrLogin";
 import { useCreateSessionMutation } from "../redux/api/sessionApi";
 import { hideLoader, showLoader } from "../redux/slices/loaderSlice";
+import { getGetAuthPayload, useGetAuthMutation } from "../redux/api/getAuth";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,46 +21,52 @@ const RootNavigator = () => {
   const proReduxData = useSelector(
     (state: any) => state.abha.activeUser
   );
-
+  const appId = useSelector(
+    (state: any) => state.auth.appId
+  );
+  const deviceName = useSelector(
+    (state: any) => state.auth.deviceName
+  );
+  const [getAuth] = useGetAuthMutation();
   const [ready, setReady] = useState(false);
 
 
-   const [
-          createSession
-      ] = useCreateSessionMutation();
-  
-      const handleSession = async () => {
-          try {
-              const response =
-                  await createSession()
-                      .unwrap();
-              console.log(
-                  "Session Response",
-                  response
-              );
-          } catch (err) {
-              console.log(
-                  "Session Error",
-                  err
-              );
-          }
-      };
-  
-      useEffect(() => {
-          const init = async () => {
-              try {
-                  dispatch(showLoader());
-  
-                  await handleSession();
-              } catch (error) {
-                  console.log(error);
-              } finally {
-                  dispatch(hideLoader());
-              }
-          };
-  
-          init();
-      }, []);
+  const [
+    createSession
+  ] = useCreateSessionMutation();
+
+  const handleSession = async () => {
+    try {
+      const response =
+        await createSession()
+          .unwrap();
+      console.log(
+        "Session Response",
+        response
+      );
+    } catch (err) {
+      console.log(
+        "Session Error",
+        err
+      );
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        dispatch(showLoader());
+
+        await handleSession();
+      } catch (error) {
+        console.log(error);
+      } finally {
+        dispatch(hideLoader());
+      }
+    };
+
+    init();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,65 +76,86 @@ const RootNavigator = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+       console.log("Auth + + + + + + + + + + + + + + + + + +  isLoggedIn =>", proReduxData, appId, deviceName);
+  if (!proReduxData) return;
+  if (!appId || !deviceName) return;
+
+  const fetchAuth = async () => {
+    try {
+      const response = await getAuth(
+        getGetAuthPayload(appId, deviceName)
+      ).unwrap();
+
+      console.log("Auth + + + + + + + + + + + + + + + + + +  Response =>", response);
+    } catch (error) {
+      console.log("Auth Error =>", error);
+    }
+  };
+
+  fetchAuth();
+}, [isLoggedIn, appId, deviceName]);
+
   if (!ready) {
-  return (
-    <View style={styles.container}>
-      <View style={styles.topSection}>
-        <Image
-          source={{
-            uri: 'https://play-lh.googleusercontent.com/4o2xmTJIFLjpToZnWJZUYsCYcWGuJlH_SVGue1a6z39stjg-1Xl3KWxggo9p2pSMYE94Ol2HjeF4Z-83rLmPyA=w240-h480-rw'
-          }} // apna logo
-          style={styles.logo}
-          resizeMode="contain"
-        />
+    return (
+      <View style={styles.container}>
+        <View style={styles.topSection}>
+          <Image
+            source={{
+              uri: 'https://play-lh.googleusercontent.com/4o2xmTJIFLjpToZnWJZUYsCYcWGuJlH_SVGue1a6z39stjg-1Xl3KWxggo9p2pSMYE94Ol2HjeF4Z-83rLmPyA=w240-h480-rw'
+            }} // apna logo
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
-        <Text style={styles.title}>ABHA Health</Text>
+          <Text style={styles.title}>ABHA Health</Text>
 
-        <Text style={styles.subtitle}>
-          Your Digital Health Identity
-        </Text>
+          <Text style={styles.subtitle}>
+            Your Digital Health Identity
+          </Text>
+        </View>
+
+        <View style={styles.loaderSection}>
+          <ActivityIndicator
+            size="large"
+            color="#251d50"
+          />
+
+          <Text style={styles.loadingText}>
+            Connecting securely...
+          </Text>
+        </View>
+
+        <View style={styles.bottomSection}>
+          <Text style={styles.powered}>
+            Powered by
+          </Text>
+
+          <Text style={styles.abdm}>
+            Ayushman Bharat Digital Mission
+          </Text>
+        </View>
       </View>
-
-      <View style={styles.loaderSection}>
-        <ActivityIndicator
-          size="large"
-          color="#D96A27"
-        />
-
-        <Text style={styles.loadingText}>
-          Connecting securely...
-        </Text>
-      </View>
-
-      <View style={styles.bottomSection}>
-        <Text style={styles.powered}>
-          Powered by
-        </Text>
-
-        <Text style={styles.abdm}>
-          Ayushman Bharat Digital Mission
-        </Text>
-      </View>
-    </View>
-  );
-}
+    );
+  }
 
   const isLoggedIn = !!proReduxData;
+
 
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-         animation: 'fade',
+        animation: 'fade',
       }}
     >
       {isLoggedIn ? (
-       <>
-        <Stack.Screen
-          name="Main"
-          component={DrawerNavigator}
-        />
-         <Stack.Screen
+        <>
+          <Stack.Screen
+            name="Main"
+            component={DrawerNavigator}
+          />
+          <Stack.Screen
             name="RegistrationAbha"
             component={LoginScreen}
           />
@@ -134,7 +163,7 @@ const RootNavigator = () => {
             name="OtpVerification"
             component={OtpVerificationScreen}
           />
-       </>
+        </>
       ) : (
         <>
           <Stack.Screen
@@ -145,8 +174,8 @@ const RootNavigator = () => {
             name="DrLogin"
             component={DrLogin}
           />
-         
-          
+
+
         </>
       )}
     </Stack.Navigator>
@@ -211,7 +240,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 15,
     fontWeight: "600",
-    color: "#D96A27",
+    color: "#251d50",
   },
 });
 

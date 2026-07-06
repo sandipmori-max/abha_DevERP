@@ -88,7 +88,7 @@ const CustomDrawer = (
                                     size={24}
                                     color={
                                         active
-                                            ? "#D96A27"
+                                            ? "#251d50"
                                             : "#64748B"
                                     }
                                 />
@@ -133,7 +133,7 @@ const CustomDrawer = (
                     <MaterialIcons
                         name="logout"
                         size={22}
-                        color="#D96A27"
+                        color="#251d50"
                     />
 
                     <Text style={styles.logoutText}>
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     },
 
     activeText: {
-        color: "#D96A27",
+        color: "#251d50",
     },
 
     footer: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
 
     logoutText: {
         marginLeft: 10,
-        color: "#D96A27",
+        color: "#251d50",
         fontSize: 16,
         fontWeight: "700",
     },

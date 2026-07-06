@@ -100,7 +100,7 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                     <MaterialIcons
                         name='copy-all'
                         size={18}
-                        color="#D96A27"
+                        color="#251d50"
                     />
                 </TouchableOpacity>
             </View>

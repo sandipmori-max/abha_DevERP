@@ -209,7 +209,7 @@ const OtpInput = ({
                     styles.otpBox,
                     isActive && {
                       borderColor:
-                        '#D96A27',
+                        '#251d50',
                     },
                   ]}
                 >
@@ -361,6 +361,6 @@ const styles =
     resendText: {
       fontSize: 15,
       fontWeight: '700',
-      color: '#D96A27',
+      color: '#251d50',
     },
   });

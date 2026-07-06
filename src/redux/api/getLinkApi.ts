@@ -57,6 +57,7 @@ export const getLinkApi = baseApi.injectEndpoints({
           url,
           method: "POST",
           body,
+          
         });
       },
 
@@ -92,10 +93,10 @@ export const getLinkApi = baseApi.injectEndpoints({
         //     "Link fetched successfully."
         //   );
         } catch (error: any) {
-        //   showToast(
-        //     "error", 
-        //     getErrorMessage(error)
-        //   );
+          // showToast(
+          //   "error", 
+          //    JSON.stringify(error, null, 2)
+          // );
 
           console.log(
             "========== GET LINK ERROR =========="

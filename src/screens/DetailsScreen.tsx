@@ -12,6 +12,9 @@ import {
 import Header from "../Components/Header";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import CustomBottomSheet from "./Profile/CustomBottomSheet";
+import RNPrint from 'react-native-print';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
 
 const DetailsScreen = ({ route }: any) => {
   const { item } = route.params || {};
@@ -33,6 +36,48 @@ const DetailsScreen = ({ route }: any) => {
       }]}>{value || "-"}</Text>
     </View>
   );
+
+  const downloadPDF = async (url) => {
+    const filePath = `${RNFS.DocumentDirectoryPath}/sample.pdf`;
+
+    const result = await RNFS.downloadFile({
+      fromUrl: url,
+      toFile: filePath,
+    }).promise;
+
+    if (result.statusCode === 200) {
+      return filePath;
+    }
+
+    throw new Error('Download failed');
+  };
+
+  const sharePDF = async (filePath) => {
+    try {
+      await Share.open({
+        title: 'Share ABHA Card',
+        url: `file://${filePath}`,
+        type: 'application/pdf',
+        failOnCancel: false,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const printPdfFromUrl = async () => {
+    try {
+      const pdfPath = await downloadPDF(
+        'https://pdfobject.com/pdf/sample.pdf',
+      );
+
+      await RNPrint.print({
+        filePath: pdfPath,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -313,7 +358,10 @@ const DetailsScreen = ({ route }: any) => {
               <TouchableOpacity
                 style={styles.shareBtn}
                 activeOpacity={0.8}
-              //   onPress={onShare}
+                onPress={async () => {
+                  const pdfPath = await downloadPDF('https://pdfobject.com/pdf/sample.pdf');
+                  await sharePDF(pdfPath);
+                }}
               >
                 <MaterialIcons
                   name='share'
@@ -322,14 +370,14 @@ const DetailsScreen = ({ route }: any) => {
                 />
 
                 <Text style={styles.shareText}>
-                  Share QR
+                  Share
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.downloadBtn}
                 activeOpacity={0.8}
-              //   onPress={onDownload}
+                onPress={printPdfFromUrl}
               >
                 <MaterialIcons
                   name='print'
@@ -580,7 +628,7 @@ const styles = StyleSheet.create({
   qrInfo: {
     marginTop: 18,
     textAlign: "center",
-    color: "#64748B", 
+    color: "#64748B",
   },
 
   actionContainer: {

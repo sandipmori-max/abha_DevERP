@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,27 +18,24 @@ import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
 import { showToast } from '../../utils/toast';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { getEnrollmentPayload, useEnrollmentRequestOtpMutation } from '../../redux/api/enrollmentApi';
-import { getEnrolByAadhaarPayload, useEnrolByAadhaarMutation } from '../../redux/api/enrolByAadhaarApi';
-import { getAuthByAbdmPayload, useAuthByAbdmMutation } from '../../redux/api/authByAbdmApi';
 import { getEmailVerificationLinkPayload, useRequestEmailVerificationLinkMutation } from '../../redux/api/emailVerificationLinkApi';
 import { useEnrolSuggestionMutation } from '../../redux/api/enrolSuggestionApi';
-import { getEnrolAbhaAddressPayload, useEnrolAbhaAddressMutation } from '../../redux/api/enrolAbhaAddressApi';
-import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
 import DLStepTwo from './DLStepTwo';
 import { styles } from './style';
 import RadioItem from './RadioItem';
-import { formatLoginInput, generateCaptcha, getIsFormValid, getLoginKeyboardType, getLoginPlaceholder, isStrictIndianMobile, stepOneValidator, steps, stepsDL, stepTwoValidator, TERMS_FIVE, TERMS_FOUR, TERMS_ONE, TERMS_SIX, TERMS_TWO, validateForm } from '../../utils/helpers';
+import { formatLoginInput, getIsFormValid, getLoginKeyboardType, getLoginMaxLength, getLoginPlaceholder, isStrictIndianMobile, steps, stepsDL, validateForm } from '../../utils/helpers';
 import StepOne from './StepOne';
 import StepTwo from './StepTwo';
 import StepThree from './StepThree';
 import StepFour from './StepFour';
 import DLStepOne from './DLStepOne';
 import { getDlEnrollmentRequestOtpPayload, useDlEnrollmentRequestOtpMutation } from '../../redux/api/dlEnrollmentRequestOtpApi';
-import { isValidAadhaar } from '../../utils/aadhaarValidator';
 import ValidationErrorBottomSheet from './ValidationErrorBottomSheet';
-import { useSavePageMutation } from '../../redux/api/savePageApi';
-import { useLazyProfileQrCodeQuery } from '../../redux/api/qrCodeApi';
-import { useLazyProfileAbhaCardQuery } from '../../redux/api/abhaCardApi';
+import { LOGIN_TYPES } from '../../utils/constants';
+import TermsConditions from './TermsConditions';
+import AadhaarInput from './AadhaarInput';
+import ValidationOptions from './ValidationOptions';
+import { useLoginFlow } from './useLoginFlow';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -48,306 +45,44 @@ const LoginScreen = () => {
   const publicKey = useSelector(
     (state: any) => state.auth.publicKey
   );
-  const { activeUser: proReduxData, txnId } = useSelector((state: any) => state.abha);
+  const { txnId } = useSelector((state: any) => state.abha);
   const { loginType, isFromRegister = false, isFromCreate = false, isFromMobileRegister = false, isFromForgotAbhaNumber = false, isFromForgotAbhaNumberWithType = false, } = route.params ?? {};
-  const [showValidationSheet, setShowValidationSheet] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const stepTwoRef = useRef<any>(null);
-  const [abhaResult, setAbhaResult] = useState<any>();
 
-  const [stepOne, setStepOne] = useState<any>({
-    aadhaarNumber: '',
-    termsAgree: false,
-    authType: "",
-    captchaValid: false,
-    passedForVarification: false,
-    setOneDone: false,
+  const {
+    stepOne, setStepOne, stepTwo, setStepTwo, stepThree, setStepThree, stepFour,
+    stepOneDL, setStepOneDL, currentStep, setCurrentStep,
+     currentStepDL, setCurrentStepDL,
+    loginValue, setLoginValue,
+    password, setPassword,
+    showPassword, setShowPassword,
+    validationMethod, setValidationMethod,
+    otpMethod, setOtpMethod,
+    isAgreed, setIsAgreed,
+    captcha, captchaValue, setCaptchaValue,
+    refreshCaptcha, selectedItem,
+    abhaSuggestionList, setAbhaSuggestionList,
+    showValidationSheet, setShowValidationSheet,
+    validationErrors, setValidationErrors,
+    stepTwoRef, handleSelect, handleSteps, handleOTPVerify,
+    shouldShowTerms, termsText, validationConfig,
+  } = useLoginFlow({
+    loginType, isFromRegister, isFromCreate, isFromMobileRegister, isFromForgotAbhaNumber, isFromForgotAbhaNumberWithType,
   });
-
-  const [stepTwo, setStepTwo] = useState<any>({
-    stepTwoTitle: "",
-    stepTwoOTP: '',
-    stepTwoMobileNumber: "",
-    setTwoDone: false,
-  });
-
-  const [stepThree, setStepThree] = useState<any>({
-    stepThreeMobile: '',
-    stepThreeMobileVerifyed: false,
-    stepThreeMobileOTP: "",
-    stepThreeMobileAuthDone: false,
-    stepThreeEmail: "",
-    stepThreeEmailOTP: "",
-    stepThreeEmailVarifying: false,
-    stepThreeEmailOPTVerify: false,
-    stepThreeEmailVarifyDone: false
-  });
-
-  const [stepFour, setStepFour] = useState<any>({
-    userName: ""
-  });
-
-  const [stepOneDL, setStepOneDL] = useState<any>({
-    stepOneDLTitle: "",
-    stepOneDLOTP: '',
-    stepOneDLMobileNumber: "",
-    stepOneDLMobileVerifying: false,
-    stepOneDLDone: false,
-  })
-
-  const [currentStep, setCurrentStep] = useState(1);
-  const [currentStepDL, setCurrentStepDL] = useState(1);
-  const [captcha, setCaptcha] = useState(generateCaptcha());
-  const [captchaValue, setCaptchaValue] = useState('');
 
   const [requestOtp] = useRequestOtpMutation();
   const [enrollmentRequestOtp,] = useEnrollmentRequestOtpMutation();
-  const [enrolByAadhaar,] = useEnrolByAadhaarMutation();
-  const [authByAbdm,] = useAuthByAbdmMutation();
   const [requestEmailVerificationLink,] = useRequestEmailVerificationLinkMutation();
   const [enrolSuggestion,] = useEnrolSuggestionMutation();
-  const [enrolAbhaAddress,] = useEnrolAbhaAddressMutation();
-  const [getProfileAccount,] = useLazyProfileAccountQuery();
   const [dlEnrollmentRequestOtp,] = useDlEnrollmentRequestOtpMutation();
-  const [savePage] = useSavePageMutation();
-  const [getQrCode,] = useLazyProfileQrCodeQuery();
-  const [getAbhaCard] = useLazyProfileAbhaCardQuery();
-
-  const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
-  const [loginValue, setLoginValue] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [validationMethod, setValidationMethod] = useState('');
-  const [otpMethod, setOtpMethod] = useState('');
-  const [isAgreed, setIsAgreed] = useState(false);
-
-  const input1Ref = useRef<TextInput>(null);
-  const input2Ref = useRef<TextInput>(null);
-  const input3Ref = useRef<TextInput>(null);
-
-  const [focusedInput, setFocusedInput] = useState<"part1" | "part2" | "part3" | null>(null);
-
-  const getBorderColor = (key: "part1" | "part2" | "part3") => {
-    if (aadhaar[key].length === 4) {
-      return "#22C55E";
-    }
-    if (focusedInput === key) {
-      return "#2563EB";
-    }
-    return "#D1D5DB";
-  };
-
-  const [aadhaar, setAadhaar] = useState({
-    part1: "",
-    part2: "",
-    part3: "",
-  });
-
-  const updateAadhaar = (
-    part1: string,
-    part2: string,
-    part3: string,
-  ) => {
-    const aadhaarNumber = part1 + part2 + part3;
-    setLoginValue(aadhaarNumber);
-  };
 
   const placeholder = useMemo(
     () => getLoginPlaceholder(loginType),
     [loginType]
   );
 
-  const renderValidationOptions = () => {
-    if (loginType === 'Mobile Number') {
-      return null;
-    }
-
-    if (loginType === 'Aadhaar Number' && !isFromForgotAbhaNumberWithType) {
-      return (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            Verification Method
-          </Text>
-
-          <RadioItem
-            title="Aadhaar OTP"
-            selected={validationMethod === 'Aadhaar OTP'}
-            onPress={() =>
-              setValidationMethod(
-                'Aadhaar OTP',
-              )
-            }
-          />
-
-          <RadioItem
-            title="Face Auth"
-            selected={validationMethod === 'Face Auth'}
-            onPress={() =>
-              setValidationMethod(
-                'Face Auth',
-              )
-            }
-          />
-        </View>
-      );
-    }
-
-    if (loginType === 'ABHA Address') {
-      return (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            Verification Method
-          </Text>
-          <RadioItem
-            title="Password"
-            selected={validationMethod === 'Password'}
-            onPress={() => {
-              setValidationMethod(
-                'Password',
-              );
-              setOtpMethod('');
-            }}
-          />
-
-          <RadioItem
-            title="OTP"
-            selected={validationMethod === 'OTP'}
-            onPress={() => {
-              setValidationMethod('OTP');
-              setOtpMethod('');
-            }}
-          />
-
-          <RadioItem
-            title="Face Auth"
-            selected={validationMethod === 'Face Auth'}
-            onPress={() =>
-              setValidationMethod(
-                'Face Auth',
-              )
-            }
-          />
-        </View>
-      );
-    }
-
-    if (loginType === 'ABHA Number') {
-      return (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            Verification Method
-          </Text>
-
-          <RadioItem
-            title="Aadhaar OTP"
-            selected={validationMethod === 'Aadhaar OTP'}
-            onPress={() =>
-              setValidationMethod(
-                'Aadhaar OTP',
-              )
-            }
-          />
-
-          <RadioItem
-            title="Mobile OTP"
-            selected={validationMethod === 'Mobile OTP'}
-            onPress={() =>
-              setValidationMethod(
-                'Mobile OTP',
-              )
-            }
-          />
-          {
-            !isFromRegister && <RadioItem
-              title="Face Auth"
-              selected={validationMethod === 'Face Auth'}
-              onPress={() =>
-                setValidationMethod(
-                  'Face Auth',
-                )
-              }
-            />
-          }
-
-        </View>
-      );
-    }
-
-    if (loginType === 'Forgot ABHA Number' && isFromForgotAbhaNumber) {
-      return (
-        <View style={[styles.card, {
-          flexDirection: 'row', padding: 4,
-          marginHorizontal: 14,
-          alignContent: 'center',
-          alignItems: 'center',
-          paddingHorizontal: 14
-        }]}>
-          <View style={{
-            width: '50%'
-          }}>
-            <RadioItem
-              title="Aadhaar Number"
-              selected={validationMethod === 'Aadhaar Number'}
-              onPress={() => {
-                setLoginValue("")
-                refreshCaptcha()
-                setCaptchaValue("")
-                Keyboard.dismiss()
-                setValidationMethod(
-                  'Aadhaar Number',
-                )
-              }}
-            />
-          </View>
-          <View style={{
-            width: '50%'
-
-          }}>
-            <RadioItem
-              title="Mobile Number"
-              selected={validationMethod === 'Mobile Number'}
-              onPress={() => {
-                setLoginValue("")
-                refreshCaptcha()
-                setCaptchaValue("")
-                Keyboard.dismiss()
-                setValidationMethod(
-                  'Mobile Number',
-                )
-              }}
-            />
-          </View>
-        </View>
-      );
-    }
-    return null;
-  };
-
-  const refreshCaptcha = () => {
-    setCaptcha(generateCaptcha());
-    setCaptchaValue('');
-  };
-
-  const maxLength =
-    loginType === 'Aadhaar Number' ? 14 // 1234-5678-9012
-      : loginType === 'ABHA Number' || loginType === 'Create ABHA Number' ? 17 // 12-3456-7890-1234
-        : loginType === 'Mobile Number' ? 10
-          : 100;
-
-  const [selectedItem, setSelectedItem] =
-    useState<string | null>(null);
-
-  const handleSelect = (
-    item: string
-  ) => {
-    setSelectedItem((prev) =>
-      prev === item ? null : item
-    );
-    setStepFour({
-      ...stepFour,
-      userName: item,
-    });
-  };
+  const maxLength = useMemo(() => getLoginMaxLength(loginType),
+    [loginType]
+  )
 
   const renderStep = () => {
     switch (currentStep) {
@@ -410,23 +145,6 @@ const LoginScreen = () => {
     }
   };
 
-  const handleOTPVerify = async () => {
-    if (stepOneDL.stepOneDLOTP === '' || stepOneDL.stepOneDLOTP.length < 6) {
-      showToast('error', 'Please enter OTP.')
-      return;
-    }
-    const encryptedOtp = encryptData(stepOneDL.stepOneDLOTP, publicKey);
-    const payload = getAuthByAbdmPayload(txnId, encryptedOtp);
-    const result = await authByAbdm(payload).unwrap();
-    if (result?.authResult === 'success') {
-      setStepOneDL({
-        ...stepOneDL,
-        stepOneDLMobileVerifying: false,
-      });
-      setCurrentStepDL(2)
-    }
-  }
-
   const renderDLStep = () => {
     switch (currentStepDL) {
       case 1:
@@ -452,120 +170,35 @@ const LoginScreen = () => {
     }
   }
 
-  const handleProfile = async (responseProfile: any) => {
-    const { status, ...restData } = responseProfile?.data || {};
-    const { name, ...restNameData } = responseProfile?.data || {};
-    const payload = {
-      aadharNumber: stepOne?.aadhaarNumber,
-      communicationMobile: stepTwo?.stepTwoMobileNumber,
-      communicationEmail: stepThree?.stepThreeEmail,
-      userName: stepFour?.userName,
-      ...responseProfile,
-      data: {
-        ...restData,
-        ...restNameData,
-        abhaName: name,
-        profileStatus: status,
-      },
-      isNew: abhaResult?.isNew,
-      expiresIn: abhaResult?.tokens?.expiresIn,
-      refreshExpiresIn: abhaResult?.tokens?.refreshExpiresIn,
-      refreshToken: abhaResult?.tokens?.refreshToken,
-      tokens: abhaResult?.tokens?.token,
-      txnId: txnId
-    };
-
-    const payloadRow = {
-      // "patientabhaid": "",
-      "abhanumber": payload.data.ABHANumber,
-      "abhaname": payload.data.abhaName,
-      // "date": "",
-      // "branchid": "",
-      // "guid": "",
-      // "patientid": "",
-      "aadharnumber": payload.aadharNumber,
-      "firstname": payload.data.firstName,
-      "middlename": payload.data.middleName,
-      "lastname": payload.data.lastName,
-      "fullname": payload.data.name,
-      "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
-      // "yearofbirth": payload.data.yearOfBirth,
-      // "monthofbirth": payload.data.monthOfBirth,
-      // "dayofbirth": payload.data.dayOfBirth,
-      "gender": payload.data.gender,
-      "mobileno": payload.data.mobile,
-      "address": payload.data.address,
-      "statename": payload.data.stateName,
-      "statecode": payload.data.stateCode,
-      "districtname": payload.data.districtName,
-      "districtcode": payload.data.districtCode,
-      "subdistrictname": payload.data.subdistrictName,
-      "pincode": payload.data.pincode,
-      "communicationmobile": payload.communicationMobile,
-      "communicationemail": payload.communicationEmail,
-      // "message": "",
-      "txnid": payload.txnId,
-      // "token": payload.tokens,
-      // "tokenexpiresin": payload.expiresIn,
-      // "refreshtoken": payload.refreshToken,
-      // "refreshexpiresin": payload.refreshExpiresIn,
-      "preferredabhaaddress": payload.data.preferredAbhaAddress,
-      "photo": payload.data.photo,
-      "profilephoto": payload.data.profilePhoto,
-      "kycphoto": payload.data.kycPhoto,
-      "localizedname": payload.data.localizedDetails.name,
-      "localizedgender": payload.data.localizedDetails.gender,
-      "localizedtownname": payload.data.localizedDetails.townName,
-      "localizeddistrictname": payload.data.localizedDetails.districtName,
-      "localizedvillagename": payload.data.localizedDetails.villageName,
-      "localizedstatename": payload.data.localizedDetails.stateName,
-      "phraddressjson": payload.data.phraddress,
-      "authmethodsjson": payload.data.authMethods,
-      "tagsjson": payload.data.tags,
-      "localizedlabelsjson": payload.data.localizedDetails.localizedLabels,
-      // "registrationsource": "",
-      "profilestatus": payload.data.profileStatus,
-      "abhatype": payload.data.abhatype,
-      "abhastatus": payload.data.status,
-      "verificationtype": payload.data.verificationType,
-      "verificationstatus": payload.data.verificationStatus,
-      "iskycverified": payload.data.kycVerified,
-      "isnew": payload.isNew,
-      "createdDate": payload?.data?.createdDate,
-      // "lastsyncdate": "",
-      // "cuid": "",
-      // "authby": "",
-      // "status": "",
-      // "cdt": "",
-      // "muid": "",
-      // "mdt": ""
+  const headerTitle = useMemo(() => {
+    if (isFromForgotAbhaNumber) {
+      return "Recover ABHA Number";
     }
 
-    const payloadData = {
-      token: proReduxData?.token,
-      page: "PatientABHAProfile",
-      data: JSON.stringify(payloadRow),
+    if (isFromRegister) {
+      return loginType === LOGIN_TYPES.AADHAAR
+        ? "Create ABHA Number Using Aadhaar"
+        : "Create ABHA Number Using Driving Licence";
     }
 
-    console.log(" Full data ----- - - - - +++++++++++++++++- payloadRow*-*-*-- ==== - - - -== ", payloadRow)
+    if (isFromCreate || isFromMobileRegister) {
+      return loginType;
+    }
 
-    const apiResponse = await savePage(payloadData).unwrap();
-    console.log(apiResponse);
-    const qr = await getQrCode()
-    const downloadAbhaCard = await getAbhaCard();
-    showToast('success', 'Record inserted successfully...')
-    // navigation.goBack()
-  }
+    return "Welcome Back 👋";
+  }, [
+    loginType,
+    isFromRegister,
+    isFromCreate,
+    isFromMobileRegister,
+    isFromForgotAbhaNumber,
+  ]);
 
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={
-          Platform.OS === 'ios'
-            ? 'padding'
-            : undefined
-        }
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
           <TouchableOpacity
@@ -583,10 +216,7 @@ const LoginScreen = () => {
           <Text style={[styles.welcome, isFromRegister && {
             fontSize: 18
           }]}>
-            {
-              isFromForgotAbhaNumber ? 'Recover ABHA Number' : `${isFromRegister ?
-                loginType === 'Aadhaar Number' ? 'Create ABHA Number Using Aadhaar' : 'Create ABHA Number Using Driving Licence' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
-            }
+            {headerTitle}
           </Text>
         </View>
         {
@@ -664,107 +294,7 @@ const LoginScreen = () => {
                     </View>
                     <TouchableOpacity
                       onPress={async () => {
-                        try {
-                          dispatch(showLoader());
-                          if (currentStep === 1) {
-                            //step 1
-                            const validate = stepOneValidator(stepOne, captchaValue, captcha);
-                            if (!validate) {
-                              showToast('error', "Please fill in all required fields correctly.")
-                              return;
-                            }
-                            if (!isValidAadhaar(stepOne?.aadhaarNumber)) {
-                              showToast('error', "Please enter a valid Aadhaar number.")
-                              return;
-                            }
-                            setStepOne({
-                              ...stepOne,
-                              passedForVarification: !stepOne.passedForVarification,
-                            });
-                            if (!publicKey) {
-                              return showToast('error', "Public key not found. Please try again later.")
-                            }
-                            const encryptedValue = encryptData(loginValue, publicKey,);
-                            const payloadPassed = getEnrollmentPayload(loginType, encryptedValue, '',);
-                            const result = await enrollmentRequestOtp(payloadPassed).unwrap();
-                            setStepTwo({
-                              ...stepTwo,
-                              stepTwoTitle: result?.message,
-                            });
-                            setCurrentStep(2)
-
-                          } else if (currentStep === 2) {
-                            //step 2
-                            dispatch(showLoader());
-                            const validate = stepTwoValidator(stepTwo);
-                            if (!validate) {
-                              showToast('error', "Please fill in all required fields correctly.")
-                              return;
-                            }
-                            if (!isStrictIndianMobile(`+91${stepTwo.stepTwoMobileNumber}`)) {
-                              showToast('error', "Please enter a valid mobile number.")
-                              return;
-                            }
-                            const encryptedValue = encryptData(stepTwo.stepTwoOTP, publicKey,);
-                            const payloadPassed = getEnrolByAadhaarPayload(txnId, encryptedValue, stepTwo.stepTwoMobileNumber,
-                            );
-                            const result = await enrolByAadhaar(payloadPassed).unwrap();
-                            setAbhaResult(result);
-                            if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
-                              const responseProfile = await getProfileAccount();
-                              handleProfile(responseProfile)
-                            } else {
-                              setCurrentStep(3)
-                            }
-                          } else if (currentStep === 3) {
-                            if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
-                              if (stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6) {
-                                showToast('error', "Please enter a valid OTP.")
-                                return;
-                              }
-                              const encryptedOtp = encryptData(stepThree.stepThreeMobileOTP, publicKey);
-                              const payload = getAuthByAbdmPayload(txnId, encryptedOtp);
-                              const result = await authByAbdm(payload).unwrap();
-
-                              if (result?.authResult === 'success') {
-                                setStepThree({
-                                  ...stepThree,
-                                  stepThreeMobileAuthDone: true,
-                                });
-                              }
-                              return;
-                            }
-                            if (stepThree.stepThreeMobileAuthDone && !stepThree.stepThreeEmailVarifying) {
-                              setStepThree({
-                                ...stepThree,
-                                stepThreeEmailVarifying: true,
-                              });
-                              return;
-                            }
-                            if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                              const response = await enrolSuggestion({ txnId, }).unwrap();
-                              setAbhaSuggestionList(response.abhaAddressList)
-                              setCurrentStep(4)
-                              return;
-                            }
-                            showToast('error', "Please verify your mobile number.")
-
-                          } else if (currentStep === 4) {
-                            //step 4
-                            if (!stepFour.userName && stepFour.userName === '') {
-                              showToast('error', "Please enter your ABHA address.")
-                              return;
-                            }
-                            await enrolAbhaAddress(getEnrolAbhaAddressPayload(txnId, stepFour.userName, 1)).unwrap();
-                            const responseProfile = await getProfileAccount();
-                            handleProfile(responseProfile)
-                          }
-                        } catch (error) {
-                          console.log("--------------------", error)
-                          dispatch(hideLoader());
-                        } finally {
-                          dispatch(hideLoader());
-                        }
+                        handleSteps()
                       }}
                       style={styles.nextButton}
                     >
@@ -970,131 +500,27 @@ const LoginScreen = () => {
                     backgroundColor: '#fff',
                     borderColor: '#fff'
                   }]}>
-                    {(loginType === 'Mobile Number' ||
+                    {(loginType === LOGIN_TYPES.MOBILE ||
                       loginType === 'Register with Mobile Number') && (
                         <Text style={styles.prefix}>+91</Text>
                       )}
                     {
-                      loginType === 'Aadhaar Number' ? <>
-                        <View style={styles.aadhaarContainer}>
-                          <TextInput
-                            ref={input1Ref}
-                            style={[
-                              styles.box,
-                              {
-                                borderColor: getBorderColor("part1"),
-                              },
-                            ]}
-                            onFocus={() => setFocusedInput("part1")}
-                            onBlur={() => setFocusedInput(null)}
-                            keyboardType="number-pad"
-                            placeholder='0000'
-                            maxLength={4}
-                            value={aadhaar.part1}
-                            onChangeText={(text) => {
-                              const value = text.replace(/\D/g, "");
-                              setAadhaar(prev => {
-                                const updated = { ...prev, part1: value };
-                                updateAadhaar(updated.part1, updated.part2, updated.part3,);
-                                return updated;
-                              });
-
-                              if (value.length === 4) {
-                                input2Ref.current?.focus();
-                              }
-                            }}
+                      loginType === 'Aadhaar Number' ?
+                        <>
+                          <AadhaarInput
+                            value={loginValue}
+                            onChange={setLoginValue}
                           />
-                          <View style={{
-                            height: 1,
-                            width: 4,
-                            marginHorizontal: 4,
-                            backgroundColor: '#ccc'
-                          }}></View>
-                          <TextInput
-                            ref={input2Ref}
-                            style={[
-                              styles.box,
-                              {
-                                borderColor: getBorderColor("part2"),
-                              },
-                            ]}
-                            onFocus={() => setFocusedInput("part2")}
-                            onBlur={() => setFocusedInput(null)}
-                            keyboardType="number-pad"
-                            placeholder='0000'
-                            maxLength={4}
-                            value={aadhaar.part2}
-                            onKeyPress={({ nativeEvent }) => {
-                              if (
-                                nativeEvent.key === "Backspace" &&
-                                aadhaar.part2.length === 0
-                              ) {
-                                input1Ref.current?.focus();
-                              }
-                            }}
-                            onChangeText={(text) => {
-                              const value = text.replace(/\D/g, "");
-                              setAadhaar(prev => {
-                                const updated = { ...prev, part2: value };
-                                updateAadhaar(updated.part1, updated.part2, updated.part3,);
-                                return updated;
-                              });
-
-                              if (value.length === 4) {
-                                input3Ref.current?.focus();
-                              }
-                            }}
-                          />
-                          <View style={{
-                            height: 1,
-                            width: 4,
-                            marginHorizontal: 4,
-                            backgroundColor: '#ccc'
-                          }}></View>
-
-                          <TextInput
-                            ref={input3Ref}
-                            style={[
-                              styles.box,
-                              {
-                                borderColor: getBorderColor("part3"),
-                              },
-                            ]}
-                            onFocus={() => setFocusedInput("part3")}
-                            onBlur={() => setFocusedInput(null)}
-                            keyboardType="number-pad"
-                            maxLength={4}
-                            placeholder='0000'
-                            value={aadhaar.part3}
-                            onKeyPress={({ nativeEvent }) => {
-                              if (
-                                nativeEvent.key === "Backspace" &&
-                                aadhaar.part3.length === 0
-                              ) {
-                                input2Ref.current?.focus();
-                              }
-                            }}
-                            onChangeText={(text) => {
-                              const value = text.replace(/\D/g, "");
-                              setAadhaar(prev => {
-                                const updated = { ...prev, part3: value };
-                                updateAadhaar(updated.part1, updated.part2, updated.part3,);
-                                return updated;
-                              });
-
-                            }}
-                          />
-                        </View>
-                      </> : <>  <TextInput
-                        value={loginValue}
-                        onChangeText={text => {
-                          setLoginValue(formatLoginInput(loginType, text))
-                        }}
-                        placeholder={placeholder}
-                        maxLength={maxLength}
-                        keyboardType={getLoginKeyboardType(loginType)}
-                        style={styles.input}
-                      /> </>
+                        </> : <>  <TextInput
+                          value={loginValue}
+                          onChangeText={text => {
+                            setLoginValue(formatLoginInput(loginType, text))
+                          }}
+                          placeholder={placeholder}
+                          maxLength={maxLength}
+                          keyboardType={getLoginKeyboardType(loginType)}
+                          style={styles.input}
+                        /> </>
                     }
 
                     {
@@ -1153,14 +579,21 @@ const LoginScreen = () => {
                   </View>
                 </View>
               }
-              {loginType === 'Forgot ABHA Number' && renderValidationOptions()}
+              {loginType === 'Forgot ABHA Number' && <ValidationOptions
+                options={validationConfig[loginType] ?? []}
+                value={validationMethod}
+                onChange={(item) => {
+                  setValidationMethod(item);
+                  setOtpMethod("");
+                }}
+              />}
               {
                 isFromForgotAbhaNumber && <View style={styles.card}>
                   <Text style={styles.cardTitle}>
                     Enter Details <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View style={styles.inputContainer}>
-                    {(validationMethod === 'Mobile Number' ||
+                    {(validationMethod === LOGIN_TYPES.MOBILE ||
                       validationMethod === 'Register with Mobile Number') && (
                         <Text style={styles.prefix}>+91</Text>
                       )}
@@ -1169,7 +602,7 @@ const LoginScreen = () => {
                       onChangeText={text => {
                         setLoginValue(formatLoginInput(loginType, text))
                       }}
-                      placeholder={validationMethod === 'Mobile Number' ? 'Enter mobile number' : 'Enter aadhaar number'}
+                      placeholder={validationMethod === LOGIN_TYPES.MOBILE ? 'Enter mobile number' : 'Enter aadhaar number'}
                       maxLength={maxLength}
                       keyboardType={getLoginKeyboardType(loginType)}
                       style={styles.input}
@@ -1248,206 +681,15 @@ const LoginScreen = () => {
                     />
                   </View>
                 )}
-              {
-                isFromForgotAbhaNumberWithType && <View style={styles.termsContainer}>
-                  <Text style={styles.termsTitle}>
-                    Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
-                  </Text>
 
-                  <View style={styles.termsCard}>
-                    <Text style={styles.termsText}>
-                      I hereby declare that I am voluntarily sharing my
-                      Aadhaar Number and demographic information issued
-                      by UIDAI with National Health Authority (NHA) for
-                      the sole purpose of authentication and healthcare
-                      services under ABDM.
-                    </Text>
+              {shouldShowTerms && (
+                <TermsConditions
+                  text={termsText}
+                  checked={isAgreed}
+                  onToggle={() => setIsAgreed(prev => !prev)}
+                />
+              )}
 
-                    <View style={styles.termsFooter}>
-                      <TouchableOpacity
-                        style={styles.checkboxRow}
-                        onPress={() => setIsAgreed(!isAgreed)}
-                      >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            isAgreed && styles.checkboxActive,
-                          ]}
-                        >
-                          {isAgreed && (
-                            <Text style={styles.checkmark}>
-                              ✓
-                            </Text>
-                          )}
-                        </View>
-
-                        <Text style={styles.agreeText}>
-                          I agree
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity>
-                        <Text style={styles.speakerIcon}>
-                          🔊
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              }
-              {
-                !isFromForgotAbhaNumberWithType && loginType === 'Aadhaar Number' && <View style={styles.termsContainer}>
-                  <Text style={styles.termsTitle}>
-                    Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
-                  </Text>
-
-                  <View style={styles.termsCard}>
-                    <View style={{ height: 140, marginVertical: 8 }}>
-                      <ScrollView>
-                        <Text style={styles.termsText}>
-                          {TERMS_TWO}
-                        </Text>
-                      </ScrollView>
-                    </View>
-                    <View style={styles.termsFooter}>
-                      <TouchableOpacity
-                        style={styles.checkboxRow}
-                        onPress={() => setIsAgreed(!isAgreed)}
-                      >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            isAgreed && styles.checkboxActive,
-                          ]}
-                        >
-                          {isAgreed && (
-                            <Text style={styles.checkmark}>
-                              ✓
-                            </Text>
-                          )}
-                        </View>
-
-                        <Text style={styles.agreeText}>
-                          I agree
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity>
-                        <Text style={styles.speakerIcon}>
-                          🔊
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              }
-
-
-              {
-                isFromForgotAbhaNumber && <View style={styles.termsContainer}>
-                  <Text style={styles.termsTitle}>
-                    Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
-                  </Text>
-
-                  <View style={styles.termsCard}>
-                    <View style={{ height: 140, marginVertical: 8 }}>
-                      <ScrollView>
-                        {
-                          validationMethod === 'Aadhaar Number' ? <Text style={styles.termsText}>
-                            {
-                              TERMS_FOUR
-                            }
-                          </Text>
-                            : <Text style={styles.termsText}>
-                              {
-                                TERMS_FIVE
-                              }
-                            </Text>
-
-                        }
-                      </ScrollView>
-                    </View>
-
-                    <View style={styles.termsFooter}>
-                      <TouchableOpacity
-                        style={styles.checkboxRow}
-                        onPress={() => setIsAgreed(!isAgreed)}
-                      >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            isAgreed && styles.checkboxActive,
-                          ]}
-                        >
-                          {isAgreed && (
-                            <Text style={styles.checkmark}>
-                              ✓
-                            </Text>
-                          )}
-                        </View>
-
-                        <Text style={styles.agreeText}>
-                          I agree
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity>
-                        <Text style={styles.speakerIcon}>
-                          🔊
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              }
-
-              {
-                !isFromForgotAbhaNumberWithType && loginType === 'Create ABHA Number' && <View style={styles.termsContainer}>
-                  <Text style={styles.termsTitle}>
-                    Terms & Conditions <Text style={{ color: 'red' }}>*</Text>
-                  </Text>
-
-                  <View style={styles.termsCard}>
-                    <Text style={styles.termsText}>
-                      I hereby declare that I am voluntarily sharing my
-                      Aadhaar Number and demographic information issued
-                      by UIDAI with National Health Authority (NHA) for
-                      the sole purpose of authentication and healthcare
-                      services under ABDM.
-                    </Text>
-
-                    <View style={styles.termsFooter}>
-                      <TouchableOpacity
-                        style={styles.checkboxRow}
-                        onPress={() => setIsAgreed(!isAgreed)}
-                      >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            isAgreed && styles.checkboxActive,
-                          ]}
-                        >
-                          {isAgreed && (
-                            <Text style={styles.checkmark}>
-                              ✓
-                            </Text>
-                          )}
-                        </View>
-
-                        <Text style={styles.agreeText}>
-                          I agree
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity>
-                        <Text style={styles.speakerIcon}>
-                          🔊
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              }
               <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
                 <View>
                   <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>

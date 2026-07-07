@@ -1,4 +1,5 @@
 import { KeyboardTypeOptions } from "react-native";
+import { LOGIN_TYPES } from "./constants";
 
 
 export const generateGUID = () => {
@@ -434,3 +435,111 @@ export const getLoginKeyboardType = (
     ? "number-pad"
     : "default";
 };
+
+export const getPayloadForProfile = (stepOne, stepTwo, stepThree, stepFour, responseProfile, abhaResult, txnId) => {
+  const { status, ...restData } = responseProfile?.data || {};
+      const { name, ...restNameData } = responseProfile?.data || {};
+      const payload = {
+        aadharNumber: stepOne?.aadhaarNumber,
+        communicationMobile: stepTwo?.stepTwoMobileNumber,
+        communicationEmail: stepThree?.stepThreeEmail,
+        userName: stepFour?.userName,
+        ...responseProfile,
+        data: {
+          ...restData,
+          ...restNameData,
+          abhaName: name,
+          profileStatus: status,
+        },
+        isNew: abhaResult?.isNew,
+        expiresIn: abhaResult?.tokens?.expiresIn,
+        refreshExpiresIn: abhaResult?.tokens?.refreshExpiresIn,
+        refreshToken: abhaResult?.tokens?.refreshToken,
+        tokens: abhaResult?.tokens?.token,
+        txnId: txnId
+      };
+  
+      const payloadRow = {
+        // "patientabhaid": "",
+        "abhanumber": payload.data.ABHANumber,
+        "abhaname": payload.data.abhaName,
+        // "date": "",
+        // "branchid": "",
+        // "guid": "",
+        // "patientid": "",
+        "aadharnumber": payload.aadharNumber,
+        "firstname": payload.data.firstName,
+        "middlename": payload.data.middleName,
+        "lastname": payload.data.lastName,
+        "fullname": payload.data.name,
+        "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
+        // "yearofbirth": payload.data.yearOfBirth,
+        // "monthofbirth": payload.data.monthOfBirth,
+        // "dayofbirth": payload.data.dayOfBirth,
+        "gender": payload.data.gender,
+        "mobileno": payload.data.mobile,
+        "address": payload.data.address,
+        "statename": payload.data.stateName,
+        "statecode": payload.data.stateCode,
+        "districtname": payload.data.districtName,
+        "districtcode": payload.data.districtCode,
+        "subdistrictname": payload.data.subdistrictName,
+        "pincode": payload.data.pincode,
+        "communicationmobile": payload.communicationMobile,
+        "communicationemail": payload.communicationEmail,
+        // "message": "",
+        "txnid": payload.txnId,
+        // "token": payload.tokens,
+        // "tokenexpiresin": payload.expiresIn,
+        // "refreshtoken": payload.refreshToken,
+        // "refreshexpiresin": payload.refreshExpiresIn,
+        "preferredabhaaddress": payload.data.preferredAbhaAddress,
+        "photo": payload.data.photo,
+        "profilephoto": payload.data.profilePhoto,
+        "kycphoto": payload.data.kycPhoto,
+        "localizedname": payload.data.localizedDetails.name,
+        "localizedgender": payload.data.localizedDetails.gender,
+        "localizedtownname": payload.data.localizedDetails.townName,
+        "localizeddistrictname": payload.data.localizedDetails.districtName,
+        "localizedvillagename": payload.data.localizedDetails.villageName,
+        "localizedstatename": payload.data.localizedDetails.stateName,
+        "phraddressjson": payload.data.phraddress,
+        "authmethodsjson": payload.data.authMethods,
+        "tagsjson": payload.data.tags,
+        "localizedlabelsjson": payload.data.localizedDetails.localizedLabels,
+        // "registrationsource": "",
+        "profilestatus": payload.data.profileStatus,
+        "abhatype": payload.data.abhatype,
+        "abhastatus": payload.data.status,
+        "verificationtype": payload.data.verificationType,
+        "verificationstatus": payload.data.verificationStatus,
+        "iskycverified": payload.data.kycVerified,
+        "isnew": payload.isNew,
+        "createdDate": payload?.data?.createdDate,
+        // "lastsyncdate": "",
+        // "cuid": "",
+        // "authby": "",
+        // "status": "",
+        // "cdt": "",
+        // "muid": "",
+        // "mdt": ""
+      }
+    return payloadRow
+}
+
+export const getLoginMaxLength = (loginType: string) => {
+   switch(loginType){
+      case LOGIN_TYPES.AADHAAR:
+         return 14;
+
+      case LOGIN_TYPES.ABHA_NUMBER:
+      case LOGIN_TYPES.CREATE_ABHA:
+         return 17;
+
+      case LOGIN_TYPES.MOBILE:
+         return 10;
+
+      default:
+         return 100;
+   }
+}

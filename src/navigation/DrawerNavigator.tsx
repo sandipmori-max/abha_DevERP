@@ -17,32 +17,23 @@ const DrawerNavigator = () => {
       )}
       screenOptions={{
         headerShown: false,
-
-        drawerType: "front",
-
+        drawerType: 'front',
         swipeEdgeWidth: 80,
-
         overlayColor: "rgba(0,0,0,0.45)",
-
         sceneStyle: {
           backgroundColor: "#F5F7FB",
         },
-
         drawerStyle: {
-          width: "82%",
+          width: "72%",
           backgroundColor: "#FFFFFF",
-          borderTopRightRadius: 35,
+          borderTopRightRadius: 12,
           borderBottomRightRadius: 35,
           overflow: "hidden",
         },
-
         drawerActiveTintColor: "#2563EB",
         drawerInactiveTintColor: "#64748B",
-
-        swipeEnabled: true,
-
-        drawerHideStatusBarOnOpen: true,
-
+        swipeEnabled: false,
+        drawerHideStatusBarOnOpen: false,
         drawerStatusBarAnimation: "fade",
       }}
     >

@@ -249,10 +249,10 @@ export const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#fff',
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     marginBottom: 15,
     borderRadius: 8,
-    padding: 16,
+    padding: 12,
   },
   cardTitle: {
     fontSize: 16,
@@ -461,13 +461,15 @@ export const styles = StyleSheet.create({
   },
 
   box: {
-    width: 100,
-    height: 46,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  width: 100,
+  height: 46,
+  borderWidth: 1,
+  borderRadius: 8,
+  textAlign: "center",
+  paddingHorizontal: 0,
+  paddingVertical: 0,
+  includeFontPadding: false,
+  fontSize: 16,
+  fontWeight: "600",
+}
 });

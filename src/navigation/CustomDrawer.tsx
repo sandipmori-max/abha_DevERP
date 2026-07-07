@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    SafeAreaView,
     ScrollView,
 } from "react-native";
 import {
@@ -30,6 +29,11 @@ const menuItems = [
         title: "Details",
         icon: "description",
         screen: "Details",
+    },
+     {
+        title: "Notification",
+        icon: "notifications",
+        screen: "Notification",
     },
     {
         title: "Settings",
@@ -60,58 +64,115 @@ const CustomDrawer = (
                 }}
             >
 
+                <>
 
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                >
-                    {menuItems.map(item => {
-                        const active =
-                            activeRoute === item.screen;
-
-                        return (
-                            <TouchableOpacity
-                                key={item.screen}
-                                activeOpacity={0.8}
-                                style={[
-                                    styles.menuItem,
-                                    active &&
-                                    styles.activeMenu,
-                                ]}
-                                onPress={() =>
-                                    navigation.navigate(
-                                        item.screen as never
-                                    )
-                                }
-                            >
-                                <MaterialIcons
-                                    name={item.icon as any}
-                                    size={24}
-                                    color={
-                                        active
-                                            ? "#251d50"
-                                            : "#64748B"
-                                    }
-                                />
-
-                                <Text
-                                    style={[
-                                        styles.menuText,
-                                        active &&
-                                        styles.activeText,
-                                    ]}
-                                >
-                                    {item.title}
+                    <View style={styles.profileContainer}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View style={styles.avatar}>
+                                <Text style={styles.avatarText}>
+                                    {user?.fullname?.charAt(0)?.toUpperCase() || "U"}
+                                </Text>
+                            </View>
+                            <View style={{marginLeft: 8}}> 
+                                <Text numberOfLines={1} style={styles.fullName}>
+                                    {user?.fullname}
                                 </Text>
 
-                                <MaterialIcons
-                                    name="chevron-right"
-                                    size={20}
-                                    color="#94A3B8"
-                                />
-                            </TouchableOpacity>
-                        );
-                    })}
-                </ScrollView>
+                                <View style={styles.roleBadge}>
+                                    <MaterialIcons
+                                        name="verified-user"
+                                        size={15}
+                                        color="#2563EB"
+                                    />
+                                    <Text style={styles.roleText}>
+                                        {user?.rolename}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+
+
+
+                        <View style={styles.infoRow}>
+                            <MaterialIcons
+                                name="email"
+                                size={16}
+                                color="#64748B"
+                            />
+                            <Text
+                                numberOfLines={1}
+                                style={styles.infoText}
+                            >
+                                {user?.emailid}
+                            </Text>
+                        </View>
+
+                        <View style={styles.infoRow}>
+                            <MaterialIcons
+                                name="call"
+                                size={16}
+                                color="#64748B"
+                            />
+                            <Text style={styles.infoText}>
+                                +91 {user?.mobileno}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {menuItems.map(item => {
+                            const active =
+                                activeRoute === item.screen;
+
+                            return (
+                                <TouchableOpacity
+                                    key={item.screen}
+                                    activeOpacity={0.8}
+                                    style={[
+                                        styles.menuItem,
+                                        active &&
+                                        styles.activeMenu,
+                                    ]}
+                                    onPress={() =>
+                                        navigation.navigate(
+                                            item.screen as never
+                                        )
+                                    }
+                                >
+                                    <MaterialIcons
+                                        name={item.icon as any}
+                                        size={20}
+                                        color={
+                                            active
+                                                ? "#251d50"
+                                                : "#64748B"
+                                        }
+                                    />
+
+                                    <Text
+                                        style={[
+                                            styles.menuText,
+                                            active &&
+                                            styles.activeText,
+                                        ]}
+                                    >
+                                        {item.title}
+                                    </Text>
+
+                                    <MaterialIcons
+                                        name="chevron-right"
+                                        size={16}
+                                        color="#94A3B8"
+                                    />
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
+                </>
+
             </DrawerContentScrollView>
 
             {/* ================= FOOTER ================= */}
@@ -121,18 +182,14 @@ const CustomDrawer = (
                     style={styles.logout}
                     activeOpacity={0.8}
                     onPress={async () => {
-                        // store.dispatch(baseApi.util.resetApiState());
-                        // Reset Redux State
                         store.dispatch({ type: "RESET_APP" });
-                        // Clear Persist Storage
                         await persistor.purge();
-                        // Optional
                         await persistor.flush();
                     }}
                 >
                     <MaterialIcons
                         name="logout"
-                        size={22}
+                        size={14}
                         color="#251d50"
                     />
 
@@ -155,23 +212,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#FFF",
-    },
-
-
-    avatar: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        backgroundColor: "#FFF",
-        justifyContent: "center",
-        alignItems: "center",
-        elevation: 6,
-    },
-
-    avatarText: {
-        fontSize: 34,
-        fontWeight: "700",
-        color: "#2563EB",
     },
 
     name: {
@@ -221,11 +261,11 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         fontSize: 16,
         color: "#1F2937",
-        fontWeight: "600",
     },
 
     activeText: {
         color: "#251d50",
+        fontWeight: "600",
     },
 
     footer: {
@@ -239,15 +279,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "#FEF2F2",
-        paddingVertical: 14,
-        borderRadius: 8,
+        paddingVertical: 8,
+        borderRadius: 4,
     },
 
     logoutText: {
         marginLeft: 10,
         color: "#251d50",
-        fontSize: 16,
-        fontWeight: "700",
     },
 
     version: {
@@ -255,5 +293,69 @@ const styles = StyleSheet.create({
         marginTop: 16,
         color: "#94A3B8",
         fontSize: 12,
+    },
+
+    profileContainer: {
+        marginHorizontal: 6,
+        marginTop: 16,
+        marginBottom: 24,
+        padding: 20,
+        borderRadius: 12,
+        backgroundColor: "#F8FAFC",
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+    },
+
+    avatar: {
+        width: 72,
+        height: 72,
+        borderRadius: 12,
+        backgroundColor: "#251D50",
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+    },
+
+    avatarText: {
+        color: "#FFF",
+        fontSize: 30,
+        fontWeight: "700",
+    },
+
+    fullName: {
+        marginTop: 14,
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#0F172A",
+    },
+
+    roleBadge: {
+        marginTop: 10,
+        alignSelf: "center",
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#E0F2FE",
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 2,
+    },
+
+    roleText: {
+        marginLeft: 6,
+        fontSize: 13, 
+        color: "#2563EB",
+    },
+
+    infoRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 16,
+    },
+
+    infoText: {
+        marginLeft: 10,
+        flex: 1,
+        color: "#475569",
+        fontSize: 14,
     },
 });

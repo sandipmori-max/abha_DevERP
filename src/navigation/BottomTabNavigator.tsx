@@ -14,7 +14,6 @@ import { CurvedBottomBar } from "react-native-curved-bottom-bar";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 
 import ProfileScreen from "../screens/Profile/ProfileScreen";
-import DetailsScreen from "../screens/DetailsScreen";
 import { useNavigation } from "@react-navigation/native";
 import { ABHA_ICON } from "../assets";
 import EnrollmentInfoModal from "../screens/Login/EnrollmentInfoModal";
@@ -91,14 +90,13 @@ const BottomTabNavigator = () => {
             },
         }),
     ).current;
+    
     const renderIcon = (routeName: string, selectedTab: string) => {
         let icon = "";
-
         switch (routeName) {
             case "Profile":
-                icon = "person";
+                icon = "home";
                 break;
-
             case "Settings":
                 icon = "settings";
                 break;
@@ -167,6 +165,7 @@ const BottomTabNavigator = () => {
                 />
                 
             </CurvedBottomBar.Navigator>
+
             {showLoginSheet && (
                 <Modal
                     transparent

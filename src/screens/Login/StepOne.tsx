@@ -72,10 +72,14 @@ const StepOne = ({
                                 borderColor: getBorderColor("part1"),
                             },
                         ]}
+                        selection={aadhaar.part1.length === 0 ? { start: 0, end: 0 } : undefined}
                         onFocus={() => setFocusedInput("part1")}
                         onBlur={() => setFocusedInput(null)}
                         keyboardType="number-pad"
                         placeholder='0000'
+                        textAlign="center"
+                        contextMenuHidden
+                        caretHidden={false}
                         maxLength={4}
                         value={aadhaar.part1}
                         onChangeText={(text) => {
@@ -115,6 +119,10 @@ const StepOne = ({
                         keyboardType="number-pad"
                         placeholder='0000'
                         maxLength={4}
+                        textAlign="center"
+                        contextMenuHidden
+                        caretHidden={false}
+                         selection={aadhaar.part2.length === 0 ? { start: 0, end: 0 } : undefined}
                         value={aadhaar.part2}
                         onKeyPress={({ nativeEvent }) => {
                             if (
@@ -157,11 +165,15 @@ const StepOne = ({
                                 borderColor: getBorderColor("part3"),
                             },
                         ]}
+                        textAlign="center"
+                        contextMenuHidden
+                        caretHidden={false}
                         onFocus={() => setFocusedInput("part3")}
                         onBlur={() => setFocusedInput(null)}
                         keyboardType="number-pad"
                         maxLength={4}
                         placeholder='0000'
+                         selection={aadhaar.part3.length === 0 ? { start: 0, end: 0 } : undefined}
                         value={aadhaar.part3}
                         onKeyPress={({ nativeEvent }) => {
                             if (

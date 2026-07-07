@@ -8,7 +8,7 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from './ToastConfig';
 import { PersistGate } from 'redux-persist/integration/react';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "react-native";
+import { Platform, StatusBar } from "react-native";
 
 const App = () => {
   return (
@@ -21,10 +21,10 @@ const App = () => {
               edges={["top"]}
               style={{ flex: 0, backgroundColor: "#251d50" }}
             />
-            <SafeAreaView style={{ flex: 1, backgroundColor: "#251d50"    }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#251d50" }}>
               <RootNavigator />
               <GlobalLoader />
-              <Toast config={toastConfig} />
+              <Toast config={toastConfig} topOffset={Platform.OS === 'ios' ? 120 : 100 } />
             </SafeAreaView>
           </NavigationContainer>
         </PersistGate>

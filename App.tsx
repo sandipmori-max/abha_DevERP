@@ -24,7 +24,7 @@ const App = () => {
             <SafeAreaView style={{ flex: 1, backgroundColor: "#251d50" }}>
               <RootNavigator />
               <GlobalLoader />
-              <Toast config={toastConfig} topOffset={Platform.OS === 'ios' ? 120 : 100 } />
+              <Toast config={toastConfig} topOffset={Platform.OS === 'ios' ? 100 : 80 } />
             </SafeAreaView>
           </NavigationContainer>
         </PersistGate>

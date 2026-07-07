@@ -1,3 +1,6 @@
+import { KeyboardTypeOptions } from "react-native";
+
+
 export const generateGUID = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -371,3 +374,63 @@ export const VALIDATION_MESSAGES = {
   CAPTCHA_REQUIRED: "Please enter the CAPTCHA.",
   CAPTCHA_INVALID: "Please enter a valid CAPTCHA.",
 } as const;
+
+export const getLoginPlaceholder = (
+  loginType: string
+): string => {
+  switch (loginType) {
+    case "Mobile Number":
+    case "Register with Mobile Number":
+      return "Enter mobile number";
+
+    case "Aadhaar Number":
+      return "Enter aadhaar number";
+
+    case "ABHA Address":
+      return "Enter ABHA address";
+
+    case "ABHA Number":
+    case "Create ABHA Number":
+      return "Enter ABHA number";
+
+    default:
+      return "Enter value";
+  }
+};
+
+export const formatLoginInput = (
+  loginType: string,
+  text: string
+) => {
+  switch (loginType) {
+    case "Mobile Number":
+    case "Register with Mobile Number":
+      return text.replace(/\D/g, "").slice(0, 10);
+
+    case "Aadhaar Number":
+      return formatAadhaar(text);
+
+    case "ABHA Number":
+    case "Create ABHA Number":
+      return formatAbhaNumber(text);
+
+    default:
+      return text;
+  }
+};
+
+export const getLoginKeyboardType = (
+  loginType: string
+): KeyboardTypeOptions => {
+  const numberPadTypes = [
+    "Mobile Number",
+    "Register with Mobile Number",
+    "Aadhaar Number",
+    "ABHA Number",
+    "Create ABHA Number",
+  ];
+
+  return numberPadTypes.includes(loginType)
+    ? "number-pad"
+    : "default";
+};

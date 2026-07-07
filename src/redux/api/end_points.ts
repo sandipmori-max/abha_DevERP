@@ -20,5 +20,7 @@ export const END_POINTS = {
   profileAccount: "profile/account",
   dlEnrollmentRequestOtp:
     "enrollment/request/otp",
-  loginVerifyUser: 'profile/login/verify/user'
+  loginVerifyUser: 'profile/login/verify/user',
+  profileQrCode: "profile/account/qrCode",
+  profileAbhaCard: "profile/account/abha-card"
 }

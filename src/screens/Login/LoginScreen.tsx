@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   TouchableOpacity,
   TextInput,
@@ -10,7 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  FlatList,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { encryptData } from '../../utils/encrypt';
@@ -29,7 +27,7 @@ import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
 import DLStepTwo from './DLStepTwo';
 import { styles } from './style';
 import RadioItem from './RadioItem';
-import { formatAadhaar, formatAbhaNumber, generateCaptcha, getIsFormValid, isStrictIndianMobile, stepOneValidator, steps, stepsDL, stepTwoValidator, TERMS_FIVE, TERMS_FOUR, TERMS_ONE, TERMS_SIX, TERMS_TWO, validateForm } from '../../utils/helpers';
+import { formatLoginInput, generateCaptcha, getIsFormValid, getLoginKeyboardType, getLoginPlaceholder, isStrictIndianMobile, stepOneValidator, steps, stepsDL, stepTwoValidator, TERMS_FIVE, TERMS_FOUR, TERMS_ONE, TERMS_SIX, TERMS_TWO, validateForm } from '../../utils/helpers';
 import StepOne from './StepOne';
 import StepTwo from './StepTwo';
 import StepThree from './StepThree';
@@ -38,31 +36,21 @@ import DLStepOne from './DLStepOne';
 import { getDlEnrollmentRequestOtpPayload, useDlEnrollmentRequestOtpMutation } from '../../redux/api/dlEnrollmentRequestOtpApi';
 import { isValidAadhaar } from '../../utils/aadhaarValidator';
 import ValidationErrorBottomSheet from './ValidationErrorBottomSheet';
-import { setActiveUser } from '../../redux/slices/abhaSlice';
+import { useSavePageMutation } from '../../redux/api/savePageApi';
+import { useLazyProfileQrCodeQuery } from '../../redux/api/qrCodeApi';
+import { useLazyProfileAbhaCardQuery } from '../../redux/api/abhaCardApi';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const dispatch = useDispatch()
 
-  const loginType =
-    route?.params?.loginType || 'Mobile Number';
   const publicKey = useSelector(
     (state: any) => state.auth.publicKey
   );
-  const txnId = useSelector(
-    (state: any) => state.abha.txnId
-  );
-  const isFromRegister = route?.params?.isFromRegister || false
-  const isFromCreate = route?.params?.isFromCreate || false
-  const isFromMobileRegister = route?.params?.isFromMobileRegister || false
-  const isFromForgotAbhaNumber = route?.params?.isFromForgotAbhaNumber || false
-  const isFromForgotAbhaNumberWithType = route?.params?.isFromForgotAbhaNumberWithType || false
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrors, setShowErrors] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
+  const { activeUser: proReduxData, txnId } = useSelector((state: any) => state.abha);
+  const { loginType, isFromRegister = false, isFromCreate = false, isFromMobileRegister = false, isFromForgotAbhaNumber = false, isFromForgotAbhaNumberWithType = false, } = route.params ?? {};
   const [showValidationSheet, setShowValidationSheet] = useState(false);
-
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const stepTwoRef = useRef<any>(null);
   const [abhaResult, setAbhaResult] = useState<any>();
@@ -88,14 +76,12 @@ const LoginScreen = () => {
     stepThreeMobileVerifyed: false,
     stepThreeMobileOTP: "",
     stepThreeMobileAuthDone: false,
-
     stepThreeEmail: "",
     stepThreeEmailOTP: "",
     stepThreeEmailVarifying: false,
     stepThreeEmailOPTVerify: false,
     stepThreeEmailVarifyDone: false
   });
-
 
   const [stepFour, setStepFour] = useState<any>({
     userName: ""
@@ -123,6 +109,9 @@ const LoginScreen = () => {
   const [enrolAbhaAddress,] = useEnrolAbhaAddressMutation();
   const [getProfileAccount,] = useLazyProfileAccountQuery();
   const [dlEnrollmentRequestOtp,] = useDlEnrollmentRequestOtpMutation();
+  const [savePage] = useSavePageMutation();
+  const [getQrCode,] = useLazyProfileQrCodeQuery();
+  const [getAbhaCard] = useLazyProfileAbhaCardQuery();
 
   const [abhaSuggestionList, setAbhaSuggestionList] = useState([]);
   const [loginValue, setLoginValue] = useState('');
@@ -135,22 +124,17 @@ const LoginScreen = () => {
   const input1Ref = useRef<TextInput>(null);
   const input2Ref = useRef<TextInput>(null);
   const input3Ref = useRef<TextInput>(null);
-  const [focusedInput, setFocusedInput] = useState<
-    "part1" | "part2" | "part3" | null
-  >(null);
 
-  const getBorderColor = (
-    key: "part1" | "part2" | "part3"
-  ) => {
+  const [focusedInput, setFocusedInput] = useState<"part1" | "part2" | "part3" | null>(null);
+
+  const getBorderColor = (key: "part1" | "part2" | "part3") => {
     if (aadhaar[key].length === 4) {
-      return "#22C55E"; // Green
+      return "#22C55E";
     }
-
     if (focusedInput === key) {
-      return "#2563EB"; // Blue
+      return "#2563EB";
     }
-
-    return "#D1D5DB"; // Gray
+    return "#D1D5DB";
   };
 
   const [aadhaar, setAadhaar] = useState({
@@ -168,26 +152,10 @@ const LoginScreen = () => {
     setLoginValue(aadhaarNumber);
   };
 
-  const placeholder = useMemo(() => {
-    switch (loginType) {
-      case 'Mobile Number':
-        return 'Enter mobile number';
-      case 'Aadhaar Number':
-        return 'Enter aadhaar number';
-      case 'Aadhaar Number':
-        return 'Enter aadhaar number';
-      case 'ABHA Address':
-        return 'Enter ABHA address';
-      case 'ABHA Number':
-        return 'Enter ABHA number';
-      case 'Create ABHA Number':
-        return 'Enter ABHA number';
-      case 'Register with Mobile Number':
-        return 'Enter mobile number';
-      default:
-        return 'Enter value';
-    }
-  }, [loginType]);
+  const placeholder = useMemo(
+    () => getLoginPlaceholder(loginType),
+    [loginType]
+  );
 
   const renderValidationOptions = () => {
     if (loginType === 'Mobile Number') {
@@ -203,10 +171,7 @@ const LoginScreen = () => {
 
           <RadioItem
             title="Aadhaar OTP"
-            selected={
-              validationMethod ===
-              'Aadhaar OTP'
-            }
+            selected={validationMethod === 'Aadhaar OTP'}
             onPress={() =>
               setValidationMethod(
                 'Aadhaar OTP',
@@ -216,10 +181,7 @@ const LoginScreen = () => {
 
           <RadioItem
             title="Face Auth"
-            selected={
-              validationMethod ===
-              'Face Auth'
-            }
+            selected={validationMethod === 'Face Auth'}
             onPress={() =>
               setValidationMethod(
                 'Face Auth',
@@ -236,13 +198,9 @@ const LoginScreen = () => {
           <Text style={styles.cardTitle}>
             Verification Method
           </Text>
-
           <RadioItem
             title="Password"
-            selected={
-              validationMethod ===
-              'Password'
-            }
+            selected={validationMethod === 'Password'}
             onPress={() => {
               setValidationMethod(
                 'Password',
@@ -253,9 +211,7 @@ const LoginScreen = () => {
 
           <RadioItem
             title="OTP"
-            selected={
-              validationMethod === 'OTP'
-            }
+            selected={validationMethod === 'OTP'}
             onPress={() => {
               setValidationMethod('OTP');
               setOtpMethod('');
@@ -264,10 +220,7 @@ const LoginScreen = () => {
 
           <RadioItem
             title="Face Auth"
-            selected={
-              validationMethod ===
-              'Face Auth'
-            }
+            selected={validationMethod === 'Face Auth'}
             onPress={() =>
               setValidationMethod(
                 'Face Auth',
@@ -287,10 +240,7 @@ const LoginScreen = () => {
 
           <RadioItem
             title="Aadhaar OTP"
-            selected={
-              validationMethod ===
-              'Aadhaar OTP'
-            }
+            selected={validationMethod === 'Aadhaar OTP'}
             onPress={() =>
               setValidationMethod(
                 'Aadhaar OTP',
@@ -300,10 +250,7 @@ const LoginScreen = () => {
 
           <RadioItem
             title="Mobile OTP"
-            selected={
-              validationMethod ===
-              'Mobile OTP'
-            }
+            selected={validationMethod === 'Mobile OTP'}
             onPress={() =>
               setValidationMethod(
                 'Mobile OTP',
@@ -313,10 +260,7 @@ const LoginScreen = () => {
           {
             !isFromRegister && <RadioItem
               title="Face Auth"
-              selected={
-                validationMethod ===
-                'Face Auth'
-              }
+              selected={validationMethod === 'Face Auth'}
               onPress={() =>
                 setValidationMethod(
                   'Face Auth',
@@ -343,10 +287,7 @@ const LoginScreen = () => {
           }}>
             <RadioItem
               title="Aadhaar Number"
-              selected={
-                validationMethod ===
-                'Aadhaar Number'
-              }
+              selected={validationMethod === 'Aadhaar Number'}
               onPress={() => {
                 setLoginValue("")
                 refreshCaptcha()
@@ -355,9 +296,7 @@ const LoginScreen = () => {
                 setValidationMethod(
                   'Aadhaar Number',
                 )
-              }
-
-              }
+              }}
             />
           </View>
           <View style={{
@@ -366,10 +305,7 @@ const LoginScreen = () => {
           }}>
             <RadioItem
               title="Mobile Number"
-              selected={
-                validationMethod ===
-                'Mobile Number'
-              }
+              selected={validationMethod === 'Mobile Number'}
               onPress={() => {
                 setLoginValue("")
                 refreshCaptcha()
@@ -378,9 +314,7 @@ const LoginScreen = () => {
                 setValidationMethod(
                   'Mobile Number',
                 )
-              }
-
-              }
+              }}
             />
           </View>
         </View>
@@ -481,24 +415,9 @@ const LoginScreen = () => {
       showToast('error', 'Please enter OTP.')
       return;
     }
-    const encryptedOtp =
-      encryptData(
-        stepOneDL.stepOneDLOTP,
-        publicKey
-      );
-    const payload =
-      getAuthByAbdmPayload(
-        txnId,
-        encryptedOtp
-      );
-    const result =
-      await authByAbdm(
-        payload
-      ).unwrap();
-    console.log(
-      "AUTH BY ABDM RESULT =>",
-      result
-    );
+    const encryptedOtp = encryptData(stepOneDL.stepOneDLOTP, publicKey);
+    const payload = getAuthByAbdmPayload(txnId, encryptedOtp);
+    const result = await authByAbdm(payload).unwrap();
     if (result?.authResult === 'success') {
       setStepOneDL({
         ...stepOneDL,
@@ -506,8 +425,8 @@ const LoginScreen = () => {
       });
       setCurrentStepDL(2)
     }
-
   }
+
   const renderDLStep = () => {
     switch (currentStepDL) {
       case 1:
@@ -531,6 +450,111 @@ const LoginScreen = () => {
       case 3:
         return <></>
     }
+  }
+
+  const handleProfile = async (responseProfile: any) => {
+    const { status, ...restData } = responseProfile?.data || {};
+    const { name, ...restNameData } = responseProfile?.data || {};
+    const payload = {
+      aadharNumber: stepOne?.aadhaarNumber,
+      communicationMobile: stepTwo?.stepTwoMobileNumber,
+      communicationEmail: stepThree?.stepThreeEmail,
+      userName: stepFour?.userName,
+      ...responseProfile,
+      data: {
+        ...restData,
+        ...restNameData,
+        abhaName: name,
+        profileStatus: status,
+      },
+      isNew: abhaResult?.isNew,
+      expiresIn: abhaResult?.tokens?.expiresIn,
+      refreshExpiresIn: abhaResult?.tokens?.refreshExpiresIn,
+      refreshToken: abhaResult?.tokens?.refreshToken,
+      tokens: abhaResult?.tokens?.token,
+      txnId: txnId
+    };
+
+    const payloadRow = {
+      // "patientabhaid": "",
+      "abhanumber": payload.data.ABHANumber,
+      "abhaname": payload.data.abhaName,
+      // "date": "",
+      // "branchid": "",
+      // "guid": "",
+      // "patientid": "",
+      "aadharnumber": payload.aadharNumber,
+      "firstname": payload.data.firstName,
+      "middlename": payload.data.middleName,
+      "lastname": payload.data.lastName,
+      "fullname": payload.data.name,
+      "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
+      // "yearofbirth": payload.data.yearOfBirth,
+      // "monthofbirth": payload.data.monthOfBirth,
+      // "dayofbirth": payload.data.dayOfBirth,
+      "gender": payload.data.gender,
+      "mobileno": payload.data.mobile,
+      "address": payload.data.address,
+      "statename": payload.data.stateName,
+      "statecode": payload.data.stateCode,
+      "districtname": payload.data.districtName,
+      "districtcode": payload.data.districtCode,
+      "subdistrictname": payload.data.subdistrictName,
+      "pincode": payload.data.pincode,
+      "communicationmobile": payload.communicationMobile,
+      "communicationemail": payload.communicationEmail,
+      // "message": "",
+      "txnid": payload.txnId,
+      // "token": payload.tokens,
+      // "tokenexpiresin": payload.expiresIn,
+      // "refreshtoken": payload.refreshToken,
+      // "refreshexpiresin": payload.refreshExpiresIn,
+      "preferredabhaaddress": payload.data.preferredAbhaAddress,
+      "photo": payload.data.photo,
+      "profilephoto": payload.data.profilePhoto,
+      "kycphoto": payload.data.kycPhoto,
+      "localizedname": payload.data.localizedDetails.name,
+      "localizedgender": payload.data.localizedDetails.gender,
+      "localizedtownname": payload.data.localizedDetails.townName,
+      "localizeddistrictname": payload.data.localizedDetails.districtName,
+      "localizedvillagename": payload.data.localizedDetails.villageName,
+      "localizedstatename": payload.data.localizedDetails.stateName,
+      "phraddressjson": payload.data.phraddress,
+      "authmethodsjson": payload.data.authMethods,
+      "tagsjson": payload.data.tags,
+      "localizedlabelsjson": payload.data.localizedDetails.localizedLabels,
+      // "registrationsource": "",
+      "profilestatus": payload.data.profileStatus,
+      "abhatype": payload.data.abhatype,
+      "abhastatus": payload.data.status,
+      "verificationtype": payload.data.verificationType,
+      "verificationstatus": payload.data.verificationStatus,
+      "iskycverified": payload.data.kycVerified,
+      "isnew": payload.isNew,
+      "createdDate": payload?.data?.createdDate,
+      // "lastsyncdate": "",
+      // "cuid": "",
+      // "authby": "",
+      // "status": "",
+      // "cdt": "",
+      // "muid": "",
+      // "mdt": ""
+    }
+
+    const payloadData = {
+      token: proReduxData?.token,
+      page: "PatientABHAProfile",
+      data: JSON.stringify(payloadRow),
+    }
+
+    console.log(" Full data ----- - - - - +++++++++++++++++- payloadRow*-*-*-- ==== - - - -== ", payloadRow)
+
+    const apiResponse = await savePage(payloadData).unwrap();
+    console.log(apiResponse);
+    const qr = await getQrCode()
+    const downloadAbhaCard = await getAbhaCard();
+    showToast('success', 'Record inserted successfully...')
+    // navigation.goBack()
   }
 
   return (
@@ -561,7 +585,6 @@ const LoginScreen = () => {
           }]}>
             {
               isFromForgotAbhaNumber ? 'Recover ABHA Number' : `${isFromRegister ?
-
                 loginType === 'Aadhaar Number' ? 'Create ABHA Number Using Aadhaar' : 'Create ABHA Number Using Driving Licence' : isFromCreate ? loginType : isFromMobileRegister ? loginType : 'Welcome Back 👋'}`
             }
           </Text>
@@ -645,9 +668,7 @@ const LoginScreen = () => {
                           dispatch(showLoader());
                           if (currentStep === 1) {
                             //step 1
-
                             const validate = stepOneValidator(stepOne, captchaValue, captcha);
-                            console.log("validate +++++ ++ + + +++++ ", validate)
                             if (!validate) {
                               showToast('error', "Please fill in all required fields correctly.")
                               return;
@@ -663,21 +684,9 @@ const LoginScreen = () => {
                             if (!publicKey) {
                               return showToast('error', "Public key not found. Please try again later.")
                             }
-                            const encryptedValue =
-                              encryptData(
-                                loginValue,
-                                publicKey,
-                              );
-
-                            const payloadPassed = getEnrollmentPayload(
-                              loginType,
-                              encryptedValue,
-                              '',
-                            );
-
-                            console.log("payloadPassed ------+++++++++++++-------- ", payloadPassed)
+                            const encryptedValue = encryptData(loginValue, publicKey,);
+                            const payloadPassed = getEnrollmentPayload(loginType, encryptedValue, '',);
                             const result = await enrollmentRequestOtp(payloadPassed).unwrap();
-                            console.log("result ------+++++++++++++-------- ", result)
                             setStepTwo({
                               ...stepTwo,
                               stepTwoTitle: result?.message,
@@ -688,66 +697,35 @@ const LoginScreen = () => {
                             //step 2
                             dispatch(showLoader());
                             const validate = stepTwoValidator(stepTwo);
-
-
                             if (!validate) {
                               showToast('error', "Please fill in all required fields correctly.")
                               return;
                             }
-
                             if (!isStrictIndianMobile(`+91${stepTwo.stepTwoMobileNumber}`)) {
                               showToast('error', "Please enter a valid mobile number.")
                               return;
                             }
-                            const encryptedValue =
-                              encryptData(
-                                stepTwo.stepTwoOTP,
-                                publicKey,
-                              );
-                            const payloadPassed = getEnrolByAadhaarPayload(
-                              txnId,
-                              encryptedValue,
-                              stepTwo.stepTwoMobileNumber,
+                            const encryptedValue = encryptData(stepTwo.stepTwoOTP, publicKey,);
+                            const payloadPassed = getEnrolByAadhaarPayload(txnId, encryptedValue, stepTwo.stepTwoMobileNumber,
                             );
                             const result = await enrolByAadhaar(payloadPassed).unwrap();
-                            console.log("result ------+++++++++++++-------- ", result)
-                            // dispatch(setActiveUser(result))
                             setAbhaResult(result);
-
                             if (result?.isNew && stepTwo.stepTwoMobileNumber === result?.ABHAProfile?.mobile) {
-                              const responseProfile =
-                                await getProfileAccount();
-                              console.log(responseProfile);
-                              // dispatch(setActiveUser(responseProfile?.data))
-                              // navigation.replace("Main");
+                              const responseProfile = await getProfileAccount();
+                              handleProfile(responseProfile)
                             } else {
                               setCurrentStep(3)
                             }
                           } else if (currentStep === 3) {
-
                             if (!stepThree.stepThreeMobileAuthDone && stepThree.stepThreeMobileVerifyed) {
                               if (stepThree.stepThreeMobileOTP === '' || stepThree.stepThreeMobileOTP.length < 6) {
                                 showToast('error', "Please enter a valid OTP.")
                                 return;
                               }
-                              const encryptedOtp =
-                                encryptData(
-                                  stepThree.stepThreeMobileOTP,
-                                  publicKey
-                                );
-                              const payload =
-                                getAuthByAbdmPayload(
-                                  txnId,
-                                  encryptedOtp
-                                );
-                              const result =
-                                await authByAbdm(
-                                  payload
-                                ).unwrap();
-                              console.log(
-                                "AUTH BY ABDM RESULT =>",
-                                result
-                              );
+                              const encryptedOtp = encryptData(stepThree.stepThreeMobileOTP, publicKey);
+                              const payload = getAuthByAbdmPayload(txnId, encryptedOtp);
+                              const result = await authByAbdm(payload).unwrap();
+
                               if (result?.authResult === 'success') {
                                 setStepThree({
                                   ...stepThree,
@@ -764,19 +742,12 @@ const LoginScreen = () => {
                               return;
                             }
                             if (stepThree.stepThreeMobileAuthDone && stepThree.stepThreeEmailVarifying && !stepThree.stepThreeEmailVarifyDone) {
-                              // showToast('error', "Please varify email")
-                              // return;
-                              const response =
-                                await enrolSuggestion({
-                                  txnId,
-                                }).unwrap();
+                              const response = await enrolSuggestion({ txnId, }).unwrap();
                               setAbhaSuggestionList(response.abhaAddressList)
                               setCurrentStep(4)
                               return;
                             }
                             showToast('error', "Please verify your mobile number.")
-
-
 
                           } else if (currentStep === 4) {
                             //step 4
@@ -784,55 +755,9 @@ const LoginScreen = () => {
                               showToast('error', "Please enter your ABHA address.")
                               return;
                             }
-                            const response =
-                              await enrolAbhaAddress(
-                                getEnrolAbhaAddressPayload(
-                                  txnId,
-                                  stepFour.userName,
-                                  1
-                                )
-                              ).unwrap();
-                            console.log("response", response)
-                            const responseProfile =
-                              await getProfileAccount();
-
-                            console.log("responseProfile", responseProfile)
-                            console.log(responseProfile);
-
-                            console.log(" Full data ----- - - - - - stepOne ======", stepOne)
-                            console.log(" Full data ----- - - - - - stepTwo ======", stepTwo)
-                            console.log(" Full data ----- - - - - - stepThree ====", stepThree)
-                            console.log(" Full data ----- - - - - - stepFour =====", stepFour)
-                            console.log(" Full data ----- - - - - - abhaResult ===", abhaResult)
-                            const { status, ...restData } = responseProfile?.data || {};
-                            const { name, ...restNameData } = responseProfile?.data || {};
-                            const payload = {
-                              aadharNumber: stepOne?.aadhaarNumber,
-                              communicationMobile: stepTwo?.stepTwoMobileNumber,
-                              communicationEmail: stepThree?.stepThreeEmail,
-                              ...responseProfile,
-                              data: {
-                                ...restData,
-                                ...restNameData,
-                                abhaName: name,
-                                profileStatus: status,
-                              },
-                              isNew: abhaResult?.isNew,
-                              expiresIn: abhaResult?.tokens?.expiresIn,
-                              refreshExpiresIn: abhaResult?.tokens?.refreshExpiresIn,
-                              refreshToken: abhaResult?.tokens?.refreshToken,
-                              tokens: abhaResult?.tokens?.token,
-                              txnId: txnId
-                            };
-
-                            console.log(" Full data ----- - - - - +++++++++++++++++- payload ======", payload)
-
-                            // dispatch(setActiveUser(responseProfile?.data))
-                            // navigation.replace("Main", {
-                            //   profile: responseProfile.data,
-                            // });
-                            showToast('success', 'Record inserted successfully...')
-                            navigation.goBack()
+                            await enrolAbhaAddress(getEnrolAbhaAddressPayload(txnId, stepFour.userName, 1)).unwrap();
+                            const responseProfile = await getProfileAccount();
+                            handleProfile(responseProfile)
                           }
                         } catch (error) {
                           console.log("--------------------", error)
@@ -851,155 +776,145 @@ const LoginScreen = () => {
                     </TouchableOpacity>
                   </View>
                 </> :
-                <>
-                  <View style={styles.stepContainer}>
-                    {stepsDL.map((item, index) => {
-                      const stepNumber = index + 1;
-                      const isActive = currentStepDL >= stepNumber;
-                      return (
-                        <React.Fragment key={index}>
-                          <TouchableOpacity
-                            style={styles.stepItem}
-                            disabled
-                          >
-                            <View
-                              style={[
-                                styles.circle,
-                                isActive && styles.activeCircle,
-                              ]}
+                  <>
+                    <View style={styles.stepContainer}>
+                      {stepsDL.map((item, index) => {
+                        const stepNumber = index + 1;
+                        const isActive = currentStepDL >= stepNumber;
+                        return (
+                          <React.Fragment key={index}>
+                            <TouchableOpacity
+                              style={styles.stepItem}
+                              disabled
                             >
-                              <Text
+                              <View
                                 style={[
-                                  styles.circleText,
-                                  isActive && styles.activeCircleText,
+                                  styles.circle,
+                                  isActive && styles.activeCircle,
                                 ]}
                               >
-                                {stepNumber}
+                                <Text
+                                  style={[
+                                    styles.circleText,
+                                    isActive && styles.activeCircleText,
+                                  ]}
+                                >
+                                  {stepNumber}
+                                </Text>
+                              </View>
+
+                              <Text
+                                style={[
+                                  styles.stepLabel,
+                                  isActive && styles.activeStepLabel,
+                                ]}
+                              >
+                                Step {stepNumber}
                               </Text>
-                            </View>
+                            </TouchableOpacity>
 
-                            <Text
-                              style={[
-                                styles.stepLabel,
-                                isActive && styles.activeStepLabel,
-                              ]}
-                            >
-                              Step {stepNumber}
-                            </Text>
-                          </TouchableOpacity>
+                            {index < stepsDL.length - 1 && (
+                              <View
+                                style={[
+                                  styles.line,
+                                  currentStep > stepNumber && styles.activeLine,
+                                ]}
+                              />
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
 
-                          {index < stepsDL.length - 1 && (
-                            <View
-                              style={[
-                                styles.line,
-                                currentStep > stepNumber && styles.activeLine,
-                              ]}
-                            />
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-
-                  </View>
-                  <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    style={{ flex: 0.8, padding: 0 }}>
-                    {renderDLStep()}
-                  </ScrollView>
-
-                  <View style={[styles.buttonContainer, {
-
-                  }]}>
-                    <View style={[
-                      {
-                        backgroundColor: '#173D8F',
-                        borderRadius: 4,
-                        alignContent: 'center',
-                        alignItems: 'center',
-                        alignSelf: 'center',
-                        padding: 10
-                      }
-                    ]}>
-                      <Text style={styles.typeText}>
-                        {stepsDL[currentStepDL - 1]}
-                      </Text>
                     </View>
+                    <ScrollView
+                      showsVerticalScrollIndicator={false}
+                      style={{ flex: 0.8, padding: 0 }}>
+                      {renderDLStep()}
+                    </ScrollView>
 
-                    {
-                      !stepOneDL.stepOneDLMobileVerifying && <TouchableOpacity
-                        onPress={async () => {
-                          try {
-                            dispatch(showLoader())
-                            if (currentStepDL === 1) {
-                              if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
-                                showToast('error', 'Please enter your mobile number.')
-                                return;
-                              }
-                              const isNumberValid = isStrictIndianMobile(`+91${stepOneDL.stepOneDLMobileNumber}`)
-                              if (!isNumberValid) {
-                                showToast('error', 'Please enter a valid mobile number.')
-                                return;
-                              }
-                              if (!captchaValue) {
-                                showToast('error', 'Please enter the CAPTCHA.')
-                                return;
-                              }
-
-                              if (Number(captchaValue) !== captcha.answer) {
-                                showToast('error', 'Please enter a valid CAPTCHA.')
-                                return;
-                              }
-                              const encryptedMobile = encryptData(
-                                stepOneDL.stepOneDLMobileNumber,
-                                publicKey,
-                              );
-                              const payload =
-                                getDlEnrollmentRequestOtpPayload(
-                                  encryptedMobile
-                                );
-
-                              const response =
-                                await dlEnrollmentRequestOtp(
-                                  payload
-                                ).unwrap();
-
-                              console.log("response -- -- - - - - - - - - - - - - - - ", response);
-                              showToast('success', response?.message)
-                              setStepOneDL({
-                                ...stepOneDL,
-                                stepOneDLTitle: response?.message,
-                                stepOneDLMobileVerifying: true,
-                              });
-                            } else if (currentStepDL === 2) {
-                              const result = stepTwoRef.current?.validateForm();
-
-                              if (!result.isValid) {
-                                setValidationErrors(result.errors);
-                                setShowValidationSheet(true); // Bottom Sheet open
-                                return;
-                              }
-
-
-                              console.log(result.data);
-                            }
-                          } catch (error) {
-                            showToast('error', `${error}`)
-                            dispatch(hideLoader())
-                          } finally {
-                            dispatch(hideLoader())
-                          }
-
-
-                        }}
-                        style={styles.nextButton}
-                      >
-                        <Text style={{ color: '#FFF' }}>
-                          {'Next'}
+                    <View style={[styles.buttonContainer]}>
+                      <View style={[
+                        {
+                          backgroundColor: '#173D8F',
+                          borderRadius: 4,
+                          alignContent: 'center',
+                          alignItems: 'center',
+                          alignSelf: 'center',
+                          padding: 10
+                        }
+                      ]}>
+                        <Text style={styles.typeText}>
+                          {stepsDL[currentStepDL - 1]}
                         </Text>
-                      </TouchableOpacity>
-                    }
-                  </View>
-                </>
+                      </View>
+
+                      {
+                        !stepOneDL.stepOneDLMobileVerifying && <TouchableOpacity
+                          onPress={async () => {
+                            try {
+                              dispatch(showLoader())
+                              if (currentStepDL === 1) {
+                                if (stepOneDL.stepOneDLMobileNumber === '' && !stepOneDL.stepOneDLMobileVerifying) {
+                                  showToast('error', 'Please enter your mobile number.')
+                                  return;
+                                }
+                                const isNumberValid = isStrictIndianMobile(`+91${stepOneDL.stepOneDLMobileNumber}`)
+                                if (!isNumberValid) {
+                                  showToast('error', 'Please enter a valid mobile number.')
+                                  return;
+                                }
+                                if (!captchaValue) {
+                                  showToast('error', 'Please enter the CAPTCHA.')
+                                  return;
+                                }
+                                if (Number(captchaValue) !== captcha.answer) {
+                                  showToast('error', 'Please enter a valid CAPTCHA.')
+                                  return;
+                                }
+                                const encryptedMobile = encryptData(
+                                  stepOneDL.stepOneDLMobileNumber,
+                                  publicKey,
+                                );
+                                const payload =
+                                  getDlEnrollmentRequestOtpPayload(
+                                    encryptedMobile
+                                  );
+
+                                const response =
+                                  await dlEnrollmentRequestOtp(
+                                    payload
+                                  ).unwrap();
+                                showToast('success', response?.message)
+                                setStepOneDL({
+                                  ...stepOneDL,
+                                  stepOneDLTitle: response?.message,
+                                  stepOneDLMobileVerifying: true,
+                                });
+                              } else if (currentStepDL === 2) {
+                                const result = stepTwoRef.current?.validateForm();
+                                if (!result.isValid) {
+                                  setValidationErrors(result.errors);
+                                  setShowValidationSheet(true); // Bottom Sheet open
+                                  return;
+                                }
+                                console.log(result.data);
+                              }
+                            } catch (error) {
+                              showToast('error', `${error}`)
+                              dispatch(hideLoader())
+                            } finally {
+                              dispatch(hideLoader())
+                            }
+                          }}
+                          style={styles.nextButton}
+                        >
+                          <Text style={{ color: '#FFF' }}>
+                            {'Next'}
+                          </Text>
+                        </TouchableOpacity>
+                      }
+                    </View>
+                  </>
               }
             </View>
           </> : <>
@@ -1051,8 +966,6 @@ const LoginScreen = () => {
                       Enter Aadhaar number <Text style={{ color: 'red' }}>*</Text>
                     </Text>
                   }
-
-
                   <View style={[styles.inputContainer, loginType === 'Aadhaar Number' && {
                     backgroundColor: '#fff',
                     borderColor: '#fff'
@@ -1063,7 +976,6 @@ const LoginScreen = () => {
                       )}
                     {
                       loginType === 'Aadhaar Number' ? <>
-
                         <View style={styles.aadhaarContainer}>
                           <TextInput
                             ref={input1Ref}
@@ -1083,13 +995,7 @@ const LoginScreen = () => {
                               const value = text.replace(/\D/g, "");
                               setAadhaar(prev => {
                                 const updated = { ...prev, part1: value };
-
-                                updateAadhaar(
-                                  updated.part1,
-                                  updated.part2,
-                                  updated.part3,
-                                );
-
+                                updateAadhaar(updated.part1, updated.part2, updated.part3,);
                                 return updated;
                               });
 
@@ -1130,13 +1036,7 @@ const LoginScreen = () => {
                               const value = text.replace(/\D/g, "");
                               setAadhaar(prev => {
                                 const updated = { ...prev, part2: value };
-
-                                updateAadhaar(
-                                  updated.part1,
-                                  updated.part2,
-                                  updated.part3,
-                                );
-
+                                updateAadhaar(updated.part1, updated.part2, updated.part3,);
                                 return updated;
                               });
 
@@ -1178,13 +1078,7 @@ const LoginScreen = () => {
                               const value = text.replace(/\D/g, "");
                               setAadhaar(prev => {
                                 const updated = { ...prev, part3: value };
-
-                                updateAadhaar(
-                                  updated.part1,
-                                  updated.part2,
-                                  updated.part3,
-                                );
-
+                                updateAadhaar(updated.part1, updated.part2, updated.part3,);
                                 return updated;
                               });
 
@@ -1194,41 +1088,11 @@ const LoginScreen = () => {
                       </> : <>  <TextInput
                         value={loginValue}
                         onChangeText={text => {
-                          let value = text;
-
-                          switch (loginType) {
-                            case 'Mobile Number':
-                            case 'Register with Mobile Number':
-                              value = text.replace(/\D/g, '').slice(0, 10);
-                              break;
-
-                            case 'Aadhaar Number':
-                              value = formatAadhaar(text);
-                              break;
-
-                            case 'ABHA Number':
-                            case 'Create ABHA Number':
-                              value = formatAbhaNumber(text);
-                              break;
-
-                            default:
-                              break;
-                          }
-                          setLoginValue(value);
+                          setLoginValue(formatLoginInput(loginType, text))
                         }}
                         placeholder={placeholder}
                         maxLength={maxLength}
-                        keyboardType={
-                          [
-                            'Mobile Number',
-                            'Register with Mobile Number',
-                            'Aadhaar Number',
-                            'ABHA Number',
-                            'Create ABHA Number',
-                          ].includes(loginType)
-                            ? 'number-pad'
-                            : 'default'
-                        }
+                        keyboardType={getLoginKeyboardType(loginType)}
                         style={styles.input}
                       /> </>
                     }
@@ -1278,30 +1142,14 @@ const LoginScreen = () => {
                     <TextInput
                       value={loginValue}
                       onChangeText={text => {
-                        const value =
-                          loginType === 'Mobile Number' ||
-                            loginType === 'Aadhaar Number'
-                            ? text.replace(/[^0-9]/g, '')
-                            : text;
-                        setLoginValue(value);
+                        setLoginValue(formatLoginInput(loginType, text))
                       }}
                       placeholder={placeholder}
                       maxLength={maxLength}
-                      keyboardType={
-                        loginType === 'Mobile Number' ||
-                          loginType === 'Aadhaar Number'
-                          ? 'number-pad'
-                          : 'default'
-                      }
+                      keyboardType={getLoginKeyboardType(loginType)}
                       style={styles.input}
                     />
-                    {!!errorMessage && (
-                      <Text style={{
-                        color: 'red'
-                      }}>
-                        {errorMessage}
-                      </Text>
-                    )}
+
                   </View>
                 </View>
               }
@@ -1319,41 +1167,14 @@ const LoginScreen = () => {
                     <TextInput
                       value={loginValue}
                       onChangeText={text => {
-                        let value = text;
-                        switch (validationMethod) {
-                          case 'Mobile Number':
-                          case 'Register with Mobile Number':
-                            value = text.replace(/\D/g, '').slice(0, 10);
-                            break;
-                          case 'Aadhaar Number':
-                            value = formatAadhaar(text);
-                            break;
-                          case 'ABHA Number':
-                          case 'Create ABHA Number':
-                            value = formatAbhaNumber(text);
-                            break;
-                          default:
-                            break;
-                        }
-                        setLoginValue(value);
+                        setLoginValue(formatLoginInput(loginType, text))
                       }}
                       placeholder={validationMethod === 'Mobile Number' ? 'Enter mobile number' : 'Enter aadhaar number'}
                       maxLength={maxLength}
-                      keyboardType={
-                        validationMethod === 'Mobile Number' ||
-                          validationMethod === 'Aadhaar Number'
-                          ? 'number-pad'
-                          : 'default'
-                      }
+                      keyboardType={getLoginKeyboardType(loginType)}
                       style={styles.input}
                     />
-                    {!!errorMessage && (
-                      <Text style={{
-                        color: 'red'
-                      }}>
-                        {errorMessage}
-                      </Text>
-                    )}
+
                   </View>
                 </View>
               }
@@ -1409,10 +1230,7 @@ const LoginScreen = () => {
 
                     <RadioItem
                       title="Aadhaar OTP"
-                      selected={
-                        otpMethod ===
-                        'Aadhaar OTP'
-                      }
+                      selected={otpMethod === 'Aadhaar OTP'}
                       onPress={() =>
                         setOtpMethod(
                           'Aadhaar OTP',
@@ -1421,10 +1239,7 @@ const LoginScreen = () => {
                     />
                     <RadioItem
                       title="Mobile OTP"
-                      selected={
-                        otpMethod ===
-                        'Mobile OTP'
-                      }
+                      selected={otpMethod === 'Mobile OTP'}
                       onPress={() =>
                         setOtpMethod(
                           'Mobile OTP',
@@ -1494,8 +1309,6 @@ const LoginScreen = () => {
                         </Text>
                       </ScrollView>
                     </View>
-
-
                     <View style={styles.termsFooter}>
                       <TouchableOpacity
                         style={styles.checkboxRow}
@@ -1554,7 +1367,6 @@ const LoginScreen = () => {
                         }
                       </ScrollView>
                     </View>
-
 
                     <View style={styles.termsFooter}>
                       <TouchableOpacity
@@ -1687,18 +1499,9 @@ const LoginScreen = () => {
                     }
                     dispatch(showLoader());
                     if (isFromRegister) {
-                      const encryptedValue =
-                        encryptData(
-                          loginValue,
-                          publicKey,
-                        );
-                      const payloadPassed = getEnrollmentPayload(
-                        loginType,
-                        encryptedValue,
-                        txnId,
-                      );
+                      const encryptedValue = encryptData(loginValue, publicKey,);
+                      const payloadPassed = getEnrollmentPayload(loginType, encryptedValue, txnId,);
                       const result = await enrollmentRequestOtp(payloadPassed).unwrap();
-                      console.log("result ------+++++++++++++-------- ", result)
                       showToast(
                         "success",
                         result?.message || "OTP sent successfully"
@@ -1711,18 +1514,13 @@ const LoginScreen = () => {
                       }, 1000);
                     } else {
 
-                      const encryptedValue =
-                        encryptData(
-                          loginValue,
-                          publicKey,
-                        );
+                      const encryptedValue = encryptData(loginValue, publicKey,);
                       const payloadPassed = getPayload(
                         loginType === 'Forgot ABHA Number' ? validationMethod : loginType,
                         encryptedValue,
                         txnId,
                       );
                       const result = await requestOtp(payloadPassed).unwrap();
-                      console.log("result -------------- ", result)
                       showToast(
                         "success",
                         result?.message || "OTP sent successfully"
@@ -1737,16 +1535,13 @@ const LoginScreen = () => {
                           result: result
                         });
                       }, 1000);
-
                     }
-
                   } catch (error) {
                     console.log("error -------------- ", error)
                     dispatch(hideLoader());
                   } finally {
                     dispatch(hideLoader());
                   }
-
                 }}
               >
                 <Text style={styles.continueText}>

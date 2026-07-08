@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FlatList,
+  Keyboard,
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TextInput,
   View,
 } from "react-native";
 import Header from "../../Components/Header";
@@ -23,6 +25,9 @@ const ProfileScreen = ({ route }: any) => {
   const [getPageList, { data, isLoading, error }] = useGetPageListMutation();
   const [abhaUsersList, setAbhaUsersList] = useState<any>()
   const dispatch = useDispatch();
+  const [search, setSearch] = useState('');
+  const [seachActive, setSearchActive] = useState(false)
+const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,9 +63,25 @@ const ProfileScreen = ({ route }: any) => {
         contentContainerStyle={{
           paddingBottom: 30,
         }}
-         bounces={false}
+        bounces={false}
       >
-        <Header title="Dashboard" isSearch={true} isMenu={true} />
+        <Header
+        inputRef={inputRef}
+          search={search}
+          seachActive={seachActive}
+          setSearch={setSearch}
+          setSearchActive={setSearchActive}
+          title="Dashboard"
+          isSearch={true}
+          isMenu={true}
+          handleSearch={()=>{
+            inputRef.current?.focus();
+            setSearch("")
+            setSearchActive(!seachActive)
+
+          }}
+          
+        />
         <FlatList
           data={abhaUsersList}
           keyExtractor={(item) => item.txnId}
@@ -74,8 +95,8 @@ const ProfileScreen = ({ route }: any) => {
               }}
             />
           )}
-          ListFooterComponent={()=>{
-            return(<View style={{height: 80, width: 10}}></View>)
+          ListFooterComponent={() => {
+            return (<View style={{ height: 80, width: 10 }}></View>)
           }}
         />
       </ScrollView>

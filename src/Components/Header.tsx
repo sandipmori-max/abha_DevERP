@@ -6,16 +6,31 @@ import {
   StyleSheet,
   Image,
   Dimensions,
+  TextInput,
 } from "react-native";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import CustomBottomSheet from "../screens/Profile/CustomBottomSheet";
 
-const Header = ({ title, isSearch = true, isMenu = true, isShare = false, handleShare }: {
-  title: string, isSearch?: boolean, isMenu?: boolean,
-  isShare?: boolean,
-  handleShare: any
-}) => {
+const Header = ({
+  setSearch,
+  setSearchActive,
+  search,
+  seachActive,
+  title,
+  handleSearch,
+  inputRef,
+  isSearch = true, isMenu = true, isShare = false, handleShare }: {
+    title: string, isSearch?: boolean, isMenu?: boolean,
+    isShare?: boolean,
+    handleShare: any,
+    setSearch?: any,
+    setSearchActive?: any,
+    search?: any
+    seachActive?: any,
+    handleSearch?: any,
+    inputRef?: any
+  }) => {
   const navigation = useNavigation();
   const [open, setOpen] = useState(false);
 
@@ -48,18 +63,29 @@ const Header = ({ title, isSearch = true, isMenu = true, isShare = false, handle
 
 
       {/* Right Icons */}
-      <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700' }}>{title}</Text>
+      {
+        seachActive ? <>
+          <TextInput
+            ref={inputRef}
+            placeholder="Search here...."
+            value={search}
+            onChangeText={(e) => {
+              setSearch(e)
+            }}
+            style={styles.searchInput}
+          />
+        </> : <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700' }}>{title}</Text>
+      }
+
 
       {
         isSearch && <View style={styles.rightContainer}>
           <TouchableOpacity
 
-            onPress={() => {
-              // setOpen(true)
-            }}
+            onPress={handleSearch}
             style={styles.iconBtn}>
             <MaterialIcons
-              name='search'
+              name={seachActive ? 'close' : 'search'}
               size={20}
               color="#FFF"
             />
@@ -131,7 +157,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#fff'
   },
- 
+  searchInput: {
+    flex: 1,
+    height: 46,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    backgroundColor: '#FFF',
+    marginHorizontal: 12,
+    fontWeight: '600'
+  }
 });
 
 export default Header;

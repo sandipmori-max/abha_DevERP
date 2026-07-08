@@ -126,8 +126,7 @@ const OtpVerificationScreen = () => {
       const responseProfile =
         await getProfileAccount();
       console.log('responseProfile ', responseProfile);
-      dispatch(setActiveUser(responseProfile?.data));
-      // navigation.replace("Main");
+      // navigation.goBack();
 
     } catch (e) {
       console.log("Error in resend otp", e)
@@ -191,10 +190,9 @@ const OtpVerificationScreen = () => {
         const responseProfile =
           await getProfileAccount();
         console.log('responseProfile ', responseProfile?.data);
-         dispatch(setActiveUser(responseProfile?.data))
-        // navigation.replace("Main");
-
-        // navigation.navigate('Home');
+        setTimeout(() => {
+          navigation.goBack();
+        }, 200)
       } else {
         showToast(
           "error",

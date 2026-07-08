@@ -51,7 +51,7 @@ const LoginScreen = () => {
   const {
     stepOne, setStepOne, stepTwo, setStepTwo, stepThree, setStepThree, stepFour,
     stepOneDL, setStepOneDL, currentStep, setCurrentStep,
-     currentStepDL, setCurrentStepDL,
+    currentStepDL, setCurrentStepDL,
     loginValue, setLoginValue,
     password, setPassword,
     showPassword, setShowPassword,
@@ -101,6 +101,7 @@ const LoginScreen = () => {
             setValidationMethod={setValidationMethod}
           />
         </>;
+      
       case 2:
         return <>
           <StepTwo
@@ -130,6 +131,7 @@ const LoginScreen = () => {
             mobileNumer={stepTwo?.stepTwoMobileNumber}
           />
         </>
+        
       case 4:
         return <>
           <StepFour
@@ -540,7 +542,7 @@ const LoginScreen = () => {
                           refreshCaptcha()
                           setIsAgreed(false)
                           Keyboard.dismiss()
-                          navigation.navigate("Login", {
+                          navigation.navigate("RegistrationAbha", {
                             loginType: 'Forgot ABHA Number',
                             isFromRegister: false,
                             isFromCreate: false,
@@ -791,35 +793,7 @@ const LoginScreen = () => {
                 </Text>
               </TouchableOpacity>
 
-              {
-                !isFromForgotAbhaNumber && loginType !== 'Register with Mobile Number' &&
-                <View style={styles.footer}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setValidationMethod('')
-                      setLoginValue('')
-                      setCaptchaValue("")
-                      refreshCaptcha()
-                      setIsAgreed(false)
-                      Keyboard.dismiss()
-                      setTimeout(() => {
-                        navigation.navigate("Login", {
-                          loginType: isFromCreate ? 'Register with Mobile Number' : 'Create ABHA Number',
-                          isFromRegister: false,
-                          isFromCreate: isFromCreate ? false : true,
-                          isFromMobileRegister: true
-                        })
-                      })
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row' }}>
-                      <Text style={styles.createNow}>
-                        Retrieve your Enrolment number
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              }
+            
             </View></>
         }
         <ValidationErrorBottomSheet

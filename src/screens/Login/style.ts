@@ -292,7 +292,7 @@ export const styles = StyleSheet.create({
   },
   continueBtn: {
     height: 46,
-    backgroundColor: '#251d50',
+    backgroundColor: '#d67031',
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',

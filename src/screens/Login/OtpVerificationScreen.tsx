@@ -207,13 +207,8 @@ const OtpVerificationScreen = () => {
         const res = responseProfile?.data;
 
         const payloadRow = {
-          "patientabhaid": "",
           "abhanumber": res?.ABHANumber,
           "abhaname": res?.abhaName || res?.name,
-          "date": "",
-          "branchid": "",
-          "guid": "",
-          "patientid": "",
           "aadharnumber": res?.aadharNumber,
           "firstname": res?.firstName,
           "middlename": res?.middleName,
@@ -225,32 +220,17 @@ const OtpVerificationScreen = () => {
           "dayofbirth": res?.dayOfBirth,
           "gender": res?.gender,
           "mobileno": res?.mobile,
-          "communicationmobile": "",
-          "communicationemail": "",
-
           "address": res?.address,
           "statename": res?.stateName,
           "statecode": res?.stateCode,
           "districtname": res?.districtName,
           "districtcode": res?.districtCode,
-
           "subdistrictname": res?.subdistrictName,
           "pincode": res?.pincode,
-
-          "message": "",
-          "txnid": "",
-
-          "token": "",
-          "tokenexpiresin": "",
-          "refreshtoken": "",
-          "refreshexpiresin": "",
-
           "preferredabhaaddress": res?.preferredAbhaAddress,
-
           "photo": res?.photo,
           "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${res?.profilePhoto}`,
           "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${res?.kycphoto}`,
-
           "localizedname": res?.localizedDetails?.name,
           "localizedgender": res?.localizedDetails?.gender,
           "localizedtownname": res?.localizedDetails?.townName,
@@ -260,7 +240,6 @@ const OtpVerificationScreen = () => {
           "phraddress": res?.phraddress,
           "authmethods": res?.authMethods?.join(","),
           "tags": res?.tags,
-          "rawresponse": "",
           "localizedlabels": res?.localizedDetails?.localizedLabels,
           "registrationsource": "",
           "profilestatus": res?.profileStatus,
@@ -270,15 +249,7 @@ const OtpVerificationScreen = () => {
           "verificationstatus": res?.verificationStatus,
           "iskycverified": res?.kycVerified,
           "isnew": "false",
-          "createdDate": "",
-          "lastsyncdate": "",
-          "cuid": "",
-          "authby": "",
-          "status": "",
-          "cdt": "",
-          "muid": "",
-          "mdt": ""
-
+          
         }
         const payloadData = {
           token: activeUser?.token,

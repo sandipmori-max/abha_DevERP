@@ -85,7 +85,11 @@ const AbhaUserItem = ({ item, onPress }: any) => {
 
             {/* ABHA Number */}
             <View style={styles.row}>
-
+                <MaterialIcons
+                    name='numbers'
+                    size={18}
+                    color="#251d50"
+                />
                 <Text style={styles.label}>ABHA</Text>
                 <Text style={styles.value}>
                     {item.number}
@@ -109,7 +113,11 @@ const AbhaUserItem = ({ item, onPress }: any) => {
 
             {/* ABHA Address */}
             <View style={styles.row}>
-
+                <MaterialIcons
+                    name='person'
+                    size={18}
+                    color="#251d50"
+                />
                 <Text
                     style={styles.value}
                     numberOfLines={1}
@@ -145,8 +153,8 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                     />
                     <Text style={styles.footerText}>
                         {item.qty === "M"
-                                ? "Male"
-                                : "Female"}
+                            ? "Male"
+                            : "Female"}
                     </Text>
                 </View>
             </View>
@@ -176,10 +184,10 @@ const styles = StyleSheet.create({
     avatar: {
         width: 42,
         height: 42,
-        borderRadius: 8, 
+        borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
-        resizeMode:'cover',
+        resizeMode: 'cover',
         borderWidth: 0.4
     },
 

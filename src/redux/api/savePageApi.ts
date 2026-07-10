@@ -45,17 +45,30 @@ export const savePageApi = baseApi.injectEndpoints({
 
         // ACTUAL API
         const response: any = await baseQuery({
-          url: `${baseUrl}/savePage`,
+          url: `${baseUrl}/pageSave`,
           method: "POST",
           body,
         });
-
-        // If API returns { d: "....json...." }
+        console.log("========== response response ==========", response);
         if (response.data?.d) {
-          response.data = JSON.parse(response.data.d);
+          const raw = response.data.d;
+
+          try {
+            response.data = JSON.parse(raw);
+          } catch (e) {
+            console.log("========== NON JSON D ==========");
+            console.log(raw);
+
+            response.data = {
+              success: Number(raw?.split(",")[0]) || 0,
+              message: raw?.split(",").slice(1).join(",") || raw,
+            };
+          }
         }
 
-        return response;
+        return {
+          data: response.data,
+        };
       },
 
       async onQueryStarted(arg, { queryFulfilled }) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Keyboard,
@@ -13,7 +13,7 @@ import { getPageListPayload, useGetPageListMutation } from "../../redux/api/getP
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../../redux/slices/loaderSlice";
 import AbhaUserItem from "./AbhaUserItem";
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = ({ route }: any) => {
 
@@ -27,33 +27,49 @@ const ProfileScreen = ({ route }: any) => {
   const dispatch = useDispatch();
   const [search, setSearch] = useState('');
   const [seachActive, setSearchActive] = useState(false)
-const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInput>(null);
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     const fetchData = async () => {
       try {
-        dispatch(showLoader())
+        dispatch(showLoader());
+
         const response = await getPageList(
           getPageListPayload(
             activeUser?.token,
-            "BusinessCardMst"
+            "PatientABHAProfile",
+            "",
+            "",
+            "",
+            ""
           )
         ).unwrap();
-        console.log('response', response);
-        setAbhaUsersList(response)
-        dispatch(hideLoader())
+
+        console.log("response", response);
+
+        const result = JSON.parse(response.d);
+        const dataArray = result.data;
+
+        console.log(dataArray);
+
+        setAbhaUsersList(dataArray);
+
       } catch (err) {
-        console.log('err', err);
-        dispatch(hideLoader())
+        console.log("err", err);
       } finally {
-        dispatch(hideLoader())
+        dispatch(hideLoader());
       }
     };
 
     if (activeUser?.token) {
       fetchData();
     }
-  }, [activeUser?.token]);
+
+    // optional cleanup
+    return () => {};
+  }, [activeUser?.token])
+);
 
   return (
     <SafeAreaView style={styles.container}>

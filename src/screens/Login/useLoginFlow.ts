@@ -374,16 +374,21 @@ export const useLoginFlow = ({
             data: JSON.stringify(payloadRow),
         };
 
+        console.log("payloadData", payloadData)
+
         await savePage(payloadData).unwrap();
-
-        await getQrCode();
-
-        await getAbhaCard();
 
         showToast(
             "success",
             "Record inserted successfully..."
         );
+
+        setTimeout(async () => {
+            await getQrCode();
+            await getAbhaCard();
+        }, 1800)
+
+
     };
     // ===========================
     // Step 1

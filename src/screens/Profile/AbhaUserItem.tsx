@@ -24,10 +24,10 @@ const AbhaUserItem = ({ item, onPress }: any) => {
         >
             {/* Header */}
             <View style={styles.header}>
-                {item?.profilePhoto ? (
+                {true ? (
                     <Image
                         source={{
-                            uri: `${item.profilePhoto}`,
+                            uri: `${item.image}`,
                         }}
                         style={styles.avatar}
                     />
@@ -88,13 +88,13 @@ const AbhaUserItem = ({ item, onPress }: any) => {
 
                 <Text style={styles.label}>ABHA</Text>
                 <Text style={styles.value}>
-                    {item.ABHANumber}
+                    {item.number}
                 </Text>
 
                 <TouchableOpacity
                     onPress={() => {
-                        Clipboard.setString(item.ABHANumber);
-                        showToast('success', 'BHA Number copied successfully')
+                        Clipboard.setString(item.number);
+                        showToast('success', 'ABHA Number copied successfully')
                     }}
                 >
                     <MaterialIcons
@@ -114,7 +114,7 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                     style={styles.value}
                     numberOfLines={1}
                 >
-                    {item.preferredAbhaAddress}
+                    {item.address}
                 </Text>
             </View>
 
@@ -129,14 +129,14 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                         color="#6B7280"
                     />
                     <Text style={styles.footerText}>
-                        {item.dob}
+                        {item?.date}
                     </Text>
                 </View>
 
                 <View style={styles.footerItem}>
                     <MaterialIcons
                         name={
-                            item.gender === "M"
+                            item.qty === "M"
                                 ? "male"
                                 : "female"
                         }
@@ -144,9 +144,9 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                         color="#6B7280"
                     />
                     <Text style={styles.footerText}>
-                        {item.gender === "M"
-                            ? "Male"
-                            : "Female"}
+                        {item.qty === "M"
+                                ? "Male"
+                                : "Female"}
                     </Text>
                 </View>
             </View>
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
         padding: 8,
         borderWidth: 1,
         borderColor: "#edf2fb",
-
     },
 
     header: {
@@ -177,10 +176,11 @@ const styles = StyleSheet.create({
     avatar: {
         width: 42,
         height: 42,
-        borderRadius: 8,
-        backgroundColor: "#000",
+        borderRadius: 8, 
         alignItems: "center",
         justifyContent: "center",
+        resizeMode:'cover',
+        borderWidth: 0.4
     },
 
     avatarText: {

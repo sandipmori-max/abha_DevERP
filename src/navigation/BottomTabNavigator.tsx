@@ -294,12 +294,7 @@ const BottomTabNavigator = () => {
                                         ]}
                                         onPress={() => setSelected("yes")}
                                     >
-                                        {/* <View
-                                            style={[
-                                                styles.radio,
-                                                selected === "yes" && styles.radioActive,
-                                            ]}
-                                        /> */}
+
                                         <View
                                             style={[
                                                 styles.radioOuter,
@@ -338,13 +333,6 @@ const BottomTabNavigator = () => {
                                         ]}
                                         onPress={() => setSelected("no")}
                                     >
-
-                                        {/* <View
-                                            style={[
-                                                styles.radio,
-                                                selected === "no" && styles.radioActive,
-                                            ]}
-                                        /> */}
                                         <View
                                             style={[
                                                 styles.radioOuter,
@@ -390,10 +378,10 @@ const BottomTabNavigator = () => {
                         }
 
                         <TouchableOpacity
-                            disabled={!selected}
+                            disabled={!selectedLoginType}
                             style={[
                                 styles.button,
-                                !selected && styles.disabledButton,
+                                !selectedLoginType && styles.disabledButton,
                             ]}
                             onPress={() => {
                                 if (selectedLoginType === 'Driving Licence') {

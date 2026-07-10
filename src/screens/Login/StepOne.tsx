@@ -1,8 +1,6 @@
-import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { styles } from './style';
-import { formatAadhaar } from '../../utils/helpers';
-import RadioItem from './RadioItem';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 
 const StepOne = ({
@@ -39,9 +37,9 @@ const StepOne = ({
     };
 
     const [aadhaar, setAadhaar] = useState({
-        part1: "",
-        part2: "",
-        part3: "",
+        part1: "7619",
+        part2: "8714",
+        part3: "0371",
     });
 
     const updateAadhaar = (
@@ -86,13 +84,11 @@ const StepOne = ({
                             const value = text.replace(/\D/g, "");
                             setAadhaar(prev => {
                                 const updated = { ...prev, part1: value };
-
                                 updateAadhaar(
                                     updated.part1,
                                     updated.part2,
                                     updated.part3,
                                 );
-
                                 return updated;
                             });
 
@@ -104,7 +100,8 @@ const StepOne = ({
                     <View style={{
                         height: 1,
                         width: 4,
-                        backgroundColor: '#ccc'
+                        backgroundColor: '#ccc',
+                        marginHorizontal: 4
                     }}></View>
                     <TextInput
                         ref={input2Ref}
@@ -122,7 +119,7 @@ const StepOne = ({
                         textAlign="center"
                         contextMenuHidden
                         caretHidden={false}
-                         selection={aadhaar.part2.length === 0 ? { start: 0, end: 0 } : undefined}
+                        selection={aadhaar.part2.length === 0 ? { start: 0, end: 0 } : undefined}
                         value={aadhaar.part2}
                         onKeyPress={({ nativeEvent }) => {
                             if (
@@ -136,7 +133,6 @@ const StepOne = ({
                             const value = text.replace(/\D/g, "");
                             setAadhaar(prev => {
                                 const updated = { ...prev, part2: value };
-
                                 updateAadhaar(
                                     updated.part1,
                                     updated.part2,
@@ -145,7 +141,6 @@ const StepOne = ({
 
                                 return updated;
                             });
-
                             if (value.length === 4) {
                                 input3Ref.current?.focus();
                             }
@@ -154,7 +149,8 @@ const StepOne = ({
                     <View style={{
                         height: 1,
                         width: 4,
-                        backgroundColor: '#ccc'
+                        backgroundColor: '#ccc',
+                        marginHorizontal: 4
                     }}></View>
 
                     <TextInput
@@ -173,7 +169,7 @@ const StepOne = ({
                         keyboardType="number-pad"
                         maxLength={4}
                         placeholder='0000'
-                         selection={aadhaar.part3.length === 0 ? { start: 0, end: 0 } : undefined}
+                        selection={aadhaar.part3.length === 0 ? { start: 0, end: 0 } : undefined}
                         value={aadhaar.part3}
                         onKeyPress={({ nativeEvent }) => {
                             if (
@@ -187,13 +183,11 @@ const StepOne = ({
                             const value = text.replace(/\D/g, "");
                             setAadhaar(prev => {
                                 const updated = { ...prev, part3: value };
-
                                 updateAadhaar(
                                     updated.part1,
                                     updated.part2,
                                     updated.part3,
                                 );
-
                                 return updated;
                             });
 
@@ -214,7 +208,6 @@ const StepOne = ({
                             </Text>
                         </ScrollView>
                     </View>
-
 
                     <View style={styles.termsFooter}>
                         <TouchableOpacity
@@ -252,70 +245,7 @@ const StepOne = ({
                     </View>
                 </View>
             </View>
-            {/* <Text style={[styles.cardTitle, { marginHorizontal: 20 }]}>
-                Authentication type <Text style={{ color: 'red' }}>*</Text>
-            </Text>
-            <View style={[styles.card, {
-                flexDirection: 'row', padding: 4,
-                marginHorizontal: 14,
-                alignContent: 'center',
-                alignItems: 'center',
-                paddingHorizontal: 14
-            }]}>
-                <View style={{
-                    width: '50%'
-                }}>
-                    <RadioItem
-                        title="Aadhaar OTP"
-                        selected={
-                            validationMethod ===
-                            'Aadhaar OTP'
-                        }
-                        onPress={() => {
-                            setStepOne({
-                                ...stepOne,
-                                authType: 'Aadhaar OTP',
-                            });
-                            setLoginValue("")
-                            refreshCaptcha()
-                            setCaptchaValue("")
-                            Keyboard.dismiss()
-                            setValidationMethod(
-                                'Aadhaar OTP',
-                            )
-                        }
 
-                        }
-                    />
-                </View>
-                <View style={{
-                    width: '50%'
-
-                }}>
-                    <RadioItem
-                        title="Face Auth"
-                        selected={
-                            validationMethod ===
-                            'Face Auth'
-                        }
-                        onPress={() => {
-                            setStepOne({
-                                ...stepOne,
-                                authType: 'Face Auth',
-                            });
-                            setLoginValue("")
-                            refreshCaptcha()
-                            setCaptchaValue("")
-                            Keyboard.dismiss()
-                            setValidationMethod(
-                                'Face Auth',
-                            )
-                        }
-
-                        }
-                    />
-                </View>
-            </View> */}
             <View style={{ marginHorizontal: 24, marginVertical: 2, backgroundColor: 'white', padding: 16, borderRadius: 8 }}>
                 <View>
                     <Text style={styles.cardTitle}>Captcha <Text style={{ color: 'red' }}>*</Text></Text>

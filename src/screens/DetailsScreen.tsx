@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -15,10 +15,74 @@ import CustomBottomSheet from "./Profile/CustomBottomSheet";
 import RNPrint from 'react-native-print';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
+import { getPagePayload, useGetPageMutation } from "../redux/api/getPageApi";
+import { useDispatch, useSelector } from "react-redux";
+import { hideLoader, showLoader } from "../redux/slices/loaderSlice";
 
 const DetailsScreen = ({ route }: any) => {
   const { item } = route.params || {};
   const [open, setOpen] = useState(false);
+  const [abhaDetail, setAbhaDetail] = useState<any>([]);
+  const dispatch = useDispatch();
+  const loading = useSelector((state: any) => state.loader.loading);
+  const baseURL = useSelector((state: any) => state.abha.devERPBaseUrl)
+  const baseUrl = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
+  console.log("baseURLbaseURLbaseURLbaseURL", baseUrl)
+  const url = new URL(baseUrl).origin;
+
+  const [getPage] = useGetPageMutation();
+  const activeUser = useSelector(
+    (state: any) => state.abha.activeUser
+  );
+  const fetchProfile = async () => {
+    try {
+      dispatch(showLoader())
+      const payload = getPagePayload(
+        activeUser?.token,
+        "PatientABHAProfile",
+        item?.id
+      );
+
+
+      const response = await getPage(payload);
+      console.log("response", response, typeof response)
+      const parsedData = JSON.parse(response?.data.d);
+      const pagectl = parsedData.pagectl;
+      console.log("respon+ + + + + + ++ + + se", pagectl)
+      setAbhaDetail(pagectl);
+    } catch (error) {
+      dispatch(hideLoader())
+    } finally {
+      dispatch(hideLoader())
+    }
+
+
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, [route]);
+
+
+
+  const getValue = (fieldName: any) => {
+    console.log("abhaDetail", abhaDetail)
+    if (abhaDetail.length === 0) {
+      return;
+    }
+    const fieldMap = Object.fromEntries(
+      abhaDetail.map(item => [item.field, item.text])
+    );
+    console.log("statename", fieldMap)
+    return fieldMap[fieldName];
+  };
+
+  const authMethods = getValue("authmethods")
+    ?.split(",")
+    .map((item: string) => item.trim())
+    .filter(Boolean) || [];
+
+  console.log("authMethods++++++++++++++++++++++++++++++++", authMethods)
 
   const DetailRow = ({
     label,
@@ -90,251 +154,299 @@ const DetailsScreen = ({ route }: any) => {
           setOpen(true)
 
         }} />
+        {
+          loading ? <></> : <>
 
-        {/* Profile */}
-        <View style={styles.profileCard}>
-          {/* Top Row */}
-          <View style={styles.topRow}>
-            {item?.profilePhoto ? (
-              <Image
-                source={{
-                  uri: `${item.profilePhoto}`,
-                }}
-                style={styles.avatar}
-              />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>
-                  {item?.firstName?.charAt(0)}
-                  {item?.lastName?.charAt(0)}
-                </Text>
-              </View>
-            )}
+            {/* Profile */}
+            <View style={styles.profileCard}>
+              {/* Top Row */}
+              <View style={styles.topRow}>
+                {getValue("profilephoto") ? (
+                  <Image
+                    source={{
+                      uri: `${url}/fileupload/1/PatientABHAProfile/${item?.id}/profilephoto.jpeg`,
+                    }}
+                    style={styles.avatar}
+                  />
+                ) : (
+                  <View style={styles.avatarPlaceholder}>
+                    <Text style={styles.avatarText}>
+                      {getValue('firstname')}
+                      {getValue('lastname')}
+                    </Text>
+                  </View>
+                )}
 
-            <View style={styles.userInfo}>
-              <Text style={styles.name}>{item?.name}</Text>
-              <Text style={styles.address}>
-                {item?.preferredAbhaAddress}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor:
-                    item?.status === "ACTIVE"
-                      ? "#DCFCE7"
-                      : "#FEE2E2",
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.statusDot,
-                  {
-                    backgroundColor:
-                      item?.status === "ACTIVE"
-                        ? "#16A34A"
-                        : "#DC2626",
-                  },
-                ]}
-              />
-
-            </View>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.divider} />
-
-          {/* ABHA Number */}
-          <View style={styles.numberCard}>
-            <Text style={styles.numberLabel}>ABHA NUMBER</Text>
-
-            <Text style={styles.number}>
-              {item?.ABHANumber}
-            </Text>
-          </View>
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Digital Health Identity
-            </Text>
-
-            <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}>
-              <MaterialIcons
-                size={16}
-                name='approval' />
-              <Text style={styles.footerCheck}>Verified</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Personal Information */}
-        <View style={styles.cardTitle}>
-          <Text style={styles.cardText}>
-            Personal Information
-          </Text>
-          <MaterialIcons
-            name='person'
-            size={18}
-            color={'#ccc'}
-          />
-
-        </View>
-
-
-        <View style={styles.card}>
-
-          <DetailRow
-            label="First Name"
-            value={item?.firstName}
-          />
-
-          <DetailRow
-            label="Middle Name"
-            value={item?.middleName}
-          />
-
-          <DetailRow
-            label="Last Name"
-            value={item?.lastName}
-          />
-
-          <DetailRow
-            label="Gender"
-            value={
-              item?.gender === "M"
-                ? "Male"
-                : item?.gender === "F"
-                  ? "Female"
-                  : item?.gender
-            }
-          />
-
-          <DetailRow
-            label="DOB"
-            value={item?.dob}
-          />
-
-          <DetailRow
-            label="Mobile"
-            value={item?.mobile}
-          />
-        </View>
-
-        {/* Address */}
-        <View style={styles.cardTitle}>
-          <Text style={styles.cardText}>
-            Address
-          </Text>
-          <MaterialIcons
-            name='location-on'
-            size={18}
-            color={'#ccc'}
-          />
-
-        </View>
-
-
-        <View style={styles.card}>
-
-          <DetailRow
-            label="Address"
-            value={item?.address}
-          />
-
-          <DetailRow
-            label="District"
-            value={item?.districtName}
-          />
-
-          <DetailRow
-            label="State"
-            value={item?.stateName}
-          />
-        </View>
-
-        {/* Verification */}
-        <View style={styles.cardTitle}>
-          <Text style={styles.cardText}>
-            Verification
-          </Text>
-          <MaterialIcons
-            name='numbers'
-            size={18}
-            color={'#ccc'}
-          />
-
-        </View>
-
-
-        <View style={styles.card}>
-
-
-          <DetailRow
-            label="Verification"
-            value={item?.verificationStatus}
-          />
-
-          <DetailRow
-            label="Type"
-            value={item?.verificationType}
-          />
-
-          <DetailRow
-            label="KYC Verified"
-            value={
-              item?.kycVerified ? "Yes" : "No"
-            }
-            valueColor={item?.kycVerified ? 'black' : 'red'}
-          />
-
-          <DetailRow
-            label="Created"
-            value={item?.createdDate}
-          />
-        </View>
-
-        {/* Authentication */}
-        <View style={styles.cardTitle}>
-          <Text style={styles.cardText}>
-            Authentication Methods
-          </Text>
-          <MaterialIcons
-            name='login'
-            size={18}
-            color={'#ccc'}
-          />
-
-        </View>
-
-
-        <View style={styles.card}>
-
-
-          {item?.authMethods?.length ? (
-            item.authMethods.map(
-              (method: string, index: number) => (
-                <View
-                  key={index}
-                  style={styles.methodChip}
-                >
-                  <Text style={styles.methodText}>
-                    {method}
+                <View style={styles.userInfo}>
+                  <Text style={styles.name}>{getValue("abhaname")}</Text>
+                  <Text style={styles.address}>
+                    {
+                      getValue("mobileno")
+                    }
                   </Text>
                 </View>
-              )
-            )
-          ) : (
-            <Text style={styles.empty}>
-              No authentication methods
-            </Text>
-          )}
-        </View>
 
-        <View style={{ height: 30 }} />
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {
+                      backgroundColor:
+                        getValue('profilestatus') === "ACTIVE"
+                          ? "#DCFCE7"
+                          : "#FEE2E2",
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      {
+                        backgroundColor:
+                          getValue('profilestatus') === "ACTIVE"
+                            ? "#16A34A"
+                            : "#DC2626",
+                      },
+                    ]}
+                  />
+
+                </View>
+              </View>
+
+              {/* Divider */}
+              <View style={styles.divider} />
+
+              {/* ABHA Number */}
+              {
+                getValue("abhanumber") && <View style={styles.numberCard}>
+                  <Text style={styles.numberLabel}>ABHA NUMBER</Text>
+
+                  <Text style={styles.number}>
+                    {getValue("abhanumber")}
+                  </Text>
+                </View>
+              }
+
+              <View style={{ height: 8 }} />
+              {/* ABHA Number */}
+              {
+                getValue("aadharnumber") && <View style={styles.numberCard}>
+                  <Text style={styles.numberLabel}>AADHAR NUMBER</Text>
+
+                  <Text style={styles.number}>
+                    {getValue("aadharnumber")}
+                  </Text>
+                </View>
+              }
+
+
+              {/* Footer */}
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>
+                  Digital Health Identity
+                </Text>
+
+                <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}>
+                  <MaterialIcons
+                    size={16}
+                    name='approval' />
+                  <Text style={styles.footerCheck}>{getValue('verificationstatus')}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Personal Information */}
+            <View style={styles.cardTitle}>
+              <Text style={styles.cardText}>
+                Personal Information
+              </Text>
+              <MaterialIcons
+                name='person'
+                size={18}
+                color={'#ccc'}
+              />
+
+            </View>
+
+
+            <View style={styles.card}>
+
+              <DetailRow
+                label="First Name"
+                value={getValue('firstname')}
+              />
+
+              <DetailRow
+                label="Middle Name"
+                value={getValue("middlename")}
+              />
+
+              <DetailRow
+                label="Last Name"
+                value={getValue("lastname")}
+              />
+
+              <DetailRow
+                label="Gender"
+                value={
+                  getValue("gender") === "M"
+                    ? "Male"
+                    : getValue("gender") === "F"
+                      ? "Female"
+                      : getValue("gender")
+                }
+              />
+
+              <DetailRow
+                label="DOB"
+                value={getValue("dob")}
+              />
+
+
+            </View>
+
+
+
+            {/* Contact information */}
+            <View style={styles.cardTitle}>
+              <Text style={styles.cardText}>
+                Contact information
+              </Text>
+              <MaterialIcons
+                name='location-on'
+                size={18}
+                color={'#ccc'}
+              />
+
+            </View>
+
+
+            <View style={styles.card}>
+
+              <DetailRow
+                label="Mobile"
+                value={getValue("mobileno")}
+              />
+
+              <DetailRow
+                label="Contact - Mobile"
+                value={getValue("communicationmobile")}
+              />
+
+              <DetailRow
+                label="Contact - Email"
+                value={getValue("communicationemail")}
+              />
+            </View>
+
+            {/* Address */}
+            <View style={styles.cardTitle}>
+              <Text style={styles.cardText}>
+                Address
+              </Text>
+              <MaterialIcons
+                name='location-on'
+                size={18}
+                color={'#ccc'}
+              />
+
+            </View>
+
+
+            <View style={styles.card}>
+
+              <DetailRow
+                label="Address"
+                value={getValue("address")}
+              />
+
+              <DetailRow
+                label="District"
+                value={getValue("districtname")}
+              />
+
+              <DetailRow
+                label="State"
+                value={getValue("statename")}
+              />
+            </View>
+
+            {/* Verification */}
+            <View style={styles.cardTitle}>
+              <Text style={styles.cardText}>
+                Verification
+              </Text>
+              <MaterialIcons
+                name='numbers'
+                size={18}
+                color={'#ccc'}
+              />
+
+            </View>
+
+
+            <View style={styles.card}>
+
+
+              <DetailRow
+                label="Type"
+                value={getValue("verificationtype")}
+              />
+
+              <DetailRow
+                label="KYC Verified"
+                value={getValue("verificationstatus")}
+              />
+
+              <DetailRow
+                label="Created"
+                value={getValue("cdt")}
+              />
+            </View>
+
+            {/* Authentication */}
+            <View style={styles.cardTitle}>
+              <Text style={styles.cardText}>
+                Authentication Methods
+              </Text>
+              <MaterialIcons
+                name='login'
+                size={18}
+                color={'#ccc'}
+              />
+
+            </View>
+
+
+            <View style={styles.card}>
+
+
+              <View style={styles.methodsContainer}>
+                {authMethods.length > 0 ? (
+                  authMethods.map(
+                    (method: string, index: number) => (
+                      <View
+                        key={index}
+                        style={styles.methodChip}
+                      >
+                        <Text style={styles.methodText}>
+                          {method}
+                        </Text>
+                      </View>
+                    )
+                  )
+                ) : (
+                  <Text style={styles.empty}>
+                    No authentication methods
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View style={{ height: 30 }} />
+          </>
+        }
+
+
 
         {
           open && <CustomBottomSheet
@@ -414,16 +526,17 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 12,
     marginBottom: 15,
+    borderWidth: 0.8
   },
 
   avatarPlaceholder: {
     width: 60,
     height: 60,
     borderRadius: 8,
-    backgroundColor: "#000",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
+    borderWidth: 0.4
   },
 
   avatarText: {
@@ -679,5 +792,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     marginLeft: 8
+  },
+  methodsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10, // RN 0.71+ support
+  },
+
+  methodChip: {
+    width: "48%",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: "center",
+    backgroundColor: 'blue'
+  },
+
+  methodText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff'
   },
 });

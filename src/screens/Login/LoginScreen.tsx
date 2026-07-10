@@ -8,7 +8,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { encryptData } from '../../utils/encrypt';
@@ -531,7 +530,7 @@ const LoginScreen = () => {
                       </Text>
                     }
                   </View>
-                  {
+                  {/* {
                     <TouchableOpacity
                       onPress={() => {
                         setValidationMethod('')
@@ -558,7 +557,7 @@ const LoginScreen = () => {
                         Forgot ABHA number?
                       </Text>
                     </TouchableOpacity>
-                  }
+                  } */}
                 </View>
               }
               {
@@ -602,11 +601,11 @@ const LoginScreen = () => {
                     <TextInput
                       value={loginValue}
                       onChangeText={text => {
-                        setLoginValue(formatLoginInput(loginType, text))
+                        setLoginValue(formatLoginInput(validationMethod, text))
                       }}
                       placeholder={validationMethod === LOGIN_TYPES.MOBILE ? 'Enter mobile number' : 'Enter aadhaar number'}
                       maxLength={maxLength}
-                      keyboardType={getLoginKeyboardType(loginType)}
+                      keyboardType={getLoginKeyboardType(validationMethod)}
                       style={styles.input}
                     />
 

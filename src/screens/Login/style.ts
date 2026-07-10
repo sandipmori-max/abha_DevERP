@@ -454,8 +454,7 @@ export const styles = StyleSheet.create({
     fontSize: 20,
   },
    aadhaarContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "row", 
     alignContent:'center',
     alignItems:'center'
   },

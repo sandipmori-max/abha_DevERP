@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useState, } from "react";
+import React, { useEffect, useState, } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
 import { View, ActivityIndicator, Text, StyleSheet, Image } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-
 import IntroScreen from "../screens/Intro/IntroScreen";
 import LoginScreen from "../screens/Login/LoginScreen";
 import OtpVerificationScreen from "../screens/Login/OtpVerificationScreen";
@@ -77,8 +75,7 @@ const RootNavigator = () => {
   }, []);
 
   useEffect(() => {
-       console.log("Auth + + + + + + + + + + + + + + + + + +  isLoggedIn =>", proReduxData, appId, deviceName);
-  if (!proReduxData) return;
+   if (!proReduxData) return;
   if (!appId || !deviceName) return;
 
   const fetchAuth = async () => {
@@ -94,7 +91,7 @@ const RootNavigator = () => {
   };
 
   fetchAuth();
-}, [isLoggedIn, appId, deviceName]);
+}, [appId, deviceName]);
 
   if (!ready) {
     return (
@@ -243,5 +240,3 @@ const styles = StyleSheet.create({
     color: "#251d50",
   },
 });
-
-///https://play-lh.googleusercontent.com/4o2xmTJIFLjpToZnWJZUYsCYcWGuJlH_SVGue1a6z39stjg-1Xl3KWxggo9p2pSMYE94Ol2HjeF4Z-83rLmPyA=w240-h480-rw

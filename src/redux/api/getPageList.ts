@@ -2,12 +2,16 @@ import { BASE_URL_API, getErrorMessage } from "../../utils/helpers";
 import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { RootState } from "../store";
- 
-const MOCK_GET_PAGE_LIST = true;
+
+const MOCK_GET_PAGE_LIST = false;
 
 export interface GetPageListPayload {
     token: string;
     page: string;
+    fd: string,
+    td: string,
+    param: string,
+    branch: string
 }
 
 export const getPageListApi = baseApi.injectEndpoints({
@@ -77,7 +81,7 @@ export const getPageListApi = baseApi.injectEndpoints({
 
                 try {
                     const result = await queryFulfilled;
-                    
+
                     console.log(
                         "Response =>",
                         JSON.stringify(result.data, null, 2)
@@ -102,10 +106,18 @@ export const getPageListApi = baseApi.injectEndpoints({
 
 export const getPageListPayload = (
     token: string,
-    page: string
+    page: string,
+    fd: string,
+    td: string,
+    param: string,
+    branch: string,
 ): GetPageListPayload => ({
     token,
     page,
+    fd,
+    td,
+    param,
+    branch
 });
 
 export const {

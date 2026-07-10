@@ -42,13 +42,14 @@ export const profileAccountApi =
 
               return {
                 data: {
+                  
                   "ABHANumber": "91-7561-4088-XXXX",
-                  "preferredAbhaAddress": "username1997@sbx",
-                  "mobile": "******0903",
-                  "firstName": "Username",
-                  "middleName": "Kailas",
-                  "lastName": "Shelke",
-                  "name": "Username Kailas Shelke",
+                  "preferredAbhaAddress": "sandip1997@sbx",
+                  "mobile": "8154870903",
+                  "firstName": "Sandip test ",
+                  "middleName": "Test",
+                  "lastName": "Test",
+                  "name": "sandip",
                   "yearOfBirth": "1999",
                   "dayOfBirth": "26",
                   "monthOfBirth": "06",

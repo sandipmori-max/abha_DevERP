@@ -30,10 +30,22 @@ import { showToast } from '../../utils/toast';
 import { getLoginVerifyUserPayload, useLoginVerifyUserMutation } from '../../redux/api/loginVerifyUserApi';
 import { useLazyProfileAccountQuery } from '../../redux/api/profileAccountApi';
 import { setActiveUser } from '../../redux/slices/abhaSlice';
+import { useSavePageMutation } from '../../redux/api/savePageApi';
+import { useLazyProfileQrCodeQuery } from '../../redux/api/qrCodeApi';
+import { useLazyProfileAbhaCardQuery } from '../../redux/api/abhaCardApi';
 
 const OtpVerificationScreen = () => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch()
+
+  const [savePage] =
+    useSavePageMutation();
+
+  const [getQrCode] =
+    useLazyProfileQrCodeQuery();
+
+  const [getAbhaCard] =
+    useLazyProfileAbhaCardQuery();
 
   const route = useRoute<any>();
   const publicKey = useSelector(
@@ -52,7 +64,9 @@ const OtpVerificationScreen = () => {
   ] = useLoginVerifyUserMutation();
 
   const [getProfileAccount,] = useLazyProfileAccountQuery();
-
+  const activeUser = useSelector(
+    (state: any) => state.abha.activeUser
+  );
   const {
     loginType = '',
     loginValue = '',
@@ -123,9 +137,9 @@ const OtpVerificationScreen = () => {
 
       console.log(response);
 
-      const responseProfile =
+      const res =
         await getProfileAccount();
-      console.log('responseProfile ', responseProfile);
+      console.log('res ', res);
       // navigation.goBack();
 
     } catch (e) {
@@ -187,12 +201,104 @@ const OtpVerificationScreen = () => {
 
         console.log('response1+++++++++++++', response1);
 
-        const responseProfile =
+        const responseProfile: any =
           await getProfileAccount();
-        console.log('responseProfile ', responseProfile?.data);
-        setTimeout(() => {
-          navigation.goBack();
-        }, 200)
+
+        const res = responseProfile?.data;
+
+        const payloadRow = {
+          "patientabhaid": "",
+          "abhanumber": res?.ABHANumber,
+          "abhaname": res?.abhaName || res?.name,
+          "date": "",
+          "branchid": "",
+          "guid": "",
+          "patientid": "",
+          "aadharnumber": res?.aadharNumber,
+          "firstname": res?.firstName,
+          "middlename": res?.middleName,
+          "lastname": res?.lastName,
+          "fullname": res?.name,
+          "dob": `${res?.yearOfBirth}-${res?.monthOfBirth}-${res?.dayOfBirth}`,
+          "yearofbirth": res?.yearOfBirth,
+          "monthofbirth": res?.monthOfBirth,
+          "dayofbirth": res?.dayOfBirth,
+          "gender": res?.gender,
+          "mobileno": res?.mobile,
+          "communicationmobile": "",
+          "communicationemail": "",
+
+          "address": res?.address,
+          "statename": res?.stateName,
+          "statecode": res?.stateCode,
+          "districtname": res?.districtName,
+          "districtcode": res?.districtCode,
+
+          "subdistrictname": res?.subdistrictName,
+          "pincode": res?.pincode,
+
+          "message": "",
+          "txnid": "",
+
+          "token": "",
+          "tokenexpiresin": "",
+          "refreshtoken": "",
+          "refreshexpiresin": "",
+
+          "preferredabhaaddress": res?.preferredAbhaAddress,
+
+          "photo": res?.photo,
+          "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${res?.profilePhoto}`,
+          "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${res?.kycphoto}`,
+
+          "localizedname": res?.localizedDetails?.name,
+          "localizedgender": res?.localizedDetails?.gender,
+          "localizedtownname": res?.localizedDetails?.townName,
+          "localizeddistrictname": res?.localizedDetails?.districtName,
+          "localizedvillagename": res?.localizedDetails?.villageName,
+          "localizedstatename": res?.localizedDetails?.stateName,
+          "phraddress": res?.phraddress,
+          "authmethods": res?.authMethods?.join(","),
+          "tags": res?.tags,
+          "rawresponse": "",
+          "localizedlabels": res?.localizedDetails?.localizedLabels,
+          "registrationsource": "",
+          "profilestatus": res?.profileStatus,
+          "abhatype": res?.abhatype,
+          "abhastatus": res?.status,
+          "verificationtype": res?.verificationType,
+          "verificationstatus": res?.verificationStatus,
+          "iskycverified": res?.kycVerified,
+          "isnew": "false",
+          "createdDate": "",
+          "lastsyncdate": "",
+          "cuid": "",
+          "authby": "",
+          "status": "",
+          "cdt": "",
+          "muid": "",
+          "mdt": ""
+
+        }
+        const payloadData = {
+          token: activeUser?.token,
+          page: "PatientABHAProfile",
+          data: JSON.stringify(payloadRow),
+        };
+
+        console.log("payloadData", payloadData)
+
+        await savePage(payloadData).unwrap();
+
+        showToast(
+          "success",
+          "Record inserted successfully..."
+        );
+
+        setTimeout(async () => {
+          await getQrCode();
+          await getAbhaCard();
+        }, 1800)
       } else {
         showToast(
           "error",
@@ -205,6 +311,9 @@ const OtpVerificationScreen = () => {
       dispatch(hideLoader());
     } finally {
       dispatch(hideLoader());
+      setTimeout(() => {
+        navigation.goBack();
+      }, 200)
     }
 
   };
@@ -338,10 +447,6 @@ const OtpVerificationScreen = () => {
           >
             {result?.message || 'Please enter the OTP sent to your registered mobile number.'}
           </Text>
-
-
-
-
 
           {/* Hidden Input */}
 
@@ -662,7 +767,7 @@ const styles =
       height: 48,
       borderRadius: 8,
       backgroundColor:
-        '#251d50',
+        '#d67031',
       justifyContent:
         'center',
       alignItems: 'center',

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Dimensions,
   FlatList,
   Keyboard,
   SafeAreaView,
@@ -14,6 +15,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../../redux/slices/loaderSlice";
 import AbhaUserItem from "./AbhaUserItem";
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import NoData from "../../Components/NoData";
+import { Directions } from "react-native-gesture-handler";
 
 const ProfileScreen = ({ route }: any) => {
 
@@ -29,47 +32,47 @@ const ProfileScreen = ({ route }: any) => {
   const [seachActive, setSearchActive] = useState(false)
   const inputRef = useRef<TextInput>(null);
 
-useFocusEffect(
-  useCallback(() => {
-    const fetchData = async () => {
-      try {
-        dispatch(showLoader());
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          dispatch(showLoader());
 
-        const response = await getPageList(
-          getPageListPayload(
-            activeUser?.token,
-            "PatientABHAProfile",
-            "",
-            "",
-            "",
-            ""
-          )
-        ).unwrap();
+          const response = await getPageList(
+            getPageListPayload(
+              activeUser?.token,
+              "PatientABHAProfile",
+              "",
+              "",
+              "",
+              ""
+            )
+          ).unwrap();
 
-        console.log("response", response);
+          console.log("response", response);
 
-        const result = JSON.parse(response.d);
-        const dataArray = result.data;
+          const result = JSON.parse(response.d);
+          const dataArray = result.data;
 
-        console.log(dataArray);
+          console.log(dataArray);
 
-        setAbhaUsersList(dataArray);
+          setAbhaUsersList(dataArray);
 
-      } catch (err) {
-        console.log("err", err);
-      } finally {
-        dispatch(hideLoader());
+        } catch (err) {
+          console.log("err", err);
+        } finally {
+          dispatch(hideLoader());
+        }
+      };
+
+      if (activeUser?.token) {
+        fetchData();
       }
-    };
 
-    if (activeUser?.token) {
-      fetchData();
-    }
-
-    // optional cleanup
-    return () => {};
-  }, [activeUser?.token])
-);
+      // optional cleanup
+      return () => { };
+    }, [activeUser?.token])
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -82,7 +85,7 @@ useFocusEffect(
         bounces={false}
       >
         <Header
-        inputRef={inputRef}
+          inputRef={inputRef}
           search={search}
           seachActive={seachActive}
           setSearch={setSearch}
@@ -90,31 +93,51 @@ useFocusEffect(
           title="Dashboard"
           isSearch={true}
           isMenu={true}
-          handleSearch={()=>{
+          handleSearch={() => {
             inputRef.current?.focus();
             setSearch("")
             setSearchActive(!seachActive)
-
           }}
-          
+
         />
-        <FlatList
-          data={abhaUsersList}
-          keyExtractor={(item) => item.txnId}
-          renderItem={({ item }) => (
-            <AbhaUserItem
-              item={item}
-              onPress={(item) => {
-                navigation.navigate('Details', {
-                  item
-                })
+        {
+          !isLoading && abhaUsersList?.length > 0 ? <>
+
+            <FlatList
+              data={abhaUsersList}
+              keyExtractor={(item) => item.txnId}
+              renderItem={({ item }) => (
+                <AbhaUserItem
+                  item={item}
+                  onPress={(item) => {
+                    navigation.navigate('Details', {
+                      item
+                    })
+                  }}
+                />
+              )}
+              ListFooterComponent={() => {
+                return (<View style={{ height: 80, width: 10 }}></View>)
               }}
             />
-          )}
-          ListFooterComponent={() => {
-            return (<View style={{ height: 80, width: 10 }}></View>)
-          }}
-        />
+          </> :
+            <>
+              {
+                !isLoading && <View style={{
+                  justifyContent: 'center',
+                  alignContent: 'center',
+                  alignItems: 'center',
+                  height: Dimensions.get('screen').height * 0.75, width: Dimensions.get('screen').width
+                }}>
+                  <NoData />
+                </View>
+              }
+            </>
+
+
+        }
+
+
       </ScrollView>
     </SafeAreaView>
   );

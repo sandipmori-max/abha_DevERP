@@ -175,6 +175,16 @@ export const enrollmentApi = baseApi.injectEndpoints({
         otpSystem: "abdm",
       };
 
+        case "ABHA Address":
+      return {
+        scope: [
+          "abha-address-login",
+        "aadhaar-verify"
+        ],
+        loginHint: "abha-address",
+        loginId: encryptedValue,
+        otpSystem: "aadhaar",
+      };
     default:
       throw new Error(
         `Unsupported enrollmentType: ${enrollmentType}`

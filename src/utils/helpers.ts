@@ -192,6 +192,7 @@ export const getIsFormValid = (loginType, loginValue, isFromForgotAbhaNumber, is
 
 export const getErrorMessage = (error: any) => {
   return (
+    error?.error?.data[0]?.message ||
     error?.error?.authMethods ||
     error?.error?.mobile ||
 
@@ -460,61 +461,70 @@ export const getPayloadForProfile = (stepOne, stepTwo, stepThree, stepFour, resp
   };
 
   console.log("payload.data.authMethods.join------------------------------------------------", payload.data.authMethods.join(","))
-  const payloadRow = {
-    "abhanumber": payload.data.ABHANumber,
-    "abhaname": payload.data.abhaName,
-    "aadharnumber": payload.aadharNumber,
-    "firstname": payload.data.firstName,
-    "middlename": payload.data.middleName,
-    "lastname": payload.data.lastName,
-    "fullname": payload.data.name,
-    "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
-    "yearofbirth": payload.data.yearOfBirth,
-    "monthofbirth": payload.data.monthOfBirth,
-    "dayofbirth": payload.data.dayOfBirth,
-    "gender": payload.data.gender,
-    "mobileno": payload.data.mobile,
-    "communicationmobile": payload.communicationMobile,
-    "communicationemail": payload.communicationEmail,
+ 
+   const payloadRow = {
+        "patientabhaid": "",
+        "abhanumber": payload.data.ABHANumber,
+        "abhaname": payload.data.abhaName,
+        "aadharnumber": payload.aadharNumber,
+        "firstname": payload.data.firstName,
+        "middlename": payload.data.middleName,
+        "lastname": payload.data.lastName,
+        "fullname": payload.data.name,
+        "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
+        "yearofbirth": payload.data.yearOfBirth,
+        "monthofbirth": payload.data.monthOfBirth,
+        "dayofbirth": payload.data.dayOfBirth,
+        "gender": payload.data.gender,
+        "mobileno": payload.data.mobile,
+        "communicationmobile": payload.communicationMobile,
+        "communicationemail": payload.communicationEmail,
 
-    "address": payload.data.address,
-    "statename": payload.data.stateName,
-    "statecode": payload.data.stateCode,
-    "districtname": payload.data.districtName,
-    "districtcode": payload.data.districtCode,
+        "address": payload.data.address,
+        "statename": payload.data.stateName,
+        "statecode": payload.data.stateCode,
+        "districtname": payload.data.districtName,
+        "districtcode": payload.data.districtCode,
 
-    "subdistrictname": payload.data.subdistrictName,
-    "pincode": payload.data.pincode,
+        "subdistrictname": payload.data.subdistrictName,
+        "pincode": payload.data.pincode,
+        
+        "message": "",
+        "txnid": payload.txnId,
+        
+        "token": payload.tokens,
+        "tokenexpiresin": payload.expiresIn,
+        "refreshtoken": payload.refreshToken,
+        "refreshexpiresin": payload.refreshExpiresIn,
+        
+        "preferredabhaaddress": payload.data.preferredAbhaAddress,
+      
+        "photo": payload.data.photo,
+        "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${payload.data.profilePhoto}`,
+        "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${payload.data.kycphoto}`,
 
-    "txnid": payload.txnId,
-    "token": payload.tokens,
-    "tokenexpiresin": payload.expiresIn,
-    "refreshtoken": payload.refreshToken,
-    "refreshexpiresin": payload.refreshExpiresIn,
-    "preferredabhaaddress": payload.data.preferredAbhaAddress,
-    "photo": payload.data.photo,
-    "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${payload.data.profilePhoto}`,
-    "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${payload.data.kycphoto}`,
-
-    "localizedname": payload.data.localizedDetails.name,
-    "localizedgender": payload.data.localizedDetails.gender,
-    "localizedtownname": payload.data.localizedDetails.townName,
-    "localizeddistrictname": payload.data.localizedDetails.districtName,
-    "localizedvillagename": payload.data.localizedDetails.villageName,
-    "localizedstatename": payload.data.localizedDetails.stateName,
-    "phraddress": payload.data.phraddress,
-    "authmethods": payload.data.authMethods.join(","),
-    "tags": payload.data.tags,
-    "localizedlabels": payload.data.localizedDetails.localizedLabels,
-
-    "profilestatus": payload.data.profileStatus,
-    "abhatype": payload.data.abhatype,
-    "abhastatus": payload.data.status,
-    "verificationtype": payload.data.verificationType,
-    "verificationstatus": payload.data.verificationStatus,
-    "iskycverified": payload.data.kycVerified,
-    "isnew": payload.isNew,
-  }
+        "localizedname": payload.data.localizedDetails.name,
+        "localizedgender": payload.data.localizedDetails.gender,
+        "localizedtownname": payload.data.localizedDetails.townName,
+        "localizeddistrictname": payload.data.localizedDetails.districtName,
+        "localizedvillagename": payload.data.localizedDetails.villageName,
+        "localizedstatename": payload.data.localizedDetails.stateName,
+        "phraddress": payload.data.phraddress,
+        "authmethods": payload.data.authMethods.join(","),
+        "tags": payload.data.tags,
+        "rawresponse":"",
+        "localizedlabels": payload.data.localizedDetails.localizedLabels,
+        "registrationsource": "",
+        "profilestatus": payload.data.profileStatus,
+        "abhatype": payload.data.abhatype,
+        "abhastatus": payload.data.status,
+        "verificationtype": payload.data.verificationType,
+        "verificationstatus": payload.data.verificationStatus,
+        "iskycverified": payload.data.kycVerified,
+        "isnew": payload.isNew,
+        "date": payload?.data?.createdDate,
+        "cdt": new Date()
+      }
   return payloadRow
 }
 

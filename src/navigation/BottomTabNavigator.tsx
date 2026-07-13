@@ -62,7 +62,7 @@ const BottomTabNavigator = () => {
         'Mobile Number',
         'Aadhaar Number',
         'ABHA Number',
-        // 'ABHA Address'
+        'ABHA Address'
     ];
 
     const registerOptions = [
@@ -206,6 +206,9 @@ const BottomTabNavigator = () => {
                             },
                             confirmation && bottomSheetType !== 'Login' && {
                                 height: '34%'
+                            },
+                            confirmation && bottomSheetType === 'Login' && {
+                                height: '56%'
                             }
                         ]}
                     >

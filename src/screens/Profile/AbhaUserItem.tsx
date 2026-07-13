@@ -84,21 +84,27 @@ const AbhaUserItem = ({ item, onPress }: any) => {
             </View>
 
             {/* ABHA Number */}
-            <View style={styles.row}>
+            {
+                item.number && <View style={styles.row}>
                 <MaterialIcons
                     name='numbers'
                     size={18}
                     color="#251d50"
                 />
                 <Text style={styles.label}>ABHA</Text>
-                <Text style={styles.value}>
+                <Text style={[styles.value, {
+                    color: '#d67031'
+                }]}>
                     {item.number}
                 </Text>
 
                 <TouchableOpacity
                     onPress={() => {
-                        Clipboard.setString(item.number);
-                        showToast('success', 'ABHA Number copied successfully')
+                        if (item.number) {
+                            Clipboard.setString(item.number);
+                            showToast('success', 'ABHA Number copied successfully')
+                        }
+
                     }}
                 >
                     <MaterialIcons
@@ -108,11 +114,14 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                     />
                 </TouchableOpacity>
             </View>
+            }
+            
 
 
 
             {/* ABHA Address */}
-            <View style={styles.row}>
+            {
+                item.address && <View style={styles.row}>
                 <MaterialIcons
                     name='person'
                     size={18}
@@ -126,6 +135,8 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                 </Text>
             </View>
 
+            }
+            
 
 
             {/* Footer */}
@@ -136,7 +147,9 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                         size={16}
                         color="#6B7280"
                     />
-                    <Text style={styles.footerText}>
+                    <Text style={[styles.footerText, {
+                        color:'blue'
+                    }]}>
                         {item?.date}
                     </Text>
                 </View>

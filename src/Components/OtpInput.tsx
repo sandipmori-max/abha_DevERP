@@ -21,6 +21,7 @@ const OtpInput = ({
   handleOTPReSendCalled
 }: any) => {
   const [otp, setOtp] = useState('');
+  const [resendCount, setResendCount] = useState(0);
   const [timer, setTimer] =
     useState(60);
 
@@ -129,6 +130,11 @@ const OtpInput = ({
   };
 
   const handleResend = () => {
+    if (resendCount >= 2) {
+      return;
+    }
+
+    setResendCount(prev => prev + 1);
     setTimer(60);
     setOtp('');
 
@@ -221,13 +227,13 @@ const OtpInput = ({
                     >
                       {
                         otp[
-                          index
+                        index
                         ]
                       }
                     </Text>
                   ) : isActive &&
                     otp.length <
-                      6 ? (
+                    6 ? (
                     <Animated.View
                       style={[
                         styles.cursor,
@@ -262,8 +268,11 @@ const OtpInput = ({
         </Text>
 
         <TouchableOpacity
-          disabled={timer > 0}
-          onPress={() =>{
+          disabled={
+            timer > 0 ||
+            resendCount >= 2
+          }
+          onPress={() => {
             handleResend()
             handleOTPReSendCalled()
           }
@@ -272,12 +281,14 @@ const OtpInput = ({
           <Text
             style={[
               styles.resendText,
-              timer > 0 && {
-                opacity: 0.4,
-              },
+             (timer > 0 || resendCount >= 2) && {
+  opacity: 0.4,
+}
             ]}
           >
-            Resend OTP
+            {resendCount >= 2
+              ? 'Resend limit reached'
+              : 'Resend OTP'}
           </Text>
         </TouchableOpacity>
       </View>

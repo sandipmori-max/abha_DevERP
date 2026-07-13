@@ -33,6 +33,8 @@ import { setActiveUser } from '../../redux/slices/abhaSlice';
 import { useSavePageMutation } from '../../redux/api/savePageApi';
 import { useLazyProfileQrCodeQuery } from '../../redux/api/qrCodeApi';
 import { useLazyProfileAbhaCardQuery } from '../../redux/api/abhaCardApi';
+import { useAbhaAddressRequestOtpMutation } from '../../redux/api/abhaAddressLoginApi';
+import { useAbhaAddressVerifyOtpMutation } from '../../redux/api/abhaAddressVerifyApi';
 
 const OtpVerificationScreen = () => {
   const navigation = useNavigation<any>();
@@ -46,6 +48,9 @@ const OtpVerificationScreen = () => {
 
   const [getAbhaCard] =
     useLazyProfileAbhaCardQuery();
+  const [
+    abhaAddressRequestOtp
+  ] = useAbhaAddressRequestOtpMutation();
 
   const route = useRoute<any>();
   const publicKey = useSelector(
@@ -71,13 +76,18 @@ const OtpVerificationScreen = () => {
     loginType = '',
     loginValue = '',
     validationMethod = '',
-    result
-  } = route.params || {};
+    result,
+    payload,
+    otpMethod
+  } = route?.params || {};
 
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(60);
-
+  const [resendCount, setResendCount] = useState(0);
   const inputRef = useRef<TextInput>(null);
+  const [
+    verifyAbhaOtp
+  ] = useAbhaAddressVerifyOtpMutation();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -104,7 +114,75 @@ const OtpVerificationScreen = () => {
   };
 
   const handleResend = async () => {
+    if (resendCount >= 2) {
+      return;
+    }
 
+    setResendCount(prev => prev + 1);
+    if (loginType === 'ABHA Address') {
+      try {
+        const result = await abhaAddressRequestOtp(payload).unwrap();
+
+        console.log("result+++++++++++++++", result)
+        showToast(
+          "success",
+          result?.message || "OTP sent successfully"
+        );
+
+        if (otpMethod === 'Aadhaar OTP') {
+          const encryptedOtp =
+            encryptData(
+              loginValue,
+              publicKey,
+            );
+          const res = await verifyAbhaOtp({
+            scope: [
+              "abha-address-login",
+              "aadhaar-verify"
+            ],
+            authData: {
+              authMethods: [
+                "otp"
+              ],
+              otp: {
+                txnId: txnId,
+                otpValue:
+                  encryptedOtp
+              }
+            }
+          }).unwrap();
+
+          console.log("resssssss", res)
+        } else if (otpMethod === 'Mobile OTP') {
+          const encryptedOtp =
+            encryptData(
+              loginValue,
+              publicKey,
+            );
+          const res = await verifyAbhaOtp({
+            scope: [
+              "abha-address-login",
+              "mobile-verify"
+            ],
+            authData: {
+              authMethods: [
+                "otp"
+              ],
+              otp: {
+                txnId: txnId,
+                otpValue:
+                  encryptedOtp
+              }
+            }
+          }).unwrap();
+          console.log("resssssss + + ++ + + + ++ + + + + + + + +", res)
+        }
+        dispatch(hideLoader());
+      } catch (error) {
+        dispatch(hideLoader());
+      }
+      return;
+    }
     try {
       dispatch(showLoader());
       setTimer(60);
@@ -160,6 +238,255 @@ const OtpVerificationScreen = () => {
       );
       return;
     }
+
+    if (loginType === 'ABHA Address') {
+      try {
+
+        if (otpMethod === 'Aadhaar OTP') {
+          const encryptedOtp =
+            encryptData(
+              loginValue,
+              publicKey,
+            );
+          const response = await verifyAbhaOtp({
+            scope: [
+              "abha-address-login",
+              "aadhaar-verify"
+            ],
+            authData: {
+              authMethods: [
+                "otp"
+              ],
+              otp: {
+                txnId: txnId,
+                otpValue:
+                  encryptedOtp
+              }
+            }
+          }).unwrap();
+
+          console.log("responseresponseresponseresponseresponse", response)
+
+          if (response?.authResult === 'success') {
+            showToast(
+              "success",
+              response?.message || "Verification successful"
+            );
+
+            const payload =
+              getLoginVerifyUserPayload(
+                response?.accounts[0]?.ABHANumber,
+                response?.txnId
+              );
+
+            const response1 =
+              await loginVerifyUser(
+                payload
+              ).unwrap();
+
+            console.log('response1+++++++++++++', response1);
+
+            const responseProfile: any =
+              await getProfileAccount();
+
+            const res = responseProfile?.data;
+
+            const payloadRow = {
+              "abhanumber": res?.ABHANumber,
+              "abhaname": res?.abhaName || res?.name,
+              "aadharnumber": res?.aadharNumber,
+              "firstname": res?.firstName,
+              "middlename": res?.middleName,
+              "lastname": res?.lastName,
+              "fullname": res?.name,
+              "dob": `${res?.yearOfBirth}-${res?.monthOfBirth}-${res?.dayOfBirth}`,
+              "yearofbirth": res?.yearOfBirth,
+              "monthofbirth": res?.monthOfBirth,
+              "dayofbirth": res?.dayOfBirth,
+              "gender": res?.gender,
+              "mobileno": res?.mobile,
+              "address": res?.address,
+              "statename": res?.stateName,
+              "statecode": res?.stateCode,
+              "districtname": res?.districtName,
+              "districtcode": res?.districtCode,
+              "subdistrictname": res?.subdistrictName,
+              "pincode": res?.pincode,
+              "preferredabhaaddress": res?.preferredAbhaAddress,
+              "photo": res?.photo,
+              "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${res?.profilePhoto}`,
+              "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${res?.kycphoto}`,
+              "localizedname": res?.localizedDetails?.name,
+              "localizedgender": res?.localizedDetails?.gender,
+              "localizedtownname": res?.localizedDetails?.townName,
+              "localizeddistrictname": res?.localizedDetails?.districtName,
+              "localizedvillagename": res?.localizedDetails?.villageName,
+              "localizedstatename": res?.localizedDetails?.stateName,
+              "phraddress": res?.phraddress,
+              "authmethods": res?.authMethods?.join(","),
+              "tags": res?.tags,
+              "localizedlabels": res?.localizedDetails?.localizedLabels,
+              "registrationsource": "",
+              "profilestatus": res?.profileStatus,
+              "abhatype": res?.abhatype,
+              "abhastatus": res?.status,
+              "verificationtype": res?.verificationType,
+              "verificationstatus": res?.verificationStatus,
+              "iskycverified": res?.kycVerified,
+              "isnew": "false",
+
+            }
+            const payloadData = {
+              token: activeUser?.token,
+              page: "PatientABHAProfile",
+              data: JSON.stringify(payloadRow),
+            };
+
+            console.log("payloadData", payloadData)
+
+            await savePage(payloadData).unwrap();
+
+            showToast(
+              "success",
+              "Record inserted successfully..."
+            );
+
+            setTimeout(async () => {
+              await getQrCode();
+              await getAbhaCard();
+            }, 1800)
+          } else {
+            showToast(
+              "error",
+              response?.message || "Invalid OTP"
+            );
+          }
+
+        } else if (otpMethod === 'Mobile OTP') {
+          const encryptedOtp =
+            encryptData(
+              loginValue,
+              publicKey,
+            );
+          const response = await verifyAbhaOtp({
+            scope: [
+              "abha-address-login",
+              "mobile-verify"
+            ],
+            authData: {
+              authMethods: [
+                "otp"
+              ],
+              otp: {
+                txnId: txnId,
+                otpValue:
+                  encryptedOtp
+              }
+            }
+          }).unwrap();
+
+          if (response?.authResult === 'success') {
+            showToast(
+              "success",
+              response?.message || "Verification successful"
+            );
+
+            const payload =
+              getLoginVerifyUserPayload(
+                response?.accounts[0]?.ABHANumber,
+                response?.txnId
+              );
+
+            const response1 =
+              await loginVerifyUser(
+                payload
+              ).unwrap();
+
+            console.log('response1+++++++++++++', response1);
+
+            const responseProfile: any =
+              await getProfileAccount();
+
+            const res = responseProfile?.data;
+
+            const payloadRow = {
+              "abhanumber": res?.ABHANumber,
+              "abhaname": res?.abhaName || res?.name,
+              "aadharnumber": res?.aadharNumber,
+              "firstname": res?.firstName,
+              "middlename": res?.middleName,
+              "lastname": res?.lastName,
+              "fullname": res?.name,
+              "dob": `${res?.yearOfBirth}-${res?.monthOfBirth}-${res?.dayOfBirth}`,
+              "yearofbirth": res?.yearOfBirth,
+              "monthofbirth": res?.monthOfBirth,
+              "dayofbirth": res?.dayOfBirth,
+              "gender": res?.gender,
+              "mobileno": res?.mobile,
+              "address": res?.address,
+              "statename": res?.stateName,
+              "statecode": res?.stateCode,
+              "districtname": res?.districtName,
+              "districtcode": res?.districtCode,
+              "subdistrictname": res?.subdistrictName,
+              "pincode": res?.pincode,
+              "preferredabhaaddress": res?.preferredAbhaAddress,
+              "photo": res?.photo,
+              "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${res?.profilePhoto}`,
+              "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${res?.kycphoto}`,
+              "localizedname": res?.localizedDetails?.name,
+              "localizedgender": res?.localizedDetails?.gender,
+              "localizedtownname": res?.localizedDetails?.townName,
+              "localizeddistrictname": res?.localizedDetails?.districtName,
+              "localizedvillagename": res?.localizedDetails?.villageName,
+              "localizedstatename": res?.localizedDetails?.stateName,
+              "phraddress": res?.phraddress,
+              "authmethods": res?.authMethods?.join(","),
+              "tags": res?.tags,
+              "localizedlabels": res?.localizedDetails?.localizedLabels,
+              "registrationsource": "",
+              "profilestatus": res?.profileStatus,
+              "abhatype": res?.abhatype,
+              "abhastatus": res?.status,
+              "verificationtype": res?.verificationType,
+              "verificationstatus": res?.verificationStatus,
+              "iskycverified": res?.kycVerified,
+              "isnew": "false",
+
+            }
+            const payloadData = {
+              token: activeUser?.token,
+              page: "PatientABHAProfile",
+              data: JSON.stringify(payloadRow),
+            };
+
+            console.log("payloadData", payloadData)
+
+            await savePage(payloadData).unwrap();
+
+            showToast(
+              "success",
+              "Record inserted successfully..."
+            );
+
+            setTimeout(async () => {
+              await getQrCode();
+              await getAbhaCard();
+            }, 1800)
+          } else {
+            showToast(
+              "error",
+              response?.message || "Invalid OTP"
+            );
+          }
+        }
+        dispatch(hideLoader());
+      } catch (error) {
+        dispatch(hideLoader());
+      }
+      return;
+    }
+
     try {
       dispatch(showLoader());
       console.log('OTP:', otp);
@@ -249,7 +576,7 @@ const OtpVerificationScreen = () => {
           "verificationstatus": res?.verificationStatus,
           "iskycverified": res?.kycVerified,
           "isnew": "false",
-          
+
         }
         const payloadData = {
           token: activeUser?.token,
@@ -519,7 +846,8 @@ const OtpVerificationScreen = () => {
 
             <TouchableOpacity
               disabled={
-                timer > 0
+                timer > 0 ||
+                resendCount >= 2
               }
               onPress={
                 handleResend
@@ -528,12 +856,14 @@ const OtpVerificationScreen = () => {
               <Text
                 style={[
                   styles.resendText,
-                  timer > 0 && {
+                  (timer > 0 || resendCount >= 2) && {
                     opacity: 0.4,
-                  },
+                  }
                 ]}
               >
-                Resend OTP
+                {resendCount >= 2
+                  ? 'Resend limit reached'
+                  : 'Resend OTP'}
               </Text>
             </TouchableOpacity>
           </View>

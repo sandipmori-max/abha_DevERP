@@ -205,10 +205,10 @@ const BottomTabNavigator = () => {
                                 ],
                             },
                             confirmation && bottomSheetType !== 'Login' && {
-                                height: '34%'
+                                height: '36%'
                             },
                             confirmation && bottomSheetType === 'Login' && {
-                                height: '56%'
+                                height: '58%'
                             }
                         ]}
                     >
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     bottomSheet: {
         position: 'absolute',
         bottom: 0,
-        height: '48%',
+        height: '52%',
         width: '94%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,

@@ -35,6 +35,7 @@ import { useLazyProfileQrCodeQuery } from '../../redux/api/qrCodeApi';
 import { useLazyProfileAbhaCardQuery } from '../../redux/api/abhaCardApi';
 import { useAbhaAddressRequestOtpMutation } from '../../redux/api/abhaAddressLoginApi';
 import { useAbhaAddressVerifyOtpMutation } from '../../redux/api/abhaAddressVerifyApi';
+import { useLazyAbhaProfileQuery } from '../../redux/api/profileByTokenApi';
 
 const OtpVerificationScreen = () => {
   const navigation = useNavigation<any>();
@@ -69,6 +70,9 @@ const OtpVerificationScreen = () => {
   ] = useLoginVerifyUserMutation();
 
   const [getProfileAccount,] = useLazyProfileAccountQuery();
+  const [
+    getAbhaProfile,
+  ] = useLazyAbhaProfileQuery();
   const activeUser = useSelector(
     (state: any) => state.abha.activeUser
   );
@@ -105,13 +109,6 @@ const OtpVerificationScreen = () => {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const maskNumber = (number: string) => {
-    if (!number) {
-      return '******0000';
-    }
-
-    return `******${number.slice(-4)}`;
-  };
 
   const handleResend = async () => {
     if (resendCount >= 2) {
@@ -273,27 +270,18 @@ const OtpVerificationScreen = () => {
               response?.message || "Verification successful"
             );
 
-            const payload =
-              getLoginVerifyUserPayload(
-                response?.accounts[0]?.ABHANumber,
-                response?.txnId
-              );
-
-            const response1 =
-              await loginVerifyUser(
-                payload
-              ).unwrap();
-
-            console.log('response1+++++++++++++', response1);
-
             const responseProfile: any =
-              await getProfileAccount();
+              await getAbhaProfile({
+                json_web_token: response?.tokens?.token,
+              }).unwrap();
+            
+            const res = responseProfile;
 
-            const res = responseProfile?.data;
-
+            console.log("responseProfileresponseProfileresponseProfileresponseProfile", responseProfile)
             const payloadRow = {
-              "abhanumber": res?.ABHANumber,
-              "abhaname": res?.abhaName || res?.name,
+              "patientabhaid": "",
+              "abhanumber": res?.abhaNumber,
+              "abhaname": res?.abhaAddress || res?.name,
               "aadharnumber": res?.aadharNumber,
               "firstname": res?.firstName,
               "middlename": res?.middleName,
@@ -342,7 +330,7 @@ const OtpVerificationScreen = () => {
               data: JSON.stringify(payloadRow),
             };
 
-            console.log("payloadData", payloadData)
+            console.log("payloadData-----------", payloadData)
 
             await savePage(payloadData).unwrap();
 
@@ -352,8 +340,9 @@ const OtpVerificationScreen = () => {
             );
 
             setTimeout(async () => {
-              await getQrCode();
-              await getAbhaCard();
+              // await getQrCode();
+              // await getAbhaCard();
+              navigation.goBack()
             }, 1800)
           } else {
             showToast(
@@ -391,27 +380,17 @@ const OtpVerificationScreen = () => {
               response?.message || "Verification successful"
             );
 
-            const payload =
-              getLoginVerifyUserPayload(
-                response?.accounts[0]?.ABHANumber,
-                response?.txnId
-              );
-
-            const response1 =
-              await loginVerifyUser(
-                payload
-              ).unwrap();
-
-            console.log('response1+++++++++++++', response1);
-
             const responseProfile: any =
-              await getProfileAccount();
+              await getAbhaProfile({
+                json_web_token: response?.tokens?.token,
+              }).unwrap();
 
-            const res = responseProfile?.data;
+            const res = responseProfile;
 
             const payloadRow = {
-              "abhanumber": res?.ABHANumber,
-              "abhaname": res?.abhaName || res?.name,
+              "patientabhaid": "",
+              "abhanumber": res?.abhaNumber,
+              "abhaname": res?.abhaAddress || res?.name,
               "aadharnumber": res?.aadharNumber,
               "firstname": res?.firstName,
               "middlename": res?.middleName,
@@ -470,8 +449,9 @@ const OtpVerificationScreen = () => {
             );
 
             setTimeout(async () => {
-              await getQrCode();
-              await getAbhaCard();
+              // await getQrCode();
+              // await getAbhaCard();
+               navigation.goBack()
             }, 1800)
           } else {
             showToast(
@@ -534,6 +514,7 @@ const OtpVerificationScreen = () => {
         const res = responseProfile?.data;
 
         const payloadRow = {
+          "patientabhaid": "",
           "abhanumber": res?.ABHANumber,
           "abhaname": res?.abhaName || res?.name,
           "aadharnumber": res?.aadharNumber,

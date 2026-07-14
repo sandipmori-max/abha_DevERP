@@ -6,6 +6,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     Image,
+    Platform,
 } from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { showToast } from "../../utils/toast";
@@ -24,10 +25,13 @@ const AbhaUserItem = ({ item, onPress }: any) => {
         >
             {/* Header */}
             <View style={styles.header}>
-                {true ? (
+                {item.image ? (
                     <Image
                         source={{
-                            uri: `${item.image}`,
+                            uri:
+                                Platform.OS === "android"
+                                    ? item.image?.replace("https://", "http://")
+                                    : item.image,
                         }}
                         style={styles.avatar}
                     />
@@ -86,57 +90,57 @@ const AbhaUserItem = ({ item, onPress }: any) => {
             {/* ABHA Number */}
             {
                 item.number && <View style={styles.row}>
-                <MaterialIcons
-                    name='numbers'
-                    size={18}
-                    color="#251d50"
-                />
-                <Text style={styles.label}>ABHA</Text>
-                <Text style={[styles.value, {
-                    color: '#d67031'
-                }]}>
-                    {item.number}
-                </Text>
-
-                <TouchableOpacity
-                    onPress={() => {
-                        if (item.number) {
-                            Clipboard.setString(item.number);
-                            showToast('success', 'ABHA Number copied successfully')
-                        }
-
-                    }}
-                >
                     <MaterialIcons
-                        name='copy-all'
+                        name='numbers'
                         size={18}
                         color="#251d50"
                     />
-                </TouchableOpacity>
-            </View>
+                    <Text style={styles.label}>ABHA</Text>
+                    <Text style={[styles.value, {
+                        color: '#d67031'
+                    }]}>
+                        {item.number}
+                    </Text>
+
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (item.number) {
+                                Clipboard.setString(item.number);
+                                showToast('success', 'ABHA Number copied successfully')
+                            }
+
+                        }}
+                    >
+                        <MaterialIcons
+                            name='copy-all'
+                            size={18}
+                            color="#251d50"
+                        />
+                    </TouchableOpacity>
+                </View>
             }
-            
+
 
 
 
             {/* ABHA Address */}
             {
                 item.address && <View style={styles.row}>
-                <MaterialIcons
-                    name='person'
-                    size={18}
-                    color="#251d50"
-                />
-                <Text
-                    style={styles.value}
-                    numberOfLines={1}
-                >
-                    {item.address}
-                </Text>
-            </View>
+                    <MaterialIcons
+                        name='person'
+                        size={18}
+                        color="#251d50"
+                    />
+                    <Text
+                        style={styles.value}
+                        numberOfLines={1}
+                    >
+                        {item.address}
+                    </Text>
+                </View>
 
             }
-            
+
 
 
             {/* Footer */}
@@ -148,7 +152,7 @@ const AbhaUserItem = ({ item, onPress }: any) => {
                         color="#6B7280"
                     />
                     <Text style={[styles.footerText, {
-                        color:'blue'
+                        color: 'blue'
                     }]}>
                         {item?.date}
                     </Text>

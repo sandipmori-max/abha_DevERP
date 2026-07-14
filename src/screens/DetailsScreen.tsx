@@ -27,8 +27,7 @@ const DetailsScreen = ({ route }: any) => {
   const loading = useSelector((state: any) => state.loader.loading);
   const baseURL = useSelector((state: any) => state.abha.devERPBaseUrl)
   const baseUrl = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
-  console.log("baseURLbaseURLbaseURLbaseURL", baseUrl)
-  const url = new URL(baseUrl).origin;
+   const url = new URL(baseUrl).origin;
 
   const [getPage] = useGetPageMutation();
   const activeUser = useSelector(
@@ -580,8 +579,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 12,
     borderRadius: 8,
-    padding: 18,
-    elevation: 2,
+    padding: 18, 
   },
 
   cardTitle: {

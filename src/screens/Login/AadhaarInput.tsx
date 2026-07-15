@@ -1,8 +1,10 @@
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   TextInput,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 
 interface AadhaarInputProps {
@@ -17,6 +19,13 @@ const AadhaarInput = ({
   const input1Ref = useRef<TextInput>(null);
   const input2Ref = useRef<TextInput>(null);
   const input3Ref = useRef<TextInput>(null);
+  const [showAadhaar, setShowAadhaar] = useState(false);
+
+  const [errors, setErrors] = useState({
+    part1: false,
+    part2: false,
+    part3: false,
+  });
 
   const [focusedInput, setFocusedInput] = useState<
     "part1" | "part2" | "part3" | null
@@ -29,14 +38,19 @@ const AadhaarInput = ({
   });
 
   useEffect(() => {
-    const numbers = value.replace(/\D/g, "");
+  const numbers = value.replace(/\D/g, "");
 
+  const current =
+    aadhaar.part1 + aadhaar.part2 + aadhaar.part3;
+
+  if (numbers !== current) {
     setAadhaar({
       part1: numbers.slice(0, 4),
       part2: numbers.slice(4, 8),
       part3: numbers.slice(8, 12),
     });
-  }, [value]);
+  }
+}, [value]);
 
   const updateValue = (
     part1: string,
@@ -46,18 +60,20 @@ const AadhaarInput = ({
     onChange(part1 + part2 + part3);
   };
 
-  const getBorderColor = (
-    key: "part1" | "part2" | "part3"
-  ) => {
+  const getBorderColor = (key: "part1" | "part2" | "part3") => {
+    if (errors[key]) {
+      return "#EF4444"; // Red
+    }
+
     if (aadhaar[key].length === 4) {
-      return "#22C55E";
+      return "#22C55E"; // Green
     }
 
     if (focusedInput === key) {
-      return "#2563EB";
+      return "#2563EB"; // Blue
     }
 
-    return "#D1D5DB";
+    return "#D1D5DB"; // Gray
   };
 
   return (
@@ -76,8 +92,17 @@ const AadhaarInput = ({
         keyboardType="number-pad"
         placeholder="0000"
         maxLength={4}
+         placeholderTextColor="#999999"
+        secureTextEntry={!showAadhaar}
         onFocus={() => setFocusedInput("part1")}
-        onBlur={() => setFocusedInput(null)}
+        onBlur={() => {
+          setFocusedInput(null);
+
+          setErrors(prev => ({
+            ...prev,
+            part1: aadhaar.part1.length > 0 && aadhaar.part1.length < 4,
+          }));
+        }}
         onChangeText={(text) => {
           const value = text.replace(/\D/g, "");
 
@@ -114,12 +139,21 @@ const AadhaarInput = ({
             borderColor: getBorderColor("part2"),
           },
         ]}
+        secureTextEntry={!showAadhaar}
         value={aadhaar.part2}
         keyboardType="number-pad"
         placeholder="0000"
         maxLength={4}
+         placeholderTextColor="#999999"
         onFocus={() => setFocusedInput("part2")}
-        onBlur={() => setFocusedInput(null)}
+        onBlur={() => {
+          setFocusedInput(null);
+
+          setErrors(prev => ({
+            ...prev,
+            part2: aadhaar.part2.length > 0 && aadhaar.part2.length < 4,
+          }));
+        }}
         onKeyPress={({ nativeEvent }) => {
           if (
             nativeEvent.key === "Backspace" &&
@@ -164,12 +198,21 @@ const AadhaarInput = ({
             borderColor: getBorderColor("part3"),
           },
         ]}
+         placeholderTextColor="#999999"
+        secureTextEntry={!showAadhaar}
         value={aadhaar.part3}
         keyboardType="number-pad"
         placeholder="0000"
         maxLength={4}
         onFocus={() => setFocusedInput("part3")}
-        onBlur={() => setFocusedInput(null)}
+        onBlur={() => {
+          setFocusedInput(null);
+
+          setErrors(prev => ({
+            ...prev,
+            part3: aadhaar.part3.length > 0 && aadhaar.part3.length < 4,
+          }));
+        }}
         onKeyPress={({ nativeEvent }) => {
           if (
             nativeEvent.key === "Backspace" &&
@@ -197,6 +240,18 @@ const AadhaarInput = ({
           });
         }}
       />
+
+      <View style={{ padding: 4, marginHorizontal: 6 }}>
+        <TouchableOpacity
+          onPress={() => setShowAadhaar(prev => !prev)}
+        >
+          <MaterialIcons
+            name={showAadhaar ? "visibility-off" : "visibility"}
+            size={22}
+            color="#555"
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

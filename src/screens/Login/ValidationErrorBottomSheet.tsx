@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   button: {
     height: 52,
     marginTop: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: "#173D8F", // Use your app primary color
     justifyContent: "center",
     alignItems: "center",

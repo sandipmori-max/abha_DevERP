@@ -19,6 +19,8 @@ const StepThree = ({
   loginType,
   publicKey,
   txnId, enrollmentRequestOtp, getEmailVerificationLinkPayload,
+  setValidationErrors,
+  setShowValidationSheet,
 mobileNumer }: any) => {
   const dispatch = useDispatch()
 
@@ -41,6 +43,7 @@ mobileNumer }: any) => {
                     stepThreeMobile: value,
                   });
                 }}
+                 placeholderTextColor="#999999"
                 placeholder={'Enter Mobile Number'}
                 maxLength={10} 
                 style={styles.input}
@@ -58,14 +61,7 @@ mobileNumer }: any) => {
             marginBottom: 18, marginHorizontal: 24
           }}>
             <TouchableOpacity onPress={async () => {
-              if (!stepThree.stepThreeMobileVerifyed && mobileNumer.length < 10) {
-                showToast('error', 'Please enter a valid mobile number.');
-                return;
-              }
-              if (!isStrictIndianMobile(`+91${mobileNumer}`)) {
-                showToast('error', "Please enter a valid mobile number.")
-                return;
-              }
+              
               try {
                 dispatch(showLoader());
                 const encryptedValue =
@@ -203,7 +199,7 @@ mobileNumer }: any) => {
 
                   <View style={styles.card}>
                     <Text style={styles.cardTitle}>
-                      Enter Details
+                      Email address
                     </Text>
 
                     <View style={styles.inputContainer}>
@@ -216,9 +212,17 @@ mobileNumer }: any) => {
                             stepThreeEmail: value,
                           });
                         }}
+                         placeholderTextColor="#999999"
                         placeholder={"Enter Email address"}
                         keyboardType="email-address"
                         style={styles.input}
+                        onBlur={() => {
+                           if (!isValidEmail(stepThree.stepThreeEmail)) { 
+                          setValidationErrors(['Please enter a valid email address.'])
+                          setShowValidationSheet(true)
+                          return;
+                        }
+                        }}
                       />
 
                     </View>
@@ -234,12 +238,14 @@ mobileNumer }: any) => {
                   }}>
                     <TouchableOpacity
                       onPress={async () => {
-                        if (stepThree.stepThreeEmail.length === 0) {
-                          showToast('error', 'Please enter your email address.');
+                        if (stepThree.stepThreeEmail.length === 0) { 
+                          setValidationErrors(['Please enter your email address.'])
+                          setShowValidationSheet(true)
                           return;
                         }
-                        if (!isValidEmail(stepThree.stepThreeEmail)) {
-                          showToast('error', 'Please enter a valid email address.');
+                        if (!isValidEmail(stepThree.stepThreeEmail)) { 
+                          setValidationErrors(['Please enter a valid email address.'])
+                          setShowValidationSheet(true)
                           return;
                         }
                         try {

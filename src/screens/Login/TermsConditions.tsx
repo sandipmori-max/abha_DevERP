@@ -26,7 +26,8 @@ const TermsConditions = ({
             <View style={styles.termsCard}>
 
                 <View style={{ height: 220 }}>
-                    <ScrollView>
+                    <ScrollView  nestedScrollEnabled
+                        keyboardShouldPersistTaps="handled">
 
                         <Text style={styles.termsText}>
                             {text}
@@ -63,9 +64,7 @@ const TermsConditions = ({
 
                     <TouchableOpacity>
 
-                        <Text style={styles.speakerIcon}>
-                            🔊
-                        </Text>
+                        
 
                     </TouchableOpacity>
 

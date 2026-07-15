@@ -65,10 +65,7 @@ const CustomInput = forwardRef((props, ref) => {
           style={[
             styles.input,
             style,
-          ]}
-          placeholderTextColor={
-            COLORS.placeholder
-          }
+          ]} 
           secureTextEntry={
             secure && hidePassword
           }
@@ -76,6 +73,7 @@ const CustomInput = forwardRef((props, ref) => {
           autoCapitalize={
             rest.autoCapitalize || "none"
           }
+           placeholderTextColor="#999999"
           onFocus={(e) => {
             setFocused(true);
 

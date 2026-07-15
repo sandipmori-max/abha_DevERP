@@ -366,7 +366,10 @@ export const styles = StyleSheet.create({
   termsContainer: {
     marginHorizontal: 20,
     marginTop: 8,
-    marginBottom: 12
+    marginBottom: 12, 
+    padding: 10, 
+    backgroundColor: 'white',
+    borderRadius: 10
   },
 
   termsTitle: {
@@ -380,7 +383,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 8,
     borderColor: '#E5E5E5',
-    overflow: 'hidden',
+    overflow: 'hidden',  
   },
 
   termsText: {

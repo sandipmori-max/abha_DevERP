@@ -145,7 +145,7 @@ const OtpInput = ({
 
   return (
     <ScrollView
-      keyboardShouldPersistTaps="always"
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         paddingBottom: 20,
       }}
@@ -184,6 +184,7 @@ const OtpInput = ({
         contextMenuHidden={
           false
         }
+         placeholderTextColor="#999999"
         style={
           styles.hiddenInput
         }

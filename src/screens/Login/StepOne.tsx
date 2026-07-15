@@ -15,6 +15,7 @@ const StepOne = ({
     setCaptchaValue,
     setValidationMethod }: any) => {
 
+    const [showAadhaar, setShowAadhaar] = useState(false);
     const input1Ref = useRef<TextInput>(null);
     const input2Ref = useRef<TextInput>(null);
     const input3Ref = useRef<TextInput>(null);
@@ -22,9 +23,11 @@ const StepOne = ({
         "part1" | "part2" | "part3" | null
     >(null);
 
-    const getBorderColor = (
-        key: "part1" | "part2" | "part3"
-    ) => {
+    const getBorderColor = (key: "part1" | "part2" | "part3") => {
+        if (errors[key]) {
+            return "#EF4444"; // Red
+        }
+
         if (aadhaar[key].length === 4) {
             return "#22C55E"; // Green
         }
@@ -35,6 +38,12 @@ const StepOne = ({
 
         return "#D1D5DB"; // Gray
     };
+
+    const [errors, setErrors] = useState({
+        part1: false,
+        part2: false,
+        part3: false,
+    });
 
     const [aadhaar, setAadhaar] = useState({
         part1: "",
@@ -72,14 +81,16 @@ const StepOne = ({
                         ]}
                         selection={aadhaar.part1.length === 0 ? { start: 0, end: 0 } : undefined}
                         onFocus={() => setFocusedInput("part1")}
-                        onBlur={() => setFocusedInput(null)}
+
                         keyboardType="number-pad"
                         placeholder='0000'
                         textAlign="center"
+                         placeholderTextColor="#999999"
                         contextMenuHidden
                         caretHidden={false}
                         maxLength={4}
                         value={aadhaar.part1}
+                        secureTextEntry={!showAadhaar}
                         onChangeText={(text) => {
                             const value = text.replace(/\D/g, "");
                             setAadhaar(prev => {
@@ -95,6 +106,14 @@ const StepOne = ({
                             if (value.length === 4) {
                                 input2Ref.current?.focus();
                             }
+                        }}
+                        onBlur={() => {
+                            setFocusedInput(null);
+
+                            setErrors(prev => ({
+                                ...prev,
+                                part1: aadhaar.part1.length > 0 && aadhaar.part1.length < 4,
+                            }));
                         }}
                     />
                     <View style={{
@@ -112,9 +131,17 @@ const StepOne = ({
                             },
                         ]}
                         onFocus={() => setFocusedInput("part2")}
-                        onBlur={() => setFocusedInput(null)}
+                        onBlur={() => {
+                            setFocusedInput(null);
+
+                            setErrors(prev => ({
+                                ...prev,
+                                part2: aadhaar.part2.length > 0 && aadhaar.part2.length < 4,
+                            }));
+                        }}
                         keyboardType="number-pad"
                         placeholder='0000'
+                         placeholderTextColor="#999999"
                         maxLength={4}
                         textAlign="center"
                         contextMenuHidden
@@ -129,6 +156,7 @@ const StepOne = ({
                                 input1Ref.current?.focus();
                             }
                         }}
+                        secureTextEntry={!showAadhaar}
                         onChangeText={(text) => {
                             const value = text.replace(/\D/g, "");
                             setAadhaar(prev => {
@@ -162,10 +190,18 @@ const StepOne = ({
                             },
                         ]}
                         textAlign="center"
+                         placeholderTextColor="#999999"
                         contextMenuHidden
                         caretHidden={false}
                         onFocus={() => setFocusedInput("part3")}
-                        onBlur={() => setFocusedInput(null)}
+                        onBlur={() => {
+                            setFocusedInput(null);
+
+                            setErrors(prev => ({
+                                ...prev,
+                                part3: aadhaar.part3.length > 0 && aadhaar.part3.length < 4,
+                            }));
+                        }}
                         keyboardType="number-pad"
                         maxLength={4}
                         placeholder='0000'
@@ -192,7 +228,20 @@ const StepOne = ({
                             });
 
                         }}
+                        secureTextEntry={!showAadhaar}
                     />
+
+                    <View style={{ padding: 4, marginHorizontal: 6 }}>
+                        <TouchableOpacity
+                            onPress={() => setShowAadhaar(prev => !prev)}
+                        >
+                            <MaterialIcons
+                                name={showAadhaar ? "visibility-off" : "visibility"}
+                                size={22}
+                                color="#555"
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
             <View style={[styles.termsContainer, { marginTop: 0 }]}>
@@ -202,7 +251,9 @@ const StepOne = ({
 
                 <View style={styles.termsCard}>
                     <View style={{ height: 220, marginVertical: 8 }}>
-                        <ScrollView>
+                        <ScrollView 
+                        nestedScrollEnabled
+                        keyboardShouldPersistTaps="handled">
                             <Text style={styles.termsText}>
                                 I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number. I understand that my ABHA number can be used and shared for purposes as may be notified by ABDM from time to time including provision of healthcare services. Further, I am aware that my personal identifiable information (Name, Address, Age, Date of Birth, Gender and Photograph) may be made available to the entities working in the National Digital Health Ecosystem (NDHE) which inter alia includes stakeholders and entities such as healthcare professionals (e.g. doctors), facilities (e.g. hospitals, laboratories) and data fiduciaries (e.g. health programmes), which are registered with or linked to the Ayushman Bharat Digital Mission (ABDM), and various processes there under. I authorize NHA to use my Aadhaar number for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of “Yes” with NHA upon successful authentication. I have been duly informed about the option of using other IDs apart from Aadhaar; however, I consciously choose to use Aadhaar number for the purpose of availing benefits across the NDHE. I am aware that my personal identifiable information excluding Aadhaar number / VID number can be used and shared for purposes as mentioned above. I reserve the right to revoke the given consent at any point of time as per provisions of Aadhaar Act and Regulations.
                             </Text>
@@ -237,11 +288,7 @@ const StepOne = ({
                             </Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity>
-                            <Text style={styles.speakerIcon}>
-                                🔊
-                            </Text>
-                        </TouchableOpacity>
+
                     </View>
                 </View>
             </View>
@@ -261,6 +308,7 @@ const StepOne = ({
                         keyboardType="number-pad"
                         value={captchaValue}
                         onChangeText={setCaptchaValue}
+                         placeholderTextColor="#999999"
                         style={styles.captchaInput}
                     />
 

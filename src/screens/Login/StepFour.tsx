@@ -2,7 +2,10 @@ import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'r
 import React from 'react'
 import { styles } from './style';
 
-const StepFour = ({ stepFour, loginType, abhaSuggestionList, selectedItem, handleSelect }: any) => {
+const StepFour = ({ stepFour, loginType, abhaSuggestionList, selectedItem, handleSelect,
+  setValidationErrors,
+  showValidationSheet
+ }: any) => {
   return (
     <>
       <View style={{ marginHorizontal: 24 }}>
@@ -19,17 +22,11 @@ const StepFour = ({ stepFour, loginType, abhaSuggestionList, selectedItem, handl
         <View style={styles.inputContainer}>
 
           <TextInput
-            value={stepFour.userName}
-            //  onChangeText={text => {
-            //    let value = text;
-            //    stepFour({
-            //      ...stepFour,
-            //      userName: value
-            //    })
-            //  }}
+            value={stepFour.userName} 
             placeholder={'Select abha address'}
             keyboardType={'default'
             }
+             placeholderTextColor="#999999"
             style={styles.input}
           />
           {

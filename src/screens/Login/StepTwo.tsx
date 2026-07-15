@@ -65,6 +65,7 @@ const StepTwo = ({ setStepTwo, stepTwo, loginType, loginValue, publicKey, txnId 
             }}
             placeholder={'Enter Mobile Number'}
             maxLength={10}
+             placeholderTextColor="#999999"
             keyboardType={
               [
                 'Mobile Number',

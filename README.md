@@ -16,6 +16,7 @@ npm start
 
 # OR using Yarn
 yarn start
+ 
 ```
 
 ## Step 2: Build and run your app
@@ -96,7 +97,7 @@ To learn more about React Native, take a look at the following resources:
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 
-<!-- aa = 541245512030 -->
+<!-- aa = 5412 4551 2030 -->
 
 <!-- 
 7619 8714 0371

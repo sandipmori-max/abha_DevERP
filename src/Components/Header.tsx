@@ -72,6 +72,7 @@ const Header = ({
             onChangeText={(e) => {
               setSearch(e)
             }}
+             placeholderTextColor="#999999"
             style={styles.searchInput}
           />
         </> : <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700' }}>{title}</Text>

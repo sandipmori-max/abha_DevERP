@@ -720,6 +720,7 @@ const OtpVerificationScreen = () => {
         </View>
 
         <ScrollView
+        keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             paddingTop: 30,
             paddingBottom: 140,
@@ -760,6 +761,7 @@ const OtpVerificationScreen = () => {
             maxLength={6}
             autoFocus
             caretHidden
+             placeholderTextColor="#999999"
             contextMenuHidden={
               false
             }

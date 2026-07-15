@@ -77,6 +77,7 @@ const ProfileScreen = ({ route }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+      keyboardShouldPersistTaps="handled"
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{

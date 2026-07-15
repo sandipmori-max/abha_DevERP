@@ -402,27 +402,31 @@ export const useLoginFlow = ({
     // ===========================
 
     const handleStepOne = async () => {
-        const validate = stepOneValidator(
-            stepOne,
-            captchaValue,
-            captcha
-        );
 
-        if (!validate) {
-            showToast(
-                "error",
-                "Please fill in all required fields correctly."
-            );
-            return;
-        }
-
-        if (!isValidAadhaar(stepOne.aadhaarNumber)) {
+        if (stepOne.aadhaarNumber && stepOne.aadhaarNumber.length === 12 && !isValidAadhaar(stepOne.aadhaarNumber)) {
             showToast(
                 "error",
                 "Please enter a valid Aadhaar number."
             );
             return;
         }
+        
+        const errors = stepOneValidator(
+            stepOne,
+            captchaValue,
+            captcha
+        );
+
+        console.log("errors", errors)
+
+        if (errors.length > 0) {
+            setValidationErrors(errors);
+            setShowValidationSheet(true)
+            return;
+        }
+
+        setValidationErrors([]);
+
 
         setStepOne((prev) => ({
             ...prev,
@@ -467,25 +471,24 @@ export const useLoginFlow = ({
         dispatch(showLoader());
 
         try {
-            const validate = stepTwoValidator(stepTwo);
-
-            if (!validate) {
-                showToast(
-                    "error",
-                    "Please fill in all required fields correctly."
-                );
+            const errors = stepTwoValidator(stepTwo);
+            console.log("errors + + + + + + + ", errors)
+            if (errors.length > 0) {
+                setValidationErrors(errors);
+                setShowValidationSheet(true)
                 return;
             }
+
+            setValidationErrors([]);
 
             if (
                 !isStrictIndianMobile(
                     `+91${stepTwo.stepTwoMobileNumber}`
                 )
             ) {
-                showToast(
-                    "error",
-                    "Please enter a valid mobile number."
-                );
+
+                setValidationErrors(['Please enter a valid mobile number.']);
+                setShowValidationSheet(true)
                 return;
             }
 
@@ -535,10 +538,9 @@ export const useLoginFlow = ({
                 !stepThree.stepThreeMobileOTP ||
                 stepThree.stepThreeMobileOTP.length < 6
             ) {
-                showToast(
-                    "error",
-                    "Please enter a valid OTP."
-                );
+
+                setValidationErrors(['Please enter a valid OTP.']);
+                setShowValidationSheet(true)
                 return;
             }
 
@@ -594,10 +596,8 @@ export const useLoginFlow = ({
             return;
         }
 
-        showToast(
-            "error",
-            "Please verify your mobile number."
-        );
+        setValidationErrors(['Please verify your mobile number.']);
+        setShowValidationSheet(true)
     };
 
     // ===========================
@@ -605,11 +605,9 @@ export const useLoginFlow = ({
     // ===========================
 
     const handleStepFour = async () => {
-        if (!stepFour.userName) {
-            showToast(
-                "error",
-                "Please enter your ABHA address."
-            );
+        if (!stepFour.userName) { 
+            setValidationErrors(['ABHA Address selection is required']);
+            setShowValidationSheet(true)
             return;
         }
 

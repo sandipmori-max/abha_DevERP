@@ -43,26 +43,59 @@ export const generateCaptcha = () => {
   };
 };
 
-export const validateForm = (loginType, loginValue, captchaValue, captcha) => {
+export const validateForm = (
+  loginType,
+  loginValue,
+  isFromForgotAbhaNumber,
+  isAgreed,
+  captchaValue,
+  captcha,
+) => {
+  const errors: string[] = [];
+
   if (!loginValue) {
-    return 'Please enter your mobile number.';
+    errors.push(`Please enter ${loginType}.`);
+  } else if (
+    loginType === "Mobile Number" &&
+    loginValue.length !== 10
+  ) {
+    errors.push("Please enter a valid mobile number.");
+  } else if (
+    loginType === "Aadhaar Number" &&
+    loginValue.replace(/-/g, "").length !== 12
+  ) {
+    errors.push("Please enter a valid Aadhaar number.");
+  } else if (
+    loginType === "ABHA Number" ||
+    loginType === "Create ABHA Number"
+  ) {
+    if (loginValue.replace(/-/g, "").length !== 14) {
+      errors.push("Please enter a valid ABHA number.");
+    }
+  } else if (
+    loginType === "ABHA Address" &&
+    !loginValue.includes("@")
+  ) {
+    errors.push("Please enter a valid ABHA Address.");
   }
 
-  if (loginType === 'Mobile Number' && !/^[6-9]\d{9}$/.test(loginValue)) {
-    return 'Enter valid mobile number';
+  const termsRequired =
+    loginType === "Aadhaar Number" ||
+    loginType === "Create ABHA Number" ||
+    isFromForgotAbhaNumber;
+
+  if (termsRequired && !isAgreed) {
+    errors.push("Please accept the consent.");
   }
 
   if (!captchaValue) {
-    return 'Please enter the CAPTCHA.';
+    errors.push("Please enter CAPTCHA.");
+  } else if (Number(captchaValue) !== captcha.answer) {
+    errors.push("Invalid CAPTCHA.");
   }
 
-  if (Number(captchaValue) !== Number(captcha.answer)) {
-    return 'Invalid captcha';
-  }
-
-  return '';
+  return errors;
 };
-
 export const formatAadhaar = (value: string) => {
   const cleaned = value.replace(/\D/g, '').slice(0, 12);
 
@@ -84,23 +117,30 @@ export const stepsDL = [
   "Process Completion"
 ]
 
-export const stepOneValidator = (stepOne, captchaValue, captcha) => {
-  if (
-    stepOne.aadhaarNumber.replace(/-/g, '').length !== 12
-  ) {
-    return false;
+export const stepOneValidator = (
+  stepOne,
+  captchaValue,
+  captcha
+) => {
+  const errors: string[] = [];
+
+  if (stepOne.aadhaarNumber.replace(/-/g, "").length !== 12) {
+    errors.push("Please enter a valid Aadhaar number.");
   }
+
   const termsRequired = true;
+
   if (termsRequired && !stepOne.termsAgree) {
-    return false;
+    errors.push("Please accept the Terms & Conditions.");
   }
+
   if (!captchaValue) {
-    return false;
+    errors.push("Please enter the captcha.");
+  } else if (Number(captchaValue) !== captcha.answer) {
+    errors.push("Invalid captcha. Please try again.");
   }
-  if (Number(captchaValue) !== captcha.answer) {
-    return false;
-  }
-  return true;
+
+  return errors;
 };
 
 export const formatAbhaNumber = (value: string) => {
@@ -123,19 +163,7 @@ export const formatAbhaNumber = (value: string) => {
   )}-${cleaned.slice(6, 10)}-${cleaned.slice(10)}`;
 };
 
-export const stepTwoValidator = (stepTwo) => {
-  if (
-    stepTwo.stepTwoOTP === ''
-  ) {
-    return false;
-  }
-  if (
-    stepTwo.stepTwoMobileNumber.replace(/-/g, '').length !== 10
-  ) {
-    return false;
-  }
-  return true;
-};
+export const stepTwoValidator = (stepTwo) => { const errors: string[] = []; if (!stepTwo.stepTwoOTP?.trim()) { errors.push("Please enter the OTP."); } if (stepTwo.stepTwoMobileNumber.replace(/-/g, "").length !== 10) { errors.push("Please enter a valid mobile number."); } return errors; };
 
 export const getIsFormValid = (loginType, loginValue, isFromForgotAbhaNumber, isAgreed, captchaValue, captcha) => {
 
@@ -259,9 +287,9 @@ export const X_CM_ID = __DEV__ ? 'sbx' : 'abdm'
 
 export const GRANT_TYPE = 'client_credentials'
 export const CLIENT_SECERET = '83784be3-e94e-4d03-b0c1-d63cf46a76f4'
-export const BASE_URL_API =  __DEV__ ?
-'https://dev.abdm.gov.in/api/hiecm/gateway/v3/' :
-'https://abhasbx.abdm.gov.in/abha/api/v3/'
+export const BASE_URL_API = __DEV__ ?
+  'https://dev.abdm.gov.in/api/hiecm/gateway/v3/' :
+  'https://abhasbx.abdm.gov.in/abha/api/v3/'
 
 export const BASE_URL_PUBLIC_API = 'https://dev.abdm.gov.in/api/hiecm/gateway/v3/'
 
@@ -396,7 +424,7 @@ export const getLoginPlaceholder = (
 
     case "ABHA Number":
     case "Create ABHA Number":
-      return "Enter ABHA number";
+      return "00-0000-0000-0000";
 
     default:
       return "Enter value";
@@ -464,70 +492,70 @@ export const getPayloadForProfile = (stepOne, stepTwo, stepThree, stepFour, resp
   };
 
   console.log("payload.data.authMethods.join------------------------------------------------", payload.data.authMethods.join(","))
- 
-   const payloadRow = {
-        "patientabhaid": "",
-        "abhanumber": payload.data.ABHANumber,
-        "abhaname": payload.data.abhaName,
-        "aadharnumber": payload.aadharNumber,
-        "firstname": payload.data.firstName,
-        "middlename": payload.data.middleName,
-        "lastname": payload.data.lastName,
-        "fullname": payload.data.name,
-        "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
-        "yearofbirth": payload.data.yearOfBirth,
-        "monthofbirth": payload.data.monthOfBirth,
-        "dayofbirth": payload.data.dayOfBirth,
-        "gender": payload.data.gender,
-        "mobileno": payload.data.mobile,
-        "communicationmobile": payload.communicationMobile,
-        "communicationemail": payload.communicationEmail,
 
-        "address": payload.data.address,
-        "statename": payload.data.stateName,
-        "statecode": payload.data.stateCode,
-        "districtname": payload.data.districtName,
-        "districtcode": payload.data.districtCode,
+  const payloadRow = {
+    "patientabhaid": "",
+    "abhanumber": payload.data.ABHANumber,
+    "abhaname": payload.data.abhaName,
+    "aadharnumber": payload.aadharNumber,
+    "firstname": payload.data.firstName,
+    "middlename": payload.data.middleName,
+    "lastname": payload.data.lastName,
+    "fullname": payload.data.name,
+    "dob": `${payload.data.yearOfBirth}-${payload.data.monthOfBirth}-${payload.data.dayOfBirth}`,
+    "yearofbirth": payload.data.yearOfBirth,
+    "monthofbirth": payload.data.monthOfBirth,
+    "dayofbirth": payload.data.dayOfBirth,
+    "gender": payload.data.gender,
+    "mobileno": payload.data.mobile,
+    "communicationmobile": payload.communicationMobile,
+    "communicationemail": payload.communicationEmail,
 
-        "subdistrictname": payload.data.subdistrictName,
-        "pincode": payload.data.pincode,
-        
-        "message": "",
-        "txnid": payload.txnId,
-        
-        "token": payload.tokens,
-        "tokenexpiresin": payload.expiresIn,
-        "refreshtoken": payload.refreshToken,
-        "refreshexpiresin": payload.refreshExpiresIn,
-        
-        "preferredabhaaddress": payload.data.preferredAbhaAddress,
-      
-        "photo": payload.data.photo,
-        "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${payload.data.profilePhoto}`,
-        "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${payload.data.kycphoto}`,
+    "address": payload.data.address,
+    "statename": payload.data.stateName,
+    "statecode": payload.data.stateCode,
+    "districtname": payload.data.districtName,
+    "districtcode": payload.data.districtCode,
 
-        "localizedname": payload.data.localizedDetails.name,
-        "localizedgender": payload.data.localizedDetails.gender,
-        "localizedtownname": payload.data.localizedDetails.townName,
-        "localizeddistrictname": payload.data.localizedDetails.districtName,
-        "localizedvillagename": payload.data.localizedDetails.villageName,
-        "localizedstatename": payload.data.localizedDetails.stateName,
-        "phraddress": payload.data.phraddress,
-        "authmethods": payload.data.authMethods.join(","),
-        "tags": payload.data.tags,
-        "rawresponse":"",
-        "localizedlabels": payload.data.localizedDetails.localizedLabels,
-        "registrationsource": "",
-        "profilestatus": payload.data.profileStatus,
-        "abhatype": payload.data.abhatype,
-        "abhastatus": payload.data.status,
-        "verificationtype": payload.data.verificationType,
-        "verificationstatus": payload.data.verificationStatus,
-        "iskycverified": payload.data.kycVerified,
-        "isnew": payload.isNew,
-        "date": payload?.data?.createdDate,
-        "cdt": new Date()
-      }
+    "subdistrictname": payload.data.subdistrictName,
+    "pincode": payload.data.pincode,
+
+    "message": "",
+    "txnid": payload.txnId,
+
+    "token": payload.tokens,
+    "tokenexpiresin": payload.expiresIn,
+    "refreshtoken": payload.refreshToken,
+    "refreshexpiresin": payload.refreshExpiresIn,
+
+    "preferredabhaaddress": payload.data.preferredAbhaAddress,
+
+    "photo": payload.data.photo,
+    "profilephoto": `profilephoto.jpeg;data:image/jpeg;base64,${payload.data.profilePhoto}`,
+    "kycphoto": `kycphoto.jpeg;data:image/jpeg;base64,${payload.data.kycphoto}`,
+
+    "localizedname": payload.data.localizedDetails.name,
+    "localizedgender": payload.data.localizedDetails.gender,
+    "localizedtownname": payload.data.localizedDetails.townName,
+    "localizeddistrictname": payload.data.localizedDetails.districtName,
+    "localizedvillagename": payload.data.localizedDetails.villageName,
+    "localizedstatename": payload.data.localizedDetails.stateName,
+    "phraddress": payload.data.phraddress,
+    "authmethods": payload.data.authMethods.join(","),
+    "tags": payload.data.tags,
+    "rawresponse": "",
+    "localizedlabels": payload.data.localizedDetails.localizedLabels,
+    "registrationsource": "",
+    "profilestatus": payload.data.profileStatus,
+    "abhatype": payload.data.abhatype,
+    "abhastatus": payload.data.status,
+    "verificationtype": payload.data.verificationType,
+    "verificationstatus": payload.data.verificationStatus,
+    "iskycverified": payload.data.kycVerified,
+    "isnew": payload.isNew,
+    "date": payload?.data?.createdDate,
+    "cdt": new Date()
+  }
   return payloadRow
 }
 

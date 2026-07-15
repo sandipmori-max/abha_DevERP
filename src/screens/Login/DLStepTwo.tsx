@@ -711,11 +711,7 @@ const DLStepTwo = forwardRef((props: any, ref) => {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity>
-                <Text style={styles.speakerIcon}>
-                  🔊
-                </Text>
-              </TouchableOpacity>
+              
             </View>
           </View>
         </View>

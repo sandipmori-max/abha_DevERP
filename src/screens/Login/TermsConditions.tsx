@@ -25,7 +25,7 @@ const TermsConditions = ({
 
             <View style={styles.termsCard}>
 
-                <View style={{ height: 140 }}>
+                <View style={{ height: 220 }}>
                     <ScrollView>
 
                         <Text style={styles.termsText}>

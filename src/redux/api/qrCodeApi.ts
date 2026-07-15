@@ -6,7 +6,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_PROFILE_QR = false;
+const MOCK_PROFILE_QR = true;
 
 export const profileQrCodeApi =
   baseApi.injectEndpoints({
@@ -35,7 +35,7 @@ export const profileQrCodeApi =
           if (MOCK_PROFILE_QR) {
             return {
               data: {
-                qrCode: "",
+                qrCode: "111111",
               },
             };
           }

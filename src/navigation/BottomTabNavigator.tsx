@@ -205,7 +205,7 @@ const BottomTabNavigator = () => {
                                 ],
                             },
                             confirmation && bottomSheetType !== 'Login' && {
-                                height: '36%'
+                                height: '40%'
                             },
                             confirmation && bottomSheetType === 'Login' && {
                                 height: '58%'
@@ -277,7 +277,34 @@ const BottomTabNavigator = () => {
                                     );
                                 })}
 
-
+  <TouchableOpacity
+                            disabled={!selectedLoginType}
+                            style={[
+                                styles.button,
+                                !selectedLoginType && styles.disabledButton,
+                            ]}
+                            onPress={() => {
+                                if (selectedLoginType === 'Driving Licence') {
+                                    setShowLoginSheet(false)
+                                    setShowInfoModal(true)
+                                    return;
+                                }
+                                setTimeout(() => {
+                                    setShowLoginSheet(false)
+                                    navigation.navigate("RegistrationAbha", {
+                                        loginType: selectedLoginType,
+                                        isFromRegister: bottomSheetType === 'Login' ? false : true
+                                    })
+                                })
+                                setShowLoginSheet(false);
+                                setConfirmation(false)
+                                setSelected(null)
+                            }}
+                        >
+                            <Text style={styles.buttonText}>
+                                Continue
+                            </Text>
+                        </TouchableOpacity>
                             </> : <>
                                 <Text style={styles.title}>
                                     Do you already have ABHA?
@@ -379,37 +406,6 @@ const BottomTabNavigator = () => {
                                 </TouchableOpacity>
                             </>
                         }
-
-                        <TouchableOpacity
-                            disabled={!selectedLoginType}
-                            style={[
-                                styles.button,
-                                !selectedLoginType && styles.disabledButton,
-                            ]}
-                            onPress={() => {
-                                if (selectedLoginType === 'Driving Licence') {
-                                    setShowLoginSheet(false)
-                                    setShowInfoModal(true)
-                                    return;
-                                }
-                                setTimeout(() => {
-                                    setShowLoginSheet(false)
-                                    navigation.navigate("RegistrationAbha", {
-                                        loginType: selectedLoginType,
-                                        isFromRegister: bottomSheetType === 'Login' ? false : true
-                                    })
-                                })
-                                setShowLoginSheet(false);
-                                setConfirmation(false)
-                                setSelected(null)
-                            }}
-                        >
-                            <Text style={styles.buttonText}>
-                                Continue
-                            </Text>
-                        </TouchableOpacity>
-
-
                     </Animated.View>
                 </Modal>
             )}
@@ -589,7 +585,7 @@ const styles = StyleSheet.create({
     bottomSheet: {
         position: 'absolute',
         bottom: 0,
-        height: '52%',
+        height: '56%',
         width: '94%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,

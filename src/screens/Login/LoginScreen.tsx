@@ -206,10 +206,6 @@ const LoginScreen = () => {
     isFromForgotAbhaNumber,
   ]);
 
-  // useEffect(() => {
-  //    const encryptedValue = encryptData('8154877969', publicKey,);
-  //    console.log("encryptedValueencryptedValueencryptedValueencryptedValueencryptedValue", encryptedValue)
-  // } , [])
 
   const getPayloadData = (type, encryptedValue) => {
     switch (type) {

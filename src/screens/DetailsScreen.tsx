@@ -41,8 +41,6 @@ const DetailsScreen = ({ route }: any) => {
         "PatientABHAProfile",
         item?.id
       );
-
-
       const response = await getPage(payload);
       console.log("response", response, typeof response)
       const parsedData = JSON.parse(response?.data.d);
@@ -54,8 +52,6 @@ const DetailsScreen = ({ route }: any) => {
     } finally {
       dispatch(hideLoader())
     }
-
-
   };
 
   useEffect(() => {
@@ -300,10 +296,7 @@ const DetailsScreen = ({ route }: any) => {
                 value={getValue("dob")}
               />
 
-
             </View>
-
-
 
             {/* Contact information */}
             <View style={styles.cardTitle}>
@@ -318,19 +311,15 @@ const DetailsScreen = ({ route }: any) => {
 
             </View>
 
-
             <View style={styles.card}>
-
               <DetailRow
                 label="Mobile"
                 value={getValue("mobileno")}
               />
-
               <DetailRow
                 label="Contact - Mobile"
                 value={getValue("communicationmobile")}
               />
-
               <DetailRow
                 label="Contact - Email"
                 value={getValue("communicationemail")}
@@ -349,7 +338,6 @@ const DetailsScreen = ({ route }: any) => {
               />
 
             </View>
-
 
             <View style={styles.card}>
 
@@ -384,8 +372,6 @@ const DetailsScreen = ({ route }: any) => {
 
 
             <View style={styles.card}>
-
-
               <DetailRow
                 label="Type"
                 value={getValue("verificationtype")}
@@ -645,16 +631,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 8,
     padding: 20,
-
   },
 
   topRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-
-
-
 
   userInfo: {
     flex: 1,
@@ -667,15 +649,11 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
 
-
-
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
   },
-
-
 
   divider: {
     height: 1,

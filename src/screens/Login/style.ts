@@ -384,7 +384,7 @@ export const styles = StyleSheet.create({
   },
 
   termsText: {
-    padding: 18,
+     padding: 18,
     fontSize: 14,
     lineHeight: 24,
     color: '#555',

@@ -77,6 +77,7 @@ import {
 import {
     useLazyProfileAbhaCardQuery,
 } from "../../redux/api/abhaCardApi";
+import { useNavigation } from '@react-navigation/native';
 
 interface UseLoginFlowProps {
     loginType: string;
@@ -97,6 +98,7 @@ export const useLoginFlow = ({
 }: UseLoginFlowProps) => {
 
     const dispatch = useDispatch();
+    const navigation = useNavigation()
 
     const publicKey = useSelector(
         (state: any) => state.auth.publicKey
@@ -356,9 +358,9 @@ export const useLoginFlow = ({
     // ===========================
 
     const handleProfile = async (
-        responseProfile: any
+        responseProfile: any,
     ) => {
-        const payloadRow = getPayloadForProfile(
+        let payloadRow = getPayloadForProfile(
             stepOne,
             stepTwo,
             stepThree,
@@ -368,27 +370,32 @@ export const useLoginFlow = ({
             txnId
         );
 
+        const resQRCode = await getQrCode();
+        const resABHACard = await getAbhaCard();
+
+        if (payloadRow) {
+            payloadRow.qrCode = `qrCode.jpeg;data:image/jpeg;base64,${resQRCode?.data?.qrCode}`;
+            payloadRow.abhaCard = `abhaCard.jpeg;data:image/jpeg;base64,${resABHACard?.data?.card}`;
+        }
+        console.log("resQRCode + + + + + + + + + + + + + + + +", resQRCode)
+        console.log("abhaCard + + + + + + + + + + + + + + + +", resABHACard)
         const payloadData = {
             token: proReduxData?.token,
             page: "PatientABHAProfile",
             data: JSON.stringify(payloadRow),
         };
 
-        console.log("payloadData", payloadData)
+        console.log("payloadData + + + + + + + + + + + + + + + +", payloadData)
 
-        await savePage(payloadData).unwrap();
-
-        showToast(
-            "success",
-            "Record inserted successfully..."
-        );
-
-        setTimeout(async () => {
-            await getQrCode();
-            await getAbhaCard();
-        }, 1800)
-
-
+        const res = await savePage(payloadData).unwrap();
+        console.log("reesrerserererserse", res)
+        if (res?.success !== '0' || res?.success !== 0) {
+            showToast(
+                "success",
+                res?.message
+            );
+            navigation.goBack();
+        }
     };
     // ===========================
     // Step 1

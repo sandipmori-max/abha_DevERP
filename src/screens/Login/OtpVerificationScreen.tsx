@@ -274,7 +274,7 @@ const OtpVerificationScreen = () => {
               await getAbhaProfile({
                 json_web_token: response?.tokens?.token,
               }).unwrap();
-            
+
             const res = responseProfile;
 
             console.log("responseProfileresponseProfileresponseProfileresponseProfile", responseProfile)
@@ -322,8 +322,18 @@ const OtpVerificationScreen = () => {
               "verificationstatus": res?.verificationStatus,
               "iskycverified": res?.kycVerified,
               "isnew": "false",
+              "cdt": new Date()
 
             }
+
+            const resQRCode = await getQrCode();
+            const resABHACard = await getAbhaCard();
+
+            if (payloadRow) {
+              payloadRow.qrCode = `qrCode.jpeg;data:image/jpeg;base64,${resQRCode?.data?.qrCode}`;
+              payloadRow.abhaCard = `abhaCard.jpeg;data:image/jpeg;base64,${resABHACard?.data?.card}`;
+            }
+
             const payloadData = {
               token: activeUser?.token,
               page: "PatientABHAProfile",
@@ -332,18 +342,16 @@ const OtpVerificationScreen = () => {
 
             console.log("payloadData-----------", payloadData)
 
-            await savePage(payloadData).unwrap();
 
-            showToast(
-              "success",
-              "Record inserted successfully..."
-            );
+            const resAbha = await savePage(payloadData).unwrap();
+            if (resAbha?.success !== '0' || resAbha?.success !== 0) {
+              showToast(
+                "success",
+                resAbha?.message
+              );
+              navigation.goBack();
+            }
 
-            setTimeout(async () => {
-              // await getQrCode();
-              // await getAbhaCard();
-              navigation.goBack()
-            }, 1800)
           } else {
             showToast(
               "error",
@@ -431,28 +439,33 @@ const OtpVerificationScreen = () => {
               "verificationstatus": res?.verificationStatus,
               "iskycverified": res?.kycVerified,
               "isnew": "false",
+              "cdt": new Date()
 
             }
+
+            const resQRCode = await getQrCode();
+            const resABHACard = await getAbhaCard();
+
+            if (payloadRow) {
+              payloadRow.qrCode = `qrCode.jpeg;data:image/jpeg;base64,${resQRCode?.data?.qrCode}`;
+              payloadRow.abhaCard = `abhaCard.jpeg;data:image/jpeg;base64,${resABHACard?.data?.card}`;
+            }
+
             const payloadData = {
               token: activeUser?.token,
               page: "PatientABHAProfile",
               data: JSON.stringify(payloadRow),
             };
+            const resAbha = await savePage(payloadData).unwrap();
+            if (resAbha?.success !== '0' || resAbha?.success !== 0) {
+              showToast(
+                "success",
+                resAbha?.message
+              );
+              navigation.goBack();
+            }
 
-            console.log("payloadData", payloadData)
 
-            await savePage(payloadData).unwrap();
-
-            showToast(
-              "success",
-              "Record inserted successfully..."
-            );
-
-            setTimeout(async () => {
-              // await getQrCode();
-              // await getAbhaCard();
-               navigation.goBack()
-            }, 1800)
           } else {
             showToast(
               "error",
@@ -557,27 +570,35 @@ const OtpVerificationScreen = () => {
           "verificationstatus": res?.verificationStatus,
           "iskycverified": res?.kycVerified,
           "isnew": "false",
+          "cdt": new Date()
 
+        }
+
+
+        console.log("payloadData", payloadData)
+
+        const resQRCode = await getQrCode();
+        const resABHACard = await getAbhaCard();
+
+        if (payloadRow) {
+          payloadRow.qrCode = `qrCode.jpeg;data:image/jpeg;base64,${resQRCode?.data?.qrCode}`;
+          payloadRow.abhaCard = `abhaCard.jpeg;data:image/jpeg;base64,${resABHACard?.data?.card}`;
         }
         const payloadData = {
           token: activeUser?.token,
           page: "PatientABHAProfile",
           data: JSON.stringify(payloadRow),
         };
+        const resAbha = await savePage(payloadData).unwrap();
+        if (resAbha?.success !== '0' || resAbha?.success !== 0) {
+          showToast(
+            "success",
+            resAbha?.message
+          );
+          navigation.goBack();
+        }
 
-        console.log("payloadData", payloadData)
 
-        await savePage(payloadData).unwrap();
-
-        showToast(
-          "success",
-          "Record inserted successfully..."
-        );
-
-        setTimeout(async () => {
-          await getQrCode();
-          await getAbhaCard();
-        }, 1800)
       } else {
         showToast(
           "error",

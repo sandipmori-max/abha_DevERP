@@ -62,7 +62,8 @@ export const styles = StyleSheet.create({
   stepContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 20,
+    marginTop: 10,
+    marginBottom: 20
   },
 
   stepItem: {
@@ -225,7 +226,7 @@ export const styles = StyleSheet.create({
   welcome: {
     fontSize: 30,
     fontWeight: '700',
-    color: '#173D8F',
+    color: '#d67031',
   },
   subtitle: {
     color: '#666',
@@ -241,7 +242,7 @@ export const styles = StyleSheet.create({
   },
   typeText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '800', 
   },
   forgotText: {
     color: '#251d50',

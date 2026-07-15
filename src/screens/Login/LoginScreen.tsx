@@ -242,12 +242,64 @@ const LoginScreen = () => {
   }
   return (
     <SafeAreaView style={styles.container}>
-
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.header}>
+        {
+          isFromRegister ? <>
+           <View style={styles.header}>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }
+              style={{ marginVertical: 4 }}
+            >
+              <MaterialIcons
+                name='arrow-back'
+                size={20}
+              />
+            </TouchableOpacity>
+
+            {
+              headerTitle !== 'Welcome Back 👋' && <View style={{
+                marginLeft: 18,
+                justifyContent: 'center',
+                alignContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'row', gap: 8
+              }}>
+
+                <View style={[
+                  { 
+                    borderRadius: 4,
+                    alignContent: 'center',
+                    alignItems: 'center',
+                    alignSelf: 'center', 
+                  }
+                ]}>
+                  <Text style={[styles.typeText, {
+                    color:'black'
+                  }]}>
+                    {headerTitle}
+                    
+                  </Text>
+                </View>
+              </View>
+            }
+
+          </View>
+
+
+          <Text style={[styles.welcome, isFromRegister && {
+            fontSize: 18
+          }]}>
+            {steps[currentStep - 1]}
+          </Text>
+
+        </View>
+          </> : <View style={styles.header}>
           <TouchableOpacity
             onPress={() =>
               navigation.goBack()
@@ -266,6 +318,8 @@ const LoginScreen = () => {
             {headerTitle}
           </Text>
         </View>
+        }
+       
         {
           isFromRegister ? <>
             <View style={{ height: '85%' }}>
@@ -325,32 +379,7 @@ const LoginScreen = () => {
                   </ScrollView>
                   <View style={[styles.buttonContainer, {
                   }]}>
-                    <View style={{
-                      justifyContent: 'center',
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      flexDirection: 'row', gap: 8
-                    }}>
-
-                      <View style={[
-                        {
-                          backgroundColor: '#f18b4c',
-                          borderRadius: 4,
-                          alignContent: 'center',
-                          alignItems: 'center',
-                          alignSelf: 'center',
-                          padding: 10
-                        }
-                      ]}>
-                        <Text style={styles.typeText}>
-                          {steps[currentStep - 1]}
-                        </Text>
-                      </View>
-                      <MaterialIcons
-                        name='info-outline'
-                        size={24}
-                      />
-                    </View>
+                    <View />
                     <TouchableOpacity
                       onPress={async () => {
                         handleSteps()
@@ -878,6 +907,7 @@ const LoginScreen = () => {
 
 
                       } else {
+                        console.log("publicKeypublicKeypublicKey", publicKey)
                         const encryptedValue = encryptData(loginValue, publicKey,);
                         const payloadPassed = getPayload(
                           loginType === 'Forgot ABHA Number' ? validationMethod : loginType,
@@ -927,8 +957,6 @@ const LoginScreen = () => {
         }
 
       </KeyboardAvoidingView>
-
-
     </SafeAreaView>
   );
 };

@@ -1057,8 +1057,7 @@ const styles =
       color: '#251d50',
     },
 
-    bottomBar: {
-      position: 'absolute',
+    bottomBar: { 
       bottom: 0,
       left: 0,
       right: 0,

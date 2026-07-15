@@ -205,10 +205,10 @@ const BottomTabNavigator = () => {
                                 ],
                             },
                             confirmation && bottomSheetType !== 'Login' && {
-                                height: '40%'
+                                height: '42%'
                             },
                             confirmation && bottomSheetType === 'Login' && {
-                                height: '58%'
+                                height: '60%'
                             }
                         ]}
                     >

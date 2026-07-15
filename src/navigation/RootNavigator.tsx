@@ -32,6 +32,7 @@ const RootNavigator = () => {
   const [
     createSession
   ] = useCreateSessionMutation();
+  
 
   const handleSession = async () => {
     try {

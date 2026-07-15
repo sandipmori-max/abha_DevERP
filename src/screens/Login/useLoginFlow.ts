@@ -403,14 +403,8 @@ export const useLoginFlow = ({
 
     const handleStepOne = async () => {
 
-        if (stepOne.aadhaarNumber && stepOne.aadhaarNumber.length === 12 && !isValidAadhaar(stepOne.aadhaarNumber)) {
-            showToast(
-                "error",
-                "Please enter a valid Aadhaar number."
-            );
-            return;
-        }
         
+
         const errors = stepOneValidator(
             stepOne,
             captchaValue,
@@ -427,7 +421,13 @@ export const useLoginFlow = ({
 
         setValidationErrors([]);
 
-
+        if (stepOne.aadhaarNumber && stepOne.aadhaarNumber.length === 12 && !isValidAadhaar(stepOne.aadhaarNumber)) {
+            showToast(
+                "error",
+                "Please enter a valid Aadhaar number."
+            );
+            return;
+        }
         setStepOne((prev) => ({
             ...prev,
             passedForVarification: true,
@@ -605,7 +605,7 @@ export const useLoginFlow = ({
     // ===========================
 
     const handleStepFour = async () => {
-        if (!stepFour.userName) { 
+        if (!stepFour.userName) {
             setValidationErrors(['ABHA Address selection is required']);
             setShowValidationSheet(true)
             return;

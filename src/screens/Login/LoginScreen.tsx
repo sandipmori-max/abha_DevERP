@@ -248,8 +248,58 @@ const LoginScreen = () => {
       >
         {
           isFromRegister ? <>
-           <View style={styles.header}>
-          <View style={{ flexDirection: 'row' }}>
+            <View style={styles.header}>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.goBack()
+                  }
+                  style={{ marginVertical: 4 }}
+                >
+                  <MaterialIcons
+                    name='arrow-back'
+                    size={20}
+                  />
+                </TouchableOpacity>
+
+                {
+                  headerTitle !== 'Welcome Back 👋' && <View style={{
+                    marginLeft: 18,
+                    justifyContent: 'center',
+                    alignContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row', gap: 8
+                  }}>
+
+                    <View style={[
+                      {
+                        borderRadius: 4,
+                        alignContent: 'center',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                      }
+                    ]}>
+                      <Text style={[styles.typeText, {
+                        color: 'black'
+                      }]}>
+                        {headerTitle}
+
+                      </Text>
+                    </View>
+                  </View>
+                }
+
+              </View>
+
+
+              <Text style={[styles.welcome, isFromRegister && {
+                fontSize: 18
+              }]}>
+                {steps[currentStep - 1]}
+              </Text>
+
+            </View>
+          </> : <View style={styles.header}>
             <TouchableOpacity
               onPress={() =>
                 navigation.goBack()
@@ -262,64 +312,14 @@ const LoginScreen = () => {
               />
             </TouchableOpacity>
 
-            {
-              headerTitle !== 'Welcome Back 👋' && <View style={{
-                marginLeft: 18,
-                justifyContent: 'center',
-                alignContent: 'center',
-                alignItems: 'center',
-                flexDirection: 'row', gap: 8
-              }}>
-
-                <View style={[
-                  { 
-                    borderRadius: 4,
-                    alignContent: 'center',
-                    alignItems: 'center',
-                    alignSelf: 'center', 
-                  }
-                ]}>
-                  <Text style={[styles.typeText, {
-                    color:'black'
-                  }]}>
-                    {headerTitle}
-                    
-                  </Text>
-                </View>
-              </View>
-            }
-
+            <Text style={[styles.welcome, isFromRegister && {
+              fontSize: 18
+            }]}>
+              {headerTitle}
+            </Text>
           </View>
-
-
-          <Text style={[styles.welcome, isFromRegister && {
-            fontSize: 18
-          }]}>
-            {steps[currentStep - 1]}
-          </Text>
-
-        </View>
-          </> : <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.goBack()
-            }
-            style={{ marginVertical: 4 }}
-          >
-            <MaterialIcons
-              name='arrow-back'
-              size={20}
-            />
-          </TouchableOpacity>
-
-          <Text style={[styles.welcome, isFromRegister && {
-            fontSize: 18
-          }]}>
-            {headerTitle}
-          </Text>
-        </View>
         }
-       
+
         {
           isFromRegister ? <>
             <View style={{ height: '85%' }}>
@@ -597,6 +597,7 @@ const LoginScreen = () => {
                             value={loginValue}
                             onChange={setLoginValue}
                           />
+
                         </> : <>  <TextInput
                           value={loginValue}
                           onChangeText={text => {
@@ -610,12 +611,26 @@ const LoginScreen = () => {
                         /> </>
                     }
 
+
                     {
                       loginType === 'ABHA Address' && <Text style={styles.hintText}>
                         abdm
                       </Text>
                     }
                   </View>
+                  {
+                    loginType === 'Aadhaar Number' && <View style={{
+                      marginVertical: 4,
+                      flexDirection: 'row'
+
+                    }}>
+                      <MaterialIcons name='info-outline' color={'#869bea'} style={{ marginRight: 4 }} />
+                      <Text style={{
+                        color:'#869bea'
+                      }}>Please ensure that mobile number is linked with Aadhaar as it will be required for OTP authentication.</Text>
+                    </View>
+                  }
+
                   {/* {
                     <TouchableOpacity
                       onPress={() => {
@@ -826,6 +841,7 @@ const LoginScreen = () => {
                       isAgreed,
                       captchaValue,
                       captcha,
+                      otpMethod
                     );
 
                     if (errors.length > 0) {
@@ -868,10 +884,7 @@ const LoginScreen = () => {
                     } else {
 
                       if (loginType === 'ABHA Address') {
-                        if (!otpMethod) {
-                          showToast('error', 'Please select validate method.');
-                          return;
-                        }
+                         
 
                         const response =
                           await searchAbhaAddress({

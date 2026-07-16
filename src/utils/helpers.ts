@@ -50,6 +50,7 @@ export const validateForm = (
   isAgreed,
   captchaValue,
   captcha,
+  otpMethod
 ) => {
   const errors: string[] = [];
 
@@ -77,6 +78,8 @@ export const validateForm = (
     !loginValue.includes("@")
   ) {
     errors.push("Please enter a valid ABHA Address.");
+  }  if (loginType === 'ABHA Address' && !otpMethod){
+    errors.push("Please select validate method.")
   }
 
   const termsRequired =
@@ -163,7 +166,24 @@ export const formatAbhaNumber = (value: string) => {
   )}-${cleaned.slice(6, 10)}-${cleaned.slice(10)}`;
 };
 
-export const stepTwoValidator = (stepTwo) => { const errors: string[] = []; if (!stepTwo.stepTwoOTP?.trim()) { errors.push("Please enter the OTP."); } if (stepTwo.stepTwoMobileNumber.replace(/-/g, "").length !== 10) { errors.push("Please enter a valid mobile number."); } return errors; };
+export const stepTwoValidator = (stepTwo) => {
+  const errors: string[] = [];
+
+  const otp = stepTwo.stepTwoOTP?.replace(/-/g, "").trim() || "";
+  const mobile = stepTwo.stepTwoMobileNumber?.replace(/-/g, "").trim() || "";
+
+  if (!otp) {
+    errors.push("Please enter the OTP.");
+  } else if (!/^\d{6}$/.test(otp)) {
+    errors.push("Please enter a valid 6-digit OTP.");
+  }
+
+  if (!/^\d{10}$/.test(mobile)) {
+    errors.push("Please enter a valid mobile number.");
+  }
+
+  return errors;
+};
 
 export const getIsFormValid = (loginType, loginValue, isFromForgotAbhaNumber, isAgreed, captchaValue, captcha) => {
 
@@ -510,7 +530,6 @@ export const getPayloadForProfile = (stepOne, stepTwo, stepThree, stepFour, resp
     "mobileno": payload.data.mobile,
     "communicationmobile": payload.communicationMobile,
     "communicationemail": payload.communicationEmail,
-
     "address": payload.data.address,
     "statename": payload.data.stateName,
     "statecode": payload.data.stateCode,

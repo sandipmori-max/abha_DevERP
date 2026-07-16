@@ -6,6 +6,7 @@ import { encryptData } from '../../utils/encrypt';
 import { getEnrollmentPayload, useEnrollmentRequestOtpMutation } from '../../redux/api/enrollmentApi';
 import { useDispatch } from 'react-redux';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 
 const StepTwo = ({ setStepTwo, stepTwo, loginType, loginValue, publicKey, txnId }: any) => {
   const dispatch = useDispatch()
@@ -65,7 +66,7 @@ const StepTwo = ({ setStepTwo, stepTwo, loginType, loginValue, publicKey, txnId 
             }}
             placeholder={'Enter Mobile Number'}
             maxLength={10}
-             placeholderTextColor="#999999"
+            placeholderTextColor="#999999"
             keyboardType={
               [
                 'Mobile Number',
@@ -81,9 +82,16 @@ const StepTwo = ({ setStepTwo, stepTwo, loginType, loginValue, publicKey, txnId 
           />
 
         </View>
-        <Text style={{ marginVertical: 8 }}>
-          • This mobile number will be used for all the communications related to ABHA.
-        </Text>
+        <View style={{
+          marginVertical: 4,
+          flexDirection: 'row'
+
+        }}>
+          <MaterialIcons name='info-outline' color={'#869bea'} style={{ marginRight: 4 }} />
+          <Text style={{
+            color: '#869bea'
+          }}>This mobile number will be used for all the communications related to ABHA.</Text>
+        </View>
       </View>
     </>
   )

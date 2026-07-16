@@ -40,12 +40,12 @@ const RootNavigator = () => {
         await createSession()
           .unwrap();
       console.log(
-        "Session Response",
+        "Session Response+++++++++++++++",
         response
       );
     } catch (err) {
       console.log(
-        "Session Error",
+        "Session Error+++++++++++",
         err
       );
     }

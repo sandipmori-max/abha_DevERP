@@ -22,6 +22,7 @@ const StepFour = ({ stepFour, loginType, abhaSuggestionList, selectedItem, handl
         <View style={styles.inputContainer}>
 
           <TextInput
+            editable={false}
             value={stepFour.userName} 
             placeholder={'Select abha address'}
             keyboardType={'default'
@@ -47,7 +48,7 @@ const StepFour = ({ stepFour, loginType, abhaSuggestionList, selectedItem, handl
             return (
               <TouchableOpacity
                 onPress={() =>
-                  handleSelect(item)
+                  handleSelect(`${item}`)
                 }
                 style={{
                   padding: 12,

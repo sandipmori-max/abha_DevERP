@@ -310,7 +310,7 @@ export const useLoginFlow = ({
 
     const handleSelect = (item: string) => {
         setSelectedItem((prev) =>
-            prev === item ? null : item
+            prev === item ? null : `${item}`
         );
 
         setStepFour((prev) => ({
@@ -402,8 +402,6 @@ export const useLoginFlow = ({
     // ===========================
 
     const handleStepOne = async () => {
-
-        
 
         const errors = stepOneValidator(
             stepOne,
@@ -538,7 +536,6 @@ export const useLoginFlow = ({
                 !stepThree.stepThreeMobileOTP ||
                 stepThree.stepThreeMobileOTP.length < 6
             ) {
-
                 setValidationErrors(['Please enter a valid OTP.']);
                 setShowValidationSheet(true)
                 return;
@@ -614,7 +611,7 @@ export const useLoginFlow = ({
         await enrolAbhaAddress(
             getEnrolAbhaAddressPayload(
                 txnId,
-                stepFour.userName,
+                `${stepFour.userName}@abdm`,
                 1
             )
         ).unwrap();

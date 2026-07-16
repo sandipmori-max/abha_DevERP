@@ -8,6 +8,7 @@ import OtpInput from '../../Components/OtpInput';
 import { isStrictIndianMobile, isValidEmail } from '../../utils/helpers';
 import { useDispatch } from 'react-redux';
 import { hideLoader, showLoader } from '../../redux/slices/loaderSlice';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 
 const StepThree = ({
   requestEmailVerificationLink,
@@ -225,10 +226,17 @@ mobileNumer }: any) => {
                         }}
                       />
 
-                    </View>
-                    <Text style={{ marginVertical: 8 }}>
-                      • This Email address will be used for all communications related to ABHA.
-                    </Text>
+                    </View> 
+                    <View style={{
+                                          marginVertical: 4,
+                                          flexDirection: 'row'
+                    
+                                        }}>
+                                          <MaterialIcons name='info-outline' color={'#869bea'} style={{ marginRight: 4 }} />
+                                          <Text style={{
+                                            color:'#869bea'
+                                          }}>This Email address will be used for all communications related to ABHA.</Text>
+                                        </View>
                   </View>
 
                   <View style={{

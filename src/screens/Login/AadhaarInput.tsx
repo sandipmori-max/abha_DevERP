@@ -5,6 +5,7 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Text,
 } from "react-native";
 
 interface AadhaarInputProps {
@@ -77,7 +78,8 @@ const AadhaarInput = ({
   };
 
   return (
-    <View style={styles.container}>
+    <>
+     <View style={styles.container}>
       {/* Part 1 */}
 
       <TextInput
@@ -253,6 +255,9 @@ const AadhaarInput = ({
         </TouchableOpacity>
       </View>
     </View>
+   
+    </>
+   
   );
 };
 
@@ -266,12 +271,12 @@ const styles = StyleSheet.create({
   },
 
   box: {
-    width: 90,
-    height: 48,
+    height: 40,
+    width: 70,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderRadius: 8,
-    textAlign: "center",
-    fontSize: 16,
+    textAlign: "center", 
     fontWeight: "600",
   },
 

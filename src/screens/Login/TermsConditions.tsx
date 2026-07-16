@@ -25,7 +25,7 @@ const TermsConditions = ({
 
             <View style={styles.termsCard}>
 
-                <View style={{ height: 220 }}>
+                <View style={{ height: checked ? 30 : 220 }}>
                     <ScrollView  nestedScrollEnabled
                         keyboardShouldPersistTaps="handled">
 

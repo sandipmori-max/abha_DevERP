@@ -597,11 +597,11 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontSize: 15,
     flex: 1,
+    width: '40%', 
   },
 
   value: {
-    flex: 1.3,
-    textAlign: "right",
+    flex: 1.3, 
     color: "#111827",
     fontWeight: "600",
     fontSize: 15,

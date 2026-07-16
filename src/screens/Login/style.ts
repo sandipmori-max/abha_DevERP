@@ -463,16 +463,15 @@ export const styles = StyleSheet.create({
     alignItems:'center'
   },
 
-  box: {
-  width: 100,
-  height: 46,
+  box: { 
+  height: 40,
+  width: 70,
   borderWidth: 1,
   borderRadius: 8,
   textAlign: "center",
-  paddingHorizontal: 0,
+  paddingHorizontal: 8,
   paddingVertical: 0,
-  includeFontPadding: false,
-  fontSize: 16,
+  includeFontPadding: false, 
   fontWeight: "600",
 }
 });

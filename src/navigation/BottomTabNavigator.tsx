@@ -205,10 +205,10 @@ const BottomTabNavigator = () => {
                                 ],
                             },
                             confirmation && bottomSheetType !== 'Login' && {
-                                height: '42%'
+                                height: '46%'
                             },
                             confirmation && bottomSheetType === 'Login' && {
-                                height: '60%'
+                                height: '64%'
                             }
                         ]}
                     >
@@ -277,34 +277,34 @@ const BottomTabNavigator = () => {
                                     );
                                 })}
 
-  <TouchableOpacity
-                            disabled={!selectedLoginType}
-                            style={[
-                                styles.button,
-                                !selectedLoginType && styles.disabledButton,
-                            ]}
-                            onPress={() => {
-                                if (selectedLoginType === 'Driving Licence') {
-                                    setShowLoginSheet(false)
-                                    setShowInfoModal(true)
-                                    return;
-                                }
-                                setTimeout(() => {
-                                    setShowLoginSheet(false)
-                                    navigation.navigate("RegistrationAbha", {
-                                        loginType: selectedLoginType,
-                                        isFromRegister: bottomSheetType === 'Login' ? false : true
-                                    })
-                                })
-                                setShowLoginSheet(false);
-                                setConfirmation(false)
-                                setSelected(null)
-                            }}
-                        >
-                            <Text style={styles.buttonText}>
-                                Continue
-                            </Text>
-                        </TouchableOpacity>
+                                <TouchableOpacity
+                                    disabled={!selectedLoginType}
+                                    style={[
+                                        styles.button,
+                                        !selectedLoginType && styles.disabledButton,
+                                    ]}
+                                    onPress={() => {
+                                        if (selectedLoginType === 'Driving Licence') {
+                                            setShowLoginSheet(false)
+                                            setShowInfoModal(true)
+                                            return;
+                                        }
+                                        setTimeout(() => {
+                                            setShowLoginSheet(false)
+                                            navigation.navigate("RegistrationAbha", {
+                                                loginType: selectedLoginType,
+                                                isFromRegister: bottomSheetType === 'Login' ? false : true
+                                            })
+                                        })
+                                        setShowLoginSheet(false);
+                                        setConfirmation(false)
+                                        setSelected(null)
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>
+                                        Continue
+                                    </Text>
+                                </TouchableOpacity>
                             </> : <>
                                 <Text style={styles.title}>
                                     Do you already have ABHA?
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
     bottomSheet: {
         position: 'absolute',
         bottom: 0,
-        height: '56%',
+        height: '60%',
         width: '94%',
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,

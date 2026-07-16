@@ -243,6 +243,17 @@ const StepOne = ({
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                <View style={{
+                                      marginVertical: 8,
+                                      flexDirection: 'row'
+                
+                                    }}>
+                                      <MaterialIcons name='info-outline' color={'#869bea'} style={{ marginRight: 4 }} />
+                                      <Text style={{
+                                        color:'#869bea'
+                                      }}>Please ensure that mobile number is linked with Aadhaar as it will be required for OTP authentication.</Text>
+                                    </View>
             </View>
             <View style={[styles.termsContainer, { marginTop: 0 }]}>
                 <Text style={styles.termsTitle}>
@@ -250,7 +261,7 @@ const StepOne = ({
                 </Text>
 
                 <View style={styles.termsCard}>
-                    <View style={{ height: 220, marginVertical: 8 }}>
+                    <View style={{ height: stepOne.termsAgree ? 30 : 220, marginVertical: 8 }}>
                         <ScrollView 
                         nestedScrollEnabled
                         keyboardShouldPersistTaps="handled">
@@ -259,7 +270,6 @@ const StepOne = ({
                             </Text>
                         </ScrollView>
                     </View>
-
                     <View style={styles.termsFooter}>
                         <TouchableOpacity
                             style={styles.checkboxRow}

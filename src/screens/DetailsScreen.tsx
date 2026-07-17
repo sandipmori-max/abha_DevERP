@@ -18,6 +18,8 @@ import Share from 'react-native-share';
 import { getPagePayload, useGetPageMutation } from "../redux/api/getPageApi";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/slices/loaderSlice";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { showToast } from "../utils/toast";
 
 const DetailsScreen = ({ route }: any) => {
   const { item } = route.params || {};
@@ -27,7 +29,7 @@ const DetailsScreen = ({ route }: any) => {
   const loading = useSelector((state: any) => state.loader.loading);
   const baseURL = useSelector((state: any) => state.abha.devERPBaseUrl)
   const baseUrl = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
-   const url = new URL(baseUrl).origin;
+  const url = new URL(baseUrl).origin;
 
   const [getPage] = useGetPageMutation();
   const activeUser = useSelector(
@@ -79,20 +81,41 @@ const DetailsScreen = ({ route }: any) => {
 
   console.log("authMethods++++++++++++++++++++++++++++++++", authMethods)
 
-  const DetailRow = ({
+  const DetailItem = ({
+    icon,
     label,
     value,
-    valueColor
+    color
   }: {
+    icon: string;
     label: string;
     value: any;
-    valueColor?: string
+    color?: any
   }) => (
-    <View style={styles.row}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={[styles.value, valueColor && {
-        color: valueColor
-      }]}>{value || "-"}</Text>
+    <View style={styles.detailRow}>
+
+      <View style={styles.leftContent}>
+
+        <MaterialIcons
+          name={icon}
+          size={22}
+          color="#616161"
+        />
+
+        <Text style={styles.detailLabel}>
+          {label}
+        </Text>
+
+      </View>
+
+      <Text style={[styles.detailValue, color && {
+        color: color
+      }]}
+        numberOfLines={3}
+      >
+        {value || "-"}
+      </Text>
+
     </View>
   );
 
@@ -138,6 +161,33 @@ const DetailsScreen = ({ route }: any) => {
     }
   };
 
+  const formatDate = (date: string) => {
+    if (!date) return "-";
+
+    return date.split(" ")[0];
+  };
+
+  const [showAadhaar, setShowAadhaar] = useState(false);
+  const maskAadhaar = (number: string, show: boolean) => {
+    if (!number) return "-";
+
+    const clean = number.replace(/\s/g, "");
+
+    if (clean.length < 4) return number;
+
+    if (show) {
+      return clean.replace(/(.{4})/g, "$1 ").trim();
+    }
+
+    return `XXXX XXXX ${clean.slice(-4)}`;
+  };
+
+
+  const copyText = (text: string) => {
+    Clipboard.setString(text);
+    showToast('success', 'Copied!!')
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -154,133 +204,204 @@ const DetailsScreen = ({ route }: any) => {
 
             {/* Profile */}
             <View style={styles.profileCard}>
-              {/* Top Row */}
-              <View style={styles.topRow}>
+
+
+
+              <View style={styles.profileTop}>
+
                 {getValue("profilephoto") ? (
                   <Image
                     source={{
                       uri: `${url}/fileupload/1/PatientABHAProfile/${item?.id}/profilephoto.jpeg`,
                     }}
-                    style={styles.avatar}
+                    style={styles.profileImage}
                   />
                 ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <Text style={styles.avatarText}>
-                      {getValue('firstname')}
-                      {getValue('lastname')}
-                    </Text>
+                  <View style={styles.profilePlaceholder}>
+                    <MaterialIcons
+                      name="person"
+                      size={42}
+                      color="#FFFFFF"
+                    />
                   </View>
                 )}
 
-                <View style={styles.userInfo}>
-                  <Text style={styles.name}>{getValue("abhaname")}</Text>
-                  <Text style={styles.address}>
-                    {
-                      getValue("mobileno")
-                    }
+                <View style={{ flex: 1, marginLeft: 16 }}>
+
+                  <Text style={styles.profileName}>
+                    {getValue("firstname")} {getValue("middlename")} {getValue("lasttname")}
                   </Text>
+
+                  <Text style={styles.profileLabel}>
+                    ABHA ID
+                  </Text>
+
+                  <View style={styles.numberRow}>
+
+                    <Text style={styles.abhaNumber}>
+                      {getValue("abhanumber")}
+                    </Text>
+
+                    <TouchableOpacity
+                      onPress={() => {
+                        copyText(getValue("abhanumber"))
+                      }}
+                    >
+                      <MaterialIcons
+                        name="content-copy"
+                        size={20}
+                        color="#1565C0"
+                      />
+                    </TouchableOpacity>
+
+                  </View>
+
+                  <Text style={styles.profileLabel}>
+                    Aadhaar Number
+                  </Text>
+
+                  <View style={styles.numberRow}>
+
+                    <Text style={styles.abhaNumber}>
+                      {maskAadhaar(getValue("aadharnumber"), showAadhaar)}
+                    </Text>
+
+                    <TouchableOpacity onPress={() => setShowAadhaar(prev => !prev)}>
+                      <MaterialIcons
+                        name={showAadhaar ? "visibility-off" : "visibility"}
+                        size={20}
+                        color="#1565C0"
+                      />
+                    </TouchableOpacity>
+
+                  </View>
                 </View>
+              </View>
+              <View style={styles.statusContainer}>
+
+                {/* KYC */}
+                <View
+                  style={[
+                    styles.statusChip,
+                    {
+                      backgroundColor: "#E8F5E9",
+                    },
+                  ]}>
+
+                  <MaterialIcons
+                    name="verified"
+                    color="#2E7D32"
+                    size={14}
+                  />
+
+                  <Text
+                    style={[
+                      styles.statusText,
+                      {
+                        color: "#2E7D32",
+                      },
+                    ]}>
+                    {getValue("verificationstatus") === "VERIFIED"
+                      ? "KYC Verified"
+                      : "KYC Pending"}
+                  </Text>
+
+                </View>
+
+                {/* Mobile */}
+
+                {<View
+                  style={[
+                    styles.statusChip,
+                    {
+                      backgroundColor: "#E3F2FD",
+                    },
+                  ]}>
+
+                  <MaterialIcons
+                    name="phone-android"
+                    color="#1565C0"
+                    size={14}
+                  />
+
+                  <Text
+                    style={[
+                      styles.statusText,
+                      {
+                        color: "#1565C0",
+                      },
+                    ]}>
+                    {
+                      getValue("communicationmobile") ? 'Verified' : 'Not Verified'
+                    }
+
+                  </Text>
+
+                </View>}
+
+
+                {/* Email */}
 
                 <View
                   style={[
-                    styles.statusBadge,
+                    styles.statusChip,
                     {
-                      backgroundColor:
-                        getValue('profilestatus') === "ACTIVE"
-                          ? "#DCFCE7"
-                          : "#FEE2E2",
+                      backgroundColor: "#FFF3E0",
                     },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.statusDot,
-                      {
-                        backgroundColor:
-                          getValue('profilestatus') === "ACTIVE"
-                            ? "#16A34A"
-                            : "#DC2626",
-                      },
-                    ]}
+                  ]}>
+
+                  <MaterialIcons
+                    name="email"
+                    color="#EF6C00"
+                    size={14}
                   />
 
-                </View>
-              </View>
-
-              {/* Divider */}
-              <View style={styles.divider} />
-
-              {/* ABHA Number */}
-              {
-                getValue("abhanumber") && <View style={styles.numberCard}>
-                  <Text style={styles.numberLabel}>ABHA NUMBER</Text>
-
-                  <Text style={styles.number}>
-                    {getValue("abhanumber")}
+                  <Text
+                    style={[
+                      styles.statusText,
+                      {
+                        color: "#EF6C00",
+                      },
+                    ]}>
+                    {getValue("communicationemail")
+                      ? "Verified"
+                      : "Not Verified"}
                   </Text>
+
                 </View>
-              }
 
-              <View style={{ height: 8 }} />
-              {/* ABHA Number */}
-              {
-                getValue("aadharnumber") && <View style={styles.numberCard}>
-                  <Text style={styles.numberLabel}>AADHAR NUMBER</Text>
-
-                  <Text style={styles.number}>
-                    {getValue("aadharnumber")}
-                  </Text>
-                </View>
-              }
-
-
-              {/* Footer */}
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>
-                  Digital Health Identity
-                </Text>
-
-                <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}>
-                  <MaterialIcons
-                    size={16}
-                    name='approval' />
-                  <Text style={styles.footerCheck}>{getValue('verificationstatus')}</Text>
-                </View>
               </View>
             </View>
 
             {/* Personal Information */}
-            <View style={styles.cardTitle}>
-              <Text style={styles.cardText}>
-                Personal Information
-              </Text>
-              <MaterialIcons
-                name='person'
-                size={18}
-                color={'#ccc'}
+            <View style={styles.sectionCard}>
+
+              <View style={styles.sectionHeader}>
+
+                <View style={styles.iconCircle}>
+
+                  <MaterialIcons
+                    name="person"
+                    size={18}
+                    color="#1565C0"
+                  />
+
+                </View>
+
+                <Text style={styles.sectionTitle}>
+                  Personal Information
+                </Text>
+
+              </View>
+
+              <DetailItem
+                icon="calendar-month"
+                label="Date of Birth"
+                value={formatDate(getValue("dob"))}
               />
 
-            </View>
-
-
-            <View style={styles.card}>
-
-              <DetailRow
-                label="First Name"
-                value={getValue('firstname')}
-              />
-
-              <DetailRow
-                label="Middle Name"
-                value={getValue("middlename")}
-              />
-
-              <DetailRow
-                label="Last Name"
-                value={getValue("lastname")}
-              />
-
-              <DetailRow
+              <DetailItem
+                icon="wc"
                 label="Gender"
                 value={
                   getValue("gender") === "M"
@@ -291,142 +412,263 @@ const DetailsScreen = ({ route }: any) => {
                 }
               />
 
-              <DetailRow
-                label="DOB"
-                value={getValue("dob")}
+              <DetailItem
+                icon="bloodtype"
+                label="Blood Group"
+                value={getValue("bloodgroup")}
+              />
+
+              <DetailItem
+                icon="badge"
+                label="ABHA Address"
+                value={getValue("abhaaddress")}
               />
 
             </View>
 
             {/* Contact information */}
-            <View style={styles.cardTitle}>
-              <Text style={styles.cardText}>
-                Contact information
-              </Text>
-              <MaterialIcons
-                name='location-on'
-                size={18}
-                color={'#ccc'}
-              />
+            <View style={styles.sectionCard}>
 
-            </View>
+              <View style={styles.sectionHeader}>
 
-            <View style={styles.card}>
-              <DetailRow
-                label="Mobile"
+                <View style={styles.iconCircle}>
+                  <MaterialIcons
+                    name="contact-phone"
+                    size={18}
+                    color="#1565C0"
+                  />
+                </View>
+
+                <Text style={styles.sectionTitle}>
+                  Contact Information
+                </Text>
+
+              </View>
+
+              <DetailItem
+                icon="phone"
+                label="Mobile Number"
                 value={getValue("mobileno")}
               />
-              <DetailRow
-                label="Contact - Mobile"
-                value={getValue("communicationmobile")}
-              />
-              <DetailRow
-                label="Contact - Email"
-                value={getValue("communicationemail")}
-              />
+
+
+
+              {getValue("communicationmobile") ? (
+                <DetailItem
+                  icon="call"
+                  label="Communication mobile"
+                  value={getValue("communicationmobile")}
+                />
+              ) : null}
+              {getValue("communicationemail") ? (
+                <DetailItem
+                  icon="email"
+                  label="Email Address"
+                  value={getValue("communicationemail")}
+                />
+              ) : null}
+
             </View>
 
             {/* Address */}
-            <View style={styles.cardTitle}>
-              <Text style={styles.cardText}>
-                Address
-              </Text>
-              <MaterialIcons
-                name='location-on'
-                size={18}
-                color={'#ccc'}
-              />
+            <View style={styles.sectionCard}>
 
-            </View>
+              <View style={styles.sectionHeader}>
 
-            <View style={styles.card}>
+                <View style={styles.iconCircle}>
+                  <MaterialIcons
+                    name="location-on"
+                    size={18}
+                    color="#1565C0"
+                  />
+                </View>
 
-              <DetailRow
+                <Text style={styles.sectionTitle}>
+                  Address
+                </Text>
+
+              </View>
+
+              <DetailItem
+                icon="home"
                 label="Address"
                 value={getValue("address")}
               />
 
-              <DetailRow
+              <DetailItem
+                icon="location-city"
                 label="District"
                 value={getValue("districtname")}
               />
 
-              <DetailRow
+              <DetailItem
+                icon="map"
                 label="State"
                 value={getValue("statename")}
               />
-            </View>
 
+            </View>
             {/* Verification */}
-            <View style={styles.cardTitle}>
-              <Text style={styles.cardText}>
-                Verification
-              </Text>
-              <MaterialIcons
-                name='numbers'
-                size={18}
-                color={'#ccc'}
+            <View style={styles.sectionCard}>
+
+              <View style={styles.sectionHeader}>
+
+                <View style={styles.iconCircle}>
+                  <MaterialIcons
+                    name="verified"
+                    color="#1565C0"
+                    size={18}
+                  />
+                </View>
+
+                <Text style={styles.sectionTitle}>
+                  Verification
+                </Text>
+
+              </View>
+
+              <DetailItem
+                icon="verified-user"
+                label="KYC Status"
+                value={getValue("verificationstatus") ? getValue("verificationstatus") : 'Not verifed'}
+                color={getValue("verificationstatus") ? 'green' : 'red'}
               />
 
-            </View>
-
-
-            <View style={styles.card}>
-              <DetailRow
-                label="Type"
-                value={getValue("verificationtype")}
+              <DetailItem
+                icon="badge"
+                label="Profile Status"
+                value={getValue("profilestatus")}
               />
 
-              <DetailRow
-                label="KYC Verified"
-                value={getValue("verificationstatus")}
+              <DetailItem
+                icon="calendar-month"
+                label="Created On"
+                value={formatDate(getValue("cdt"))}
               />
 
-              <DetailRow
-                label="Created"
-                value={getValue("cdt")}
-              />
             </View>
 
             {/* Authentication */}
-            <View style={styles.cardTitle}>
-              <Text style={styles.cardText}>
-                Authentication Methods
-              </Text>
+            <View style={styles.sectionCard}>
+
+              <View style={styles.sectionHeader}>
+
+                <View style={styles.iconCircle}>
+                  <MaterialIcons
+                    name="security"
+                    size={18}
+                    color="#1565C0"
+                  />
+                </View>
+
+                <Text style={styles.sectionTitle}>
+                  Authentication Methods
+                </Text>
+
+              </View>
+
+              <View style={styles.authContainer}>
+
+                {authMethods.length > 0 ? (
+
+                  authMethods.map((item: string, index: number) => (
+
+                    <View
+                      key={index}
+                      style={styles.authChip}>
+
+                      <MaterialIcons
+                        name="verified-user"
+                        color="#1565C0"
+                      />
+
+                      <Text style={styles.authText}>
+                        {item}
+                      </Text>
+
+                    </View>
+
+                  ))
+
+                ) : (
+
+                  <Text style={{ color: "#999" }}>
+                    No Authentication Methods
+                  </Text>
+
+                )}
+
+              </View>
+
+            </View>
+
+            <View style={styles.sectionCard}>
+
+              <View style={styles.dateContainer}>
+
+                <View style={styles.dateItem}>
+
+                  <View style={styles.dateHeader}>
+                    <View style={styles.iconCircleSmall}>
+                      <MaterialIcons
+                        name="calendar-month"
+                        size={18}
+                        color="#1565C0"
+                      />
+                    </View>
+
+                    <Text style={styles.dateTitle}>
+                      ABHA Creation Date
+                    </Text>
+                  </View>
+
+                  <Text style={styles.dateValue}>
+                    {formatDate(getValue("cdt"))}
+                  </Text>
+
+                </View>
+
+                <View style={styles.dateDivider} />
+
+                <View style={styles.dateItem}>
+
+                  <View style={styles.dateHeader}>
+                    <View style={styles.iconCircleSmall}>
+                      <MaterialIcons
+                        name="verified-user"
+                        size={20}
+                        color="#1565C0"
+                      />
+                    </View>
+
+                    <Text style={styles.dateTitle}>
+                      Last Updated
+                    </Text>
+                  </View>
+
+                  <Text style={styles.dateValue}>
+                    {formatDate(getValue("udt"))}
+                  </Text>
+
+                </View>
+
+              </View>
+
+            </View>
+
+            <View style={styles.infoCard}>
+
               <MaterialIcons
-                name='login'
-                size={18}
-                color={'#ccc'}
+                name="info-outline"
+                size={28}
+                color="#1565C0"
               />
 
+              <Text style={styles.infoText}>
+                Your ABHA number uniquely identifies you in the Ayushman Bharat Digital Mission (ABDM) ecosystem.
+              </Text>
+
             </View>
-
-
-            <View style={styles.card}>
-
-
-              <View style={styles.methodsContainer}>
-                {authMethods.length > 0 ? (
-                  authMethods.map(
-                    (method: string, index: number) => (
-                      <View
-                        key={index}
-                        style={styles.methodChip}
-                      >
-                        <Text style={styles.methodText}>
-                          {method}
-                        </Text>
-                      </View>
-                    )
-                  )
-                ) : (
-                  <Text style={styles.empty}>
-                    No authentication methods
-                  </Text>
-                )}
-              </View>
-            </View>
-
             <View style={{ height: 30 }} />
           </>
         }
@@ -503,9 +745,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F7FA",
   },
-
-
-
   avatar: {
     width: 60,
     height: 60,
@@ -557,7 +796,6 @@ const styles = StyleSheet.create({
 
   statusText: {
     color: "#fff",
-    fontWeight: "700",
   },
 
   card: {
@@ -565,7 +803,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 12,
     borderRadius: 8,
-    padding: 18, 
+    padding: 18,
   },
 
   cardTitle: {
@@ -597,11 +835,11 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontSize: 15,
     flex: 1,
-    width: '40%', 
+    width: '40%',
   },
 
   value: {
-    flex: 1.3, 
+    flex: 1.3,
     color: "#111827",
     fontWeight: "600",
     fontSize: 15,
@@ -788,5 +1026,232 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#fff'
+  },
+  profileCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 8,
+    padding: 14,
+  },
+
+  profileTop: {
+    flexDirection: "row",
+  },
+
+  profileImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+  },
+
+  profilePlaceholder: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#1565C0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  profileName: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#222",
+  },
+
+  profileLabel: {
+    marginTop: 10,
+    color: "#777",
+    fontSize: 13,
+  },
+
+  numberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+
+  abhaNumber: {
+    flex: 1,
+    color: "#1565C0",
+    fontWeight: "700",
+  },
+
+  maskNumber: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#444",
+    marginTop: 4,
+  },
+
+  editButton: {
+    position: "absolute",
+    right: 18,
+    top: 18,
+    zIndex: 10,
+  },
+
+  statusContainer: {
+    marginTop: 18,
+    flexDirection: "row",
+    gap: 10,
+  },
+
+  statusChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+
+  statusText: {
+    marginLeft: 6,
+    fontSize: 10
+  },
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 10,
+    marginTop: 6,
+    borderRadius: 8,
+    padding: 16,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: "#E3F2FD",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  sectionTitle: {
+    marginLeft: 12,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1565C0",
+  },
+
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ECECEC",
+  },
+
+  leftContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+
+  detailLabel: {
+    marginLeft: 12,
+    fontSize: 15,
+    color: "#555",
+  },
+
+  detailValue: {
+    flex: 1,
+    textAlign: "right",
+    color: "#212121",
+    fontWeight: "600",
+    marginLeft: 12,
+  },
+  detailLabel: {
+    marginLeft: 12,
+    fontSize: 15,
+    color: "#616161",
+    flex: 1,
+  },
+  authContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 10,
+  },
+
+  authChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E3F2FD",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+
+  authText: {
+    marginLeft: 8,
+    color: "#1565C0",
+    fontSize: 14,
+  },
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  dateItem: {
+    width: '48%'
+  },
+
+  dateDivider: {
+    width: 1,
+    height: 60,
+    backgroundColor: "#E0E0E0",
+    marginHorizontal: 16,
+  },
+
+  dateHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  iconCircleSmall: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#E3F2FD",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+
+  dateTitle: {
+    color: "#1565C0",
+  },
+
+  dateValue: {
+    marginLeft: 46,
+    color: "#212121",
+  },
+
+  infoCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#d3d9e3",
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 30,
+    borderRadius: 8,
+    padding: 16,
+  },
+
+  infoText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#1565C0",
   },
 });

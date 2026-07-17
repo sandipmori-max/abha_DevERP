@@ -118,5 +118,3 @@ To learn more about React Native, take a look at the following resources:
 list 
 abha address - 
 ABHA Address verification
-
-3-5 abha metting

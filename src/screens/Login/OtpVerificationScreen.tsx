@@ -719,23 +719,12 @@ const OtpVerificationScreen = () => {
           />
         </View>
 
-        <ScrollView
-        keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            paddingTop: 30,
-            paddingBottom: 140,
-          }}
-          showsVerticalScrollIndicator={
-            false
-          }
+        <View
+        
         >
           {/* Illustration */}
 
-          <View style={styles.iconWrap}>
-            <Text style={styles.lockIcon}>
-              🔐
-            </Text>
-          </View>
+          
 
           {/* Title */}
 
@@ -871,7 +860,7 @@ const OtpVerificationScreen = () => {
               </Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
 
         {/* Bottom Button */}
 
@@ -1062,6 +1051,7 @@ const styles =
       left: 0,
       right: 0,
       padding: 20,
+      top: 10,
       borderTopWidth: 1,
       borderTopColor:
         '#ECECEC',

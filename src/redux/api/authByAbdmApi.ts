@@ -3,7 +3,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_AUTH_BY_ABDM = true;
+const MOCK_AUTH_BY_ABDM = false;
 
 export interface AuthByAbdmPayload {
   scope: string[];

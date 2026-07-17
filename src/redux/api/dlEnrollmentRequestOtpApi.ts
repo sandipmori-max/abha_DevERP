@@ -8,7 +8,7 @@ import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
 const MOCK_DL_ENROLLMENT_OTP =
-  true;
+  false;
 
 export interface DlEnrollmentRequestOtpPayload {
   scope: string[];

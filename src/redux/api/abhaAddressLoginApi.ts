@@ -9,7 +9,7 @@ import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
 
-const MOCK_ABHA_ADDRESS_REQUEST_OTP = true;
+const MOCK_ABHA_ADDRESS_REQUEST_OTP = false;
 
 
 export interface AbhaAddressRequestOtpPayload {

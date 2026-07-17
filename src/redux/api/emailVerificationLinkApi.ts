@@ -3,7 +3,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_EMAIL_VERIFICATION_LINK = true;
+const MOCK_EMAIL_VERIFICATION_LINK = false;
 
 export interface EmailVerificationLinkPayload {
   scope: string[];

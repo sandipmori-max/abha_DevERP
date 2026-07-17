@@ -7,7 +7,7 @@ import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
 const MOCK_ENROL_ABHA_ADDRESS =
-  true;
+  false;
 
 export interface EnrolAbhaAddressPayload {
   txnId: string;

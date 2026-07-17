@@ -6,7 +6,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_LOGIN_VERIFY = true;
+const MOCK_LOGIN_VERIFY = false;
 
 export interface LoginVerifyPayload {
   scope: string[];

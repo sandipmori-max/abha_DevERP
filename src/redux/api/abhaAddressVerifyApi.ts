@@ -8,7 +8,7 @@ import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
 
-const MOCK_ABHA_ADDRESS_VERIFY_OTP = true;
+const MOCK_ABHA_ADDRESS_VERIFY_OTP = false;
 
 
 

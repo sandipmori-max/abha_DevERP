@@ -6,7 +6,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_PROFILE_ACCOUNT = true;
+const MOCK_PROFILE_ACCOUNT = false;
 
 export const profileAccountApi =
   baseApi.injectEndpoints({

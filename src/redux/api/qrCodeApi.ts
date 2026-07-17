@@ -6,7 +6,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_PROFILE_QR = true;
+const MOCK_PROFILE_QR = false;
 
 export const profileQrCodeApi =
   baseApi.injectEndpoints({

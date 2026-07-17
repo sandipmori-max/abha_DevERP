@@ -3,7 +3,7 @@ import { showToast } from "../../utils/toast";
 import { baseApi } from "./baseApi";
 import { END_POINTS } from "./end_points";
 
-const MOCK_ABHA_PROFILE = true;
+const MOCK_ABHA_PROFILE = false;
 
 export interface AbhaProfilePayload {
     json_web_token: string;
